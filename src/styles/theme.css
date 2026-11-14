@@ -1,0 +1,59 @@
+/* Temi: chiaro (bianco/rosso) e scuro. L'attributo data-theme sta su <html>. */
+:root,
+:root[data-theme='light'] {
+  --bg: #ffffff;
+  --surface: #f7f4f4;
+  --surface-2: #efe9ea;
+  --line: #e6dfe0;
+  --text: #161112;
+  --muted: #6d6466;
+  --accent: #d50f25;
+  --accent-ink: #ffffff;
+  --accent-soft: #fbe6e9;
+  --hero-bg: #d50f25;
+  --hero-text: #ffffff;
+  --hero-muted: #ffd9de;
+  --planned: #d9d1d2;
+  --ok: #1d8c4a;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f0c0d;
+  --surface: #1a1617;
+  --surface-2: #241f20;
+  --line: #332c2e;
+  --text: #f6f2f2;
+  --muted: #a69d9f;
+  --accent: #ff3048;
+  --accent-ink: #ffffff;
+  --accent-soft: #3a1519;
+  --hero-bg: #1a1617;
+  --hero-text: #ffffff;
+  --hero-muted: #c9bfc1;
+  --planned: #4a4245;
+  --ok: #3ac473;
+  color-scheme: dark;
+}
+
+:root {
+  --swim: #1ea7e1;
+  --bike: #22a85a;
+  --run: #e2ad00;
+  --strength: #e23f6b;
+  --f-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
+  --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+[data-discipline='swim'] {
+  --c: var(--swim);
+}
+[data-discipline='bike'] {
+  --c: var(--bike);
+}
+[data-discipline='run'] {
+  --c: var(--run);
+}
+[data-discipline='strength'] {
+  --c: var(--strength);
+}

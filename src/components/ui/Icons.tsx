@@ -1,0 +1,89 @@
+import type { ReactNode } from 'react'
+import type { Discipline } from '../../data/types'
+
+function Svg({ children, width = 2 }: { children: ReactNode; width?: number }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={width}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {children}
+    </svg>
+  )
+}
+
+export const MenuIcon = () => (
+  <Svg width={2.2}>
+    <path d="M4 7h16M4 12h16M4 17h16" />
+  </Svg>
+)
+
+export const MoonIcon = () => (
+  <Svg>
+    <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+  </Svg>
+)
+
+export const SunIcon = () => (
+  <Svg>
+    <circle cx="12" cy="12" r="4.5" />
+    <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+  </Svg>
+)
+
+export const OverviewIcon = () => (
+  <Svg>
+    <rect x="3" y="3" width="7" height="9" rx="1.5" />
+    <rect x="14" y="3" width="7" height="5" rx="1.5" />
+    <rect x="14" y="12" width="7" height="9" rx="1.5" />
+    <rect x="3" y="16" width="7" height="5" rx="1.5" />
+  </Svg>
+)
+
+export const CalendarIcon = () => (
+  <Svg>
+    <rect x="3" y="5" width="18" height="16" rx="2" />
+    <path d="M3 10h18M8 3v4M16 3v4" />
+  </Svg>
+)
+
+export function DisciplineIcon({ discipline }: { discipline: Discipline }) {
+  switch (discipline) {
+    case 'swim':
+      return (
+        <Svg>
+          <path d="M2 17c2 0 2-1.5 4-1.5S8 17 10 17s2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5" />
+          <path d="M2 21c2 0 2-1.5 4-1.5S8 21 10 21s2-1.5 4-1.5 2 1.5 4 1.5 2-1.5 4-1.5" />
+          <circle cx="16" cy="6" r="2" />
+          <path d="m6 13 4-5 4 3 3-1" />
+        </Svg>
+      )
+    case 'bike':
+      return (
+        <Svg>
+          <circle cx="5.5" cy="17" r="3.5" />
+          <circle cx="18.5" cy="17" r="3.5" />
+          <path d="M5.5 17 9 9h6l3.5 8M9 9 12 17h3" />
+          <circle cx="15" cy="5" r="1.5" />
+        </Svg>
+      )
+    case 'run':
+      return (
+        <Svg>
+          <circle cx="14" cy="4" r="2" />
+          <path d="m8 21 3-6 3 2 1 4M6 12l3-4 4 1 3 4 3 1M11 15l2-6" />
+        </Svg>
+      )
+    case 'strength':
+      return (
+        <Svg>
+          <path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12" />
+        </Svg>
+      )
+  }
+}

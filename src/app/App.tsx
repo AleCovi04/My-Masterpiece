@@ -1,5 +1,26 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { I18nProvider } from '../i18n/I18nProvider'
+import CalendarPage from '../features/calendar/CalendarPage'
+import OverviewPage from '../features/overview/OverviewPage'
+import AppShell from './AppShell'
+import { ThemeProvider } from './ThemeProvider'
+
 function App() {
-  return <h1>My Masterpiece</h1>
+  return (
+    <ThemeProvider>
+      <I18nProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route element={<AppShell />}>
+              <Route index element={<OverviewPage />} />
+              <Route path="calendario" element={<CalendarPage />} />
+              <Route path="*" element={<OverviewPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </I18nProvider>
+    </ThemeProvider>
+  )
 }
 
 export default App
