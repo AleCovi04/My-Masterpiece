@@ -1,12 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
-import {
-  CalendarIcon,
-  MenuIcon,
-  OverviewIcon,
-  PlannerIcon,
-} from '../components/ui/Icons'
+import { MenuIcon } from '../components/ui/Icons'
 import { useI18n } from '../i18n/context'
+import { NAV_ITEMS } from './navItems'
 
 interface Props {
   open: boolean
@@ -54,18 +50,18 @@ export default function SideMenu({ open, onClose }: Props) {
             <span>{t.appSub}</span>
           </div>
         </div>
-        <NavLink to="/" end className="nav-item" onClick={onClose}>
-          <OverviewIcon />
-          <span>{t.nav.overview}</span>
-        </NavLink>
-        <NavLink to="/calendario" className="nav-item" onClick={onClose}>
-          <CalendarIcon />
-          <span>{t.nav.calendar}</span>
-        </NavLink>
-        <NavLink to="/planner" className="nav-item" onClick={onClose}>
-          <PlannerIcon />
-          <span>{t.nav.planner}</span>
-        </NavLink>
+        {NAV_ITEMS.map((item) => (
+          <NavLink
+            key={item.to}
+            to={item.to}
+            end={item.end}
+            className="nav-item"
+            onClick={onClose}
+          >
+            {item.icon}
+            <span>{item.label(t)}</span>
+          </NavLink>
+        ))}
       </nav>
     </>
   )

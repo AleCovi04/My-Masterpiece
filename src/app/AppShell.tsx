@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
+import { PageContainer } from '../components/layout'
+import { readPreference, writePreference } from '../lib/preferences'
 import Header from './Header'
+import Sidebar from './Sidebar'
 import SideMenu from './SideMenu'
 import './shell.css'
 
+const COLLAPSED_KEY = 'mm.sidebarCollapsed'
+
 export default function AppShell() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(
+    () => readPreference(COLLAPSED_KEY) === '1',
+  )
   const { pathname } = useLocation()
   const closeMenu = useCallback(() => setMenuOpen(false), [])
 
@@ -13,12 +21,21 @@ export default function AppShell() {
     window.scrollTo(0, 0)
   }, [pathname])
 
+  const toggleSidebar = () => {
+    const next = !collapsed
+    setCollapsed(next)
+    writePreference(COLLAPSED_KEY, next ? '1' : '0')
+  }
+
   return (
-    <div className="app">
-      <div className="wrap">
+    <div className={`app${collapsed ? ' side-collapsed' : ''}`}>
+      <Sidebar collapsed={collapsed} onToggle={toggleSidebar} />
+      <div className="wrap app-main">
         <Header onMenu={() => setMenuOpen(true)} />
-        <main className="wrap">
-          <Outlet />
+        <main>
+          <PageContainer>
+            <Outlet />
+          </PageContainer>
         </main>
       </div>
       <SideMenu open={menuOpen} onClose={closeMenu} />

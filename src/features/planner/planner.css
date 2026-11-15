@@ -16,7 +16,14 @@
   display: flex;
   gap: 6px;
   overflow-x: auto;
+  overflow-y: hidden; /* niente scrollbar verticale ▲●▼ */
+  padding-bottom: 1px;
+  margin-bottom: -1px;
+  scrollbar-width: none;
   border-bottom: 1px solid var(--line);
+}
+.pl-tabs::-webkit-scrollbar {
+  display: none;
 }
 .pl-tabs button {
   border: 0;
@@ -489,5 +496,32 @@
   }
   .pl-mf {
     flex: 1 1 100%;
+  }
+}
+
+/* ---------- PC: lista a 2 colonne, 3 da 1280 px; barra strumenti su una riga ---------- */
+@media (min-width: 1024px) {
+  .pl-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .pl-toolbar {
+    flex-wrap: nowrap;
+  }
+  .pl-search {
+    flex: 1 1 160px;
+    min-width: 120px;
+  }
+  .pl-mf {
+    flex: 0 1 240px;
+  }
+  .pl-check,
+  .pl-new {
+    white-space: nowrap;
+    flex: none;
+  }
+}
+@media (min-width: 1280px) {
+  .pl-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

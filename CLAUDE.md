@@ -19,6 +19,7 @@ React 19 + TypeScript + Vite, ESLint + Prettier.
 
 - Componenti in PascalCase (`MyComponent.tsx`)
 - Commit in italiano, piccoli e frequenti
+- Ogni schermata si progetta mobile-first e poi si adatta al desktop (≥ 1024 px) con sidebar e PageContainer (`src/components/layout/`). Ogni modifica va verificata a entrambe le larghezze.
 
 ## Comandi
 

@@ -5,6 +5,8 @@ export const en: Dictionary = {
   appSub: 'Road to 70.3',
   menu: 'Menu',
   closeMenu: 'Close menu',
+  collapseSidebar: 'Collapse the sidebar',
+  expandSidebar: 'Expand the sidebar',
   language: 'Language',
   switchToDark: 'Switch to dark theme',
   switchToLight: 'Switch to light theme',

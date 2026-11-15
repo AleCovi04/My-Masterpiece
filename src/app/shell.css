@@ -198,3 +198,124 @@
     font-size: 24px;
   }
 }
+
+/* ---------- PC (>= 1024 px): sidebar fissa, niente header ---------- */
+.side {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .app {
+    --side-w: 240px;
+    display: grid;
+    grid-template-columns: var(--side-w) minmax(0, 1fr);
+    padding: 0;
+    transition: grid-template-columns 0.2s ease;
+  }
+  .app.side-collapsed {
+    --side-w: 76px;
+  }
+  .app-main {
+    max-width: none;
+    margin: 0;
+    padding: 48px clamp(32px, 5vw, 80px) 72px;
+    min-width: 0;
+  }
+  .top,
+  .drawer,
+  .scrim {
+    display: none;
+  }
+  .side {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: 28px 14px 20px;
+    background: var(--bg);
+    border-right: 1px solid var(--line);
+    overflow: hidden auto;
+  }
+  .side-brand {
+    padding: 0 8px;
+  }
+  .side-brand b {
+    font-size: 24px;
+    line-height: 1.05;
+  }
+  .brand-mini {
+    display: none;
+  }
+  .side-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .side .nav-item {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+  .side-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 0 8px;
+  }
+  .side-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+  .side-toggle svg {
+    width: 19px;
+    height: 19px;
+    transition: transform 0.2s;
+  }
+  .side-collapsed .side-toggle svg {
+    transform: rotate(180deg);
+  }
+
+  /* versione stretta: solo icone */
+  .side-collapsed .side {
+    padding-inline: 12px;
+  }
+  .side-collapsed .brand-full,
+  .side-collapsed .brand-sub,
+  .side-collapsed .nav-item span {
+    display: none;
+  }
+  .side-collapsed .brand-mini {
+    display: block;
+    text-align: center;
+  }
+  .side-collapsed .side-brand {
+    padding: 0;
+  }
+  .side-collapsed .nav-item {
+    justify-content: center;
+    padding: 12px 0;
+  }
+  .side-collapsed .side-foot {
+    align-items: center;
+    padding: 0;
+  }
+  .side-collapsed .tools {
+    flex-direction: column;
+  }
+  .side-collapsed .seg {
+    flex-direction: column;
+    border-radius: 18px;
+  }
+  .side-collapsed .seg button {
+    padding: 7px 9px;
+  }
+}

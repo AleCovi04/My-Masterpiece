@@ -3,6 +3,8 @@ export const it = {
   appSub: 'Road to 70.3',
   menu: 'Menu',
   closeMenu: 'Chiudi il menu',
+  collapseSidebar: 'Comprimi la barra laterale',
+  expandSidebar: 'Espandi la barra laterale',
   language: 'Lingua',
   switchToDark: 'Passa al tema scuro',
   switchToLight: 'Passa al tema chiaro',
