@@ -38,19 +38,20 @@ export default function WeekView({
   const today = todayIso()
   const names = weekdayShortNames(t)
 
-  const insert = (date: IsoDate, index: number, cls: string) => (
-    <button
-      type="button"
-      className={`cal-ins ${cls}`}
-      aria-label={t.calendar.addWorkout}
-      onClick={(e: MouseEvent) => {
-        e.stopPropagation()
-        onAdd(date, index)
-      }}
-    >
-      +
-    </button>
-  )
+  const insert = (date: IsoDate, index: number, cls: string) =>
+    selected !== date ? null : (
+      <button
+        type="button"
+        className={`cal-ins ${cls}`}
+        aria-label={t.calendar.addWorkout}
+        onClick={(e: MouseEvent) => {
+          e.stopPropagation()
+          onAdd(date, index)
+        }}
+      >
+        +
+      </button>
+    )
 
   return (
     <div

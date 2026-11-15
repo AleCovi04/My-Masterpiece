@@ -180,14 +180,24 @@
 .cal-day.sel .cal-ins {
   display: block;
 }
-.cal-ins.top {
-  top: -13px;
-}
-.cal-ins.mid {
-  bottom: -18px;
-}
+.cal-ins.top,
+.cal-ins.mid,
 .cal-ins.bot {
-  bottom: -13px;
+  /* centro del cerchio a metà dello spazio di 34px sopra/sotto la card */
+  --off: -30px;
+}
+.cal-ins.top {
+  top: var(--off);
+}
+.cal-ins.mid,
+.cal-ins.bot {
+  bottom: var(--off);
+}
+/* solo nel giorno selezionato: più spazio fra le card per far stare i cerchi */
+.cal-day.sel .cal-list {
+  gap: 34px;
+  padding: 26px 0 17px;
+  min-height: 80px;
 }
 .cal-ins.only {
   top: 50%;
