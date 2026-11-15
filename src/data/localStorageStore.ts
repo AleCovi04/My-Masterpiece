@@ -1,9 +1,11 @@
 import type { DataStore } from './store'
-import type { IsoDate, Session } from './types'
-import { generateSampleSessions } from './sampleData'
+import type { Exercise, IsoDate, Session, WorkoutTemplate } from './types'
+import { generateSampleExercises, generateSampleSessions } from './sampleData'
 import { isIsoDate } from '../lib/dates'
 
 const SESSIONS_KEY = 'mm.sessions'
+const EXERCISES_KEY = 'mm.exercises'
+const TEMPLATES_KEY = 'mm.templates'
 const RACE_KEY = 'mm.raceDate'
 const DEFAULT_RACE_DATE: IsoDate = '2028-08-20'
 
@@ -42,6 +44,33 @@ export const localStorageStore: DataStore = {
   },
   async saveSessions(sessions) {
     write(SESSIONS_KEY, JSON.stringify(sessions))
+  },
+  async loadExercises() {
+    const raw = read(EXERCISES_KEY)
+    if (raw) {
+      try {
+        const parsed: unknown = JSON.parse(raw)
+        if (Array.isArray(parsed)) return parsed as Exercise[]
+      } catch {
+        // dati corrotti: si rigenera il catalogo iniziale
+      }
+    }
+    const sample = generateSampleExercises()
+    write(EXERCISES_KEY, JSON.stringify(sample))
+    return sample
+  },
+  async saveExercises(exercises) {
+    write(EXERCISES_KEY, JSON.stringify(exercises))
+  },
+  async loadTemplates() {
+    const raw = read(TEMPLATES_KEY)
+    if (!raw) return []
+    try {
+      const parsed: unknown = JSON.parse(raw)
+      return Array.isArray(parsed) ? (parsed as WorkoutTemplate[]) : []
+    } catch {
+      return []
+    }
   },
   async loadRaceDate() {
     const raw = read(RACE_KEY)
