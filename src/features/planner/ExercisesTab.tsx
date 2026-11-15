@@ -54,16 +54,14 @@ export default function ExercisesTab() {
         className="pl-item-main"
         onClick={() => setEditing(e.id)}
       >
-        <span className="pl-item-info">
-          <b>
-            {e.name}
-            {e.archived && <span className="pl-tag">{p.archivedTag}</span>}
-          </b>
-          <span className="pl-rest">
-            {p.rest} {formatMmSs(e.defaultRestSeconds)}
-          </span>
-        </span>
+        <b className="pl-item-name">
+          {e.name}
+          {e.archived && <span className="pl-tag">{p.archivedTag}</span>}
+        </b>
         <MuscleBars muscles={sortedMuscles(e)} highlight={muscles} />
+        <span className="pl-rest">
+          {p.rest} {formatMmSs(e.defaultRestSeconds)}
+        </span>
       </button>
       <button
         type="button"

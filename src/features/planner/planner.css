@@ -169,25 +169,22 @@
   gap: 10px;
 }
 .pl-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
+  position: relative;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 6px 8px 6px 6px;
+  padding: 6px;
   min-width: 0;
 }
 .pl-item.arch {
   opacity: 0.6;
 }
 .pl-item-main {
-  flex: 1;
+  width: 100%;
   min-width: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 1.3fr);
-  gap: 8px 16px;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   text-align: left;
   border: 0;
   background: none;
@@ -200,15 +197,10 @@
 .pl-item-main:hover {
   background: var(--accent-soft);
 }
-.pl-item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-.pl-item-info b {
+.pl-item-name {
   font-size: 16px;
-  overflow-wrap: anywhere;
+  padding-right: 36px; /* spazio per l'icona archivia */
+  overflow-wrap: break-word; /* a capo solo se una parola non ci sta */
 }
 .pl-rest {
   font-size: 12px;
@@ -216,10 +208,11 @@
   font-variant-numeric: tabular-nums;
 }
 .pl-ico {
-  flex: none;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   width: 34px;
   height: 34px;
-  margin-top: 6px;
   display: grid;
   place-items: center;
   border: 0;
@@ -239,7 +232,7 @@
 /* barre muscolari: una sola griglia, così nomi e barre restano allineati */
 .mb {
   display: grid;
-  grid-template-columns: max-content minmax(60px, 1fr) 4ch;
+  grid-template-columns: 8.5rem minmax(0, 1fr) 4ch; /* colonne fisse: stessa barra in ogni card */
   align-items: center;
   gap: 5px 10px;
   min-width: 0;
@@ -250,7 +243,7 @@
   color: var(--muted);
 }
 .mb-name {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 .mb-track {
   height: 8px;
@@ -471,9 +464,6 @@
 }
 
 @media (max-width: 560px) {
-  .pl-item-main {
-    grid-template-columns: minmax(0, 1fr);
-  }
   .pl-mrow {
     grid-template-columns: minmax(0, 1fr) auto auto;
   }
