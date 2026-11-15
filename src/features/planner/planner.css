@@ -173,8 +173,11 @@
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 14px;
-  padding: 6px;
+  padding: 0;
   min-width: 0;
+}
+.pl-item:hover {
+  background: var(--accent-soft);
 }
 .pl-item.arch {
   opacity: 0.6;
@@ -190,12 +193,9 @@
   background: none;
   color: inherit;
   font: inherit;
-  padding: 8px;
+  padding: 14px;
   cursor: pointer;
-  border-radius: 10px;
-}
-.pl-item-main:hover {
-  background: var(--accent-soft);
+  border-radius: 14px;
 }
 .pl-item-name {
   font-size: 16px;
@@ -209,8 +209,8 @@
 }
 .pl-ico {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 10px;
+  right: 10px;
   width: 34px;
   height: 34px;
   display: grid;
