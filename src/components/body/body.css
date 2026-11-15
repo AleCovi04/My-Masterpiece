@@ -1,0 +1,177 @@
+/* Colori della mappa: chiaro e scuro (stessi selettori di styles/theme.css). */
+:root,
+:root[data-theme='light'] {
+  --heat-lo: #f9cdd5;
+  --heat-hi: #c40d24;
+  --bm-neutral: #e6dcdd;
+  --bm-joint: #f1ebeb;
+  --bm-muscle: #d9cfd1;
+  --bm-line: rgba(70, 20, 28, 0.5);
+}
+:root[data-theme='dark'] {
+  --heat-lo: #7a3440;
+  --heat-hi: #ff3048;
+  --bm-neutral: #3a3133;
+  --bm-joint: #2a2426;
+  --bm-muscle: #4a4245;
+  --bm-line: rgba(0, 0, 0, 0.65);
+}
+
+.bm {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+.bm-figs {
+  display: flex;
+  justify-content: center;
+  gap: clamp(16px, 4vw, 48px);
+  width: 100%;
+}
+.bm-fig {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 0 1 300px;
+  min-width: 0;
+}
+.bm-fig figcaption {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.bm-svg {
+  width: 100%;
+  height: auto;
+  max-height: 78vh;
+  display: block;
+  -webkit-tap-highlight-color: transparent;
+}
+.bm-sil {
+  fill: var(--bm-neutral);
+  stroke: var(--bm-line);
+  stroke-width: 0.6;
+}
+.bm-neutral {
+  fill: var(--bm-neutral);
+  stroke: var(--bm-line);
+  stroke-width: 0.5;
+  pointer-events: none;
+}
+.bm-joints path {
+  fill: var(--bm-joint);
+  stroke: var(--bm-line);
+  stroke-width: 0.6;
+  pointer-events: none;
+}
+
+.bm-g {
+  cursor: default;
+  outline: none;
+}
+.bm.select .bm-g {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.bm-g path {
+  fill: var(--bm-fill, var(--bm-muscle));
+  stroke: var(--bm-line);
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+  transition:
+    fill 0.12s,
+    filter 0.12s;
+}
+.bm-g.sel path {
+  fill: var(--accent);
+}
+@media (hover: hover) {
+  .bm.select .bm-g:not(.sel):hover path {
+    fill: color-mix(in srgb, var(--accent) 38%, var(--bm-muscle));
+  }
+  .bm-g:hover path {
+    stroke: var(--text);
+    stroke-width: 1;
+  }
+  .bm.heat .bm-g:hover path {
+    filter: brightness(1.1);
+  }
+}
+.bm.select .bm-g.hot:not(.sel) path {
+  fill: color-mix(in srgb, var(--accent) 38%, var(--bm-muscle));
+}
+.bm-g.hot path,
+.bm-g:focus-visible path {
+  stroke: var(--text);
+  stroke-width: 1.4;
+}
+
+.bm-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.bm-legend i {
+  display: block;
+  width: min(220px, 50vw);
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--heat-lo), var(--heat-hi));
+}
+.bm-tip {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 9px;
+  border-radius: 8px;
+  max-width: 260px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* interruttore fronte/retro: solo su telefono */
+.bm-switch {
+  display: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+  background: var(--surface);
+}
+.bm-switch button {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: 600 14px var(--f-body);
+  padding: 7px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.bm-switch button[aria-pressed='true'] {
+  background: var(--text);
+  color: var(--bg);
+}
+@media (max-width: 820px) {
+  .bm-switch {
+    display: inline-flex;
+  }
+  .bm[data-view='front'] .bm-fig-back,
+  .bm[data-view='back'] .bm-fig-front {
+    display: none;
+  }
+  .bm-fig {
+    flex-basis: 280px;
+  }
+}
