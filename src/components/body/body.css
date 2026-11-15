@@ -54,21 +54,27 @@
   display: block;
   -webkit-tap-highlight-color: transparent;
 }
-.bm-sil {
-  fill: var(--bm-neutral);
+.bm-svg path {
+  vector-effect: non-scaling-stroke;
+}
+.bm-neutral,
+.bm-joint {
   stroke: var(--bm-line);
-  stroke-width: 0.6;
+  stroke-width: 1px;
+  stroke-linejoin: round;
+  pointer-events: none;
 }
 .bm-neutral {
   fill: var(--bm-neutral);
-  stroke: var(--bm-line);
-  stroke-width: 0.5;
-  pointer-events: none;
 }
-.bm-joints path {
+.bm-joint {
   fill: var(--bm-joint);
+}
+/* linea dei tagli curvi fra due gruppi che condividono un path */
+.bm-svg path.bm-seam {
+  fill: none;
   stroke: var(--bm-line);
-  stroke-width: 0.6;
+  stroke-width: 1px;
   pointer-events: none;
 }
 
@@ -83,7 +89,7 @@
 .bm-g path {
   fill: var(--bm-fill, var(--bm-muscle));
   stroke: var(--bm-line);
-  stroke-width: 0.6;
+  stroke-width: 1px;
   stroke-linejoin: round;
   transition:
     fill 0.12s,
@@ -98,7 +104,7 @@
   }
   .bm-g:hover path {
     stroke: var(--text);
-    stroke-width: 1;
+    stroke-width: 2px;
   }
   .bm.heat .bm-g:hover path {
     filter: brightness(1.1);
@@ -110,7 +116,7 @@
 .bm-g.hot path,
 .bm-g:focus-visible path {
   stroke: var(--text);
-  stroke-width: 1.4;
+  stroke-width: 2.5px;
 }
 
 .bm-legend {

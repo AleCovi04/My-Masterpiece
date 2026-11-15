@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useId,
   useRef,
   useState,
   type CSSProperties,
@@ -7,7 +8,7 @@ import {
   type PointerEvent,
 } from 'react'
 import { useI18n } from '../../i18n/context'
-import { BACK, FRONT, VIEWBOX, type Figure } from './figures'
+import { BACK, FRONT, type Figure } from './figures'
 import { BODY_GROUPS, groupName, type BodyGroup } from './groups'
 import './body.css'
 
@@ -41,7 +42,6 @@ const LABELS = {
   en: { front: 'Front', back: 'Back', legend: 'Legend', map: 'Muscle map' },
 } as const
 
-const MIRROR = 'translate(200,0) scale(-1,1)'
 const TOUCH_TIP_MS = 1600
 
 interface Tip {
@@ -57,6 +57,7 @@ export default function BodyMap(props: BodyMapProps) {
   const [tip, setTip] = useState<Tip | null>(null)
   const [pressed, setPressed] = useState<BodyGroup | null>(null)
   const wrapRef = useRef<HTMLDivElement>(null)
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
   const timer = useRef<number | undefined>(undefined)
 
   useEffect(() => () => window.clearTimeout(timer.current), [])
@@ -124,8 +125,7 @@ export default function BodyMap(props: BodyMapProps) {
     onBlur: () => setTip(null),
   })
 
-  const renderGroup = (fig: Figure, id: BodyGroup) => {
-    const paths = fig.parts.filter((p) => p.group === id)
+  const renderGroup = (fig: Figure, view: View, id: BodyGroup) => {
     const name = groupName(id, lang)
     const selected = props.mode === 'select' && props.selected.includes(id)
     const value = heatValues?.[id] ?? 0
@@ -141,17 +141,14 @@ export default function BodyMap(props: BodyMapProps) {
       tabIndex: 0,
       ...groupHandlers(id),
     }
-    const shapes = (
-      <>
-        {paths.map((p, i) => (
-          <path key={i} d={p.d} />
-        ))}
-        <g transform={MIRROR}>
-          {paths.map((p, i) => (
-            <path key={i} d={p.d} />
-          ))}
-        </g>
-      </>
+    const shapes = fig.parts.map((p, i) =>
+      p.group === id ? (
+        <path
+          key={i}
+          d={p.d}
+          clipPath={p.clip ? `url(#${uid}${view}p${i})` : undefined}
+        />
+      ) : null,
     )
     return props.mode === 'select' ? (
       <g
@@ -178,39 +175,49 @@ export default function BodyMap(props: BodyMapProps) {
   }
 
   const renderFigure = (v: View, fig: Figure) => {
-    const neutral = fig.parts.filter((p) => p.group === null)
     const groups = BODY_GROUPS.filter((g) =>
       fig.parts.some((p) => p.group === g.id),
-    )
-    const half = (
-      <>
-        <path className="bm-sil" d={fig.silhouette} />
-        {neutral.map((p, i) => (
-          <path key={i} className="bm-neutral" d={p.d} />
-        ))}
-      </>
     )
     return (
       <figure className={`bm-fig bm-fig-${v}`} key={v}>
         <svg
-          viewBox={VIEWBOX}
+          viewBox={fig.viewBox}
           className="bm-svg"
           role="group"
           aria-label={L[v]}
         >
-          {half}
-          <g transform={MIRROR}>{half}</g>
-          {groups.map((g) => renderGroup(fig, g.id))}
-          <g className="bm-joints">
-            {fig.joints.map((d, i) => (
-              <path key={i} d={d} />
+          <defs>
+            {fig.parts.map((p, i) =>
+              p.clip ? (
+                <clipPath key={i} id={`${uid}${v}p${i}`}>
+                  <path d={p.clip} />
+                </clipPath>
+              ) : null,
+            )}
+            {fig.seams.map((sm, i) => (
+              <clipPath key={i} id={`${uid}${v}s${i}`}>
+                <path d={sm.shape} />
+              </clipPath>
             ))}
-            <g transform={MIRROR}>
-              {fig.joints.map((d, i) => (
-                <path key={i} d={d} />
-              ))}
-            </g>
-          </g>
+          </defs>
+          {fig.parts.map((p, i) =>
+            p.group === null ? (
+              <path
+                key={i}
+                className={p.tone === 'joint' ? 'bm-joint' : 'bm-neutral'}
+                d={p.d}
+              />
+            ) : null,
+          )}
+          {groups.map((g) => renderGroup(fig, v, g.id))}
+          {fig.seams.map((sm, i) => (
+            <path
+              key={i}
+              className="bm-seam"
+              d={sm.d}
+              clipPath={`url(#${uid}${v}s${i})`}
+            />
+          ))}
         </svg>
         <figcaption>{L[v]}</figcaption>
       </figure>
