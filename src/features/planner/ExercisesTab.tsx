@@ -2,12 +2,13 @@ import { useMemo, useState } from 'react'
 import { MUSCLES, type Exercise, type MuscleId } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import {
+  filterByMuscles,
   formatMmSs,
-  involvesMuscle,
   normalizeName,
   sortedMuscles,
 } from '../../lib/exercises'
 import ExerciseDialog from './ExerciseDialog'
+import MuscleFilterDialog from './MuscleFilterDialog'
 import { useExercises } from './useExercises'
 
 const MAX_SHOWN = 3
@@ -17,24 +18,82 @@ export default function ExercisesTab() {
   const p = t.planner
   const { exercises, save, setArchived, remove, usageOf } = useExercises()
   const [query, setQuery] = useState('')
-  const [muscle, setMuscle] = useState<MuscleId | ''>('')
+  const [muscles, setMuscles] = useState<MuscleId[]>([])
+  const [choosing, setChoosing] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
   // `undefined` = chiuso, `null` = nuovo, altrimenti id da modificare
   const [editing, setEditing] = useState<string | null | undefined>(undefined)
 
   const label = (id: MuscleId) => MUSCLES.find((m) => m.id === id)?.[lang] ?? id
 
-  const visible = useMemo(() => {
+  // Ricerca e archiviati sempre; poi, se ci sono muscoli scelti, le due sezioni.
+  const { list, sections } = useMemo(() => {
     const q = normalizeName(query)
-    return (exercises ?? [])
-      .filter(
-        (e) =>
-          (showArchived || !e.archived) &&
-          (!q || normalizeName(e.name).includes(q)) &&
-          (!muscle || involvesMuscle(e, muscle)),
-      )
-      .sort((a, b) => a.name.localeCompare(b.name, lang))
-  }, [exercises, query, muscle, showArchived, lang])
+    const base = (exercises ?? []).filter(
+      (e) =>
+        (showArchived || !e.archived) &&
+        (!q || normalizeName(e.name).includes(q)),
+    )
+    if (muscles.length > 0) {
+      return { list: [], sections: filterByMuscles(base, muscles, lang) }
+    }
+    return {
+      list: base.sort((a, b) => a.name.localeCompare(b.name, lang)),
+      sections: null,
+    }
+  }, [exercises, query, muscles, showArchived, lang])
+
+  const total = sections
+    ? sections.primary.length + sections.secondary.length
+    : list.length
+
+  const renderItem = (e: Exercise) => {
+    const ms = sortedMuscles(e)
+    // i muscoli scelti vengono sempre mostrati, in evidenza, davanti agli altri
+    const chosen = ms.filter((m) => muscles.includes(m.muscle))
+    const others = ms
+      .filter((m) => !muscles.includes(m.muscle))
+      .slice(0, Math.max(0, MAX_SHOWN - chosen.length))
+    const hidden = ms.length - chosen.length - others.length
+    const rest = [
+      others.map((m) => `${label(m.muscle)} ${m.percent}%`).join(' · '),
+      hidden > 0 ? `+${hidden} ${p.moreMuscles}` : '',
+    ]
+      .filter(Boolean)
+      .join(' · ')
+    return (
+      <li key={e.id} className={`pl-item${e.archived ? ' arch' : ''}`}>
+        <button
+          type="button"
+          className="pl-item-main"
+          onClick={() => setEditing(e.id)}
+        >
+          <b>
+            {e.name}
+            {e.archived && <span className="pl-tag">{p.archivedTag}</span>}
+          </b>
+          <span className="pl-ms">
+            {chosen.map((m) => (
+              <strong key={m.muscle} className="pl-hit">
+                {label(m.muscle)} {m.percent}%
+              </strong>
+            ))}
+            {rest}
+          </span>
+          <span className="pl-rest">
+            {p.rest} {formatMmSs(e.defaultRestSeconds)}
+          </span>
+        </button>
+        <button
+          type="button"
+          className="pl-btn pl-small"
+          onClick={() => setArchived(e.id, !e.archived)}
+        >
+          {e.archived ? p.restore : p.archive}
+        </button>
+      </li>
+    )
+  }
 
   if (!exercises) return null
   const current: Exercise | null =
@@ -53,19 +112,28 @@ export default function ExercisesTab() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <select
-          className="pl-inp pl-select"
-          aria-label={p.muscleFilter}
-          value={muscle}
-          onChange={(e) => setMuscle(e.target.value as MuscleId | '')}
-        >
-          <option value="">{p.allMuscles}</option>
-          {MUSCLES.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m[lang]}
-            </option>
-          ))}
-        </select>
+        <span className={`pl-mf${muscles.length > 0 ? ' on' : ''}`}>
+          <button
+            type="button"
+            className="pl-mf-btn"
+            aria-label={p.muscleFilter}
+            onClick={() => setChoosing(true)}
+          >
+            {muscles.length > 0
+              ? muscles.map((id) => label(id)).join(', ')
+              : p.chooseMuscle}
+          </button>
+          {muscles.length > 0 && (
+            <button
+              type="button"
+              className="pl-mf-x"
+              aria-label={p.clearMuscles}
+              onClick={() => setMuscles([])}
+            >
+              ✕
+            </button>
+          )}
+        </span>
         <label className="pl-check">
           <input
             type="checkbox"
@@ -83,48 +151,39 @@ export default function ExercisesTab() {
         </button>
       </div>
 
-      {visible.length === 0 ? (
+      {total === 0 ? (
         <div className="ph">{p.empty}</div>
+      ) : sections ? (
+        (
+          [
+            ['primary', p.sectionPrimary],
+            ['secondary', p.sectionSecondary],
+          ] as const
+        ).map(([key, title]) =>
+          sections[key].length > 0 ? (
+            <section key={key} className="pl-sec">
+              <h3 className="pl-sec-h">
+                {title} <span>{sections[key].length}</span>
+              </h3>
+              <ul className="pl-list">
+                {sections[key].map((m) => renderItem(m.exercise))}
+              </ul>
+            </section>
+          ) : null,
+        )
       ) : (
-        <ul className="pl-list">
-          {visible.map((e) => {
-            const ms = sortedMuscles(e)
-            return (
-              <li key={e.id} className={`pl-item${e.archived ? ' arch' : ''}`}>
-                <button
-                  type="button"
-                  className="pl-item-main"
-                  onClick={() => setEditing(e.id)}
-                >
-                  <b>
-                    {e.name}
-                    {e.archived && (
-                      <span className="pl-tag">{p.archivedTag}</span>
-                    )}
-                  </b>
-                  <span className="pl-ms">
-                    {ms
-                      .slice(0, MAX_SHOWN)
-                      .map((m) => `${label(m.muscle)} ${m.percent}%`)
-                      .join(' · ')}
-                    {ms.length > MAX_SHOWN &&
-                      ` · +${ms.length - MAX_SHOWN} ${p.moreMuscles}`}
-                  </span>
-                  <span className="pl-rest">
-                    {p.rest} {formatMmSs(e.defaultRestSeconds)}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="pl-btn pl-small"
-                  onClick={() => setArchived(e.id, !e.archived)}
-                >
-                  {e.archived ? p.restore : p.archive}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+        <ul className="pl-list">{list.map(renderItem)}</ul>
+      )}
+
+      {choosing && (
+        <MuscleFilterDialog
+          selected={muscles}
+          onApply={(next) => {
+            setMuscles(next)
+            setChoosing(false)
+          }}
+          onClose={() => setChoosing(false)}
+        />
       )}
 
       {editing !== undefined && (editing === null || current) && (

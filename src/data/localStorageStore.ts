@@ -2,10 +2,13 @@ import type { DataStore } from './store'
 import type { Exercise, IsoDate, Session, WorkoutTemplate } from './types'
 import { generateSampleExercises, generateSampleSessions } from './sampleData'
 import { isIsoDate } from '../lib/dates'
+import { migrateExercise } from '../lib/muscleMigration'
 
 const SESSIONS_KEY = 'mm.sessions'
 const EXERCISES_KEY = 'mm.exercises'
 const TEMPLATES_KEY = 'mm.templates'
+const MIGRATIONS_KEY = 'mm.migrations.muscles20'
+const EXERCISES_BACKUP_KEY = 'mm.exercises.backup-v1'
 const RACE_KEY = 'mm.raceDate'
 const DEFAULT_RACE_DATE: IsoDate = '2028-08-20'
 
@@ -23,6 +26,16 @@ function write(key: string, value: string): void {
   } catch {
     // spazio esaurito o storage bloccato: i dati restano solo in memoria
   }
+}
+
+/** Passa ai 20 gruppi muscolari una sola volta, tenendo una copia dei dati originali. */
+function migrateOnce(exercises: Exercise[], raw: string): Exercise[] {
+  if (read(MIGRATIONS_KEY)) return exercises
+  const migrated = exercises.map(migrateExercise)
+  write(EXERCISES_BACKUP_KEY, raw)
+  write(EXERCISES_KEY, JSON.stringify(migrated))
+  write(MIGRATIONS_KEY, new Date().toISOString())
+  return migrated
 }
 
 export const localStorageStore: DataStore = {
@@ -50,13 +63,14 @@ export const localStorageStore: DataStore = {
     if (raw) {
       try {
         const parsed: unknown = JSON.parse(raw)
-        if (Array.isArray(parsed)) return parsed as Exercise[]
+        if (Array.isArray(parsed)) return migrateOnce(parsed as Exercise[], raw)
       } catch {
         // dati corrotti: si rigenera il catalogo iniziale
       }
     }
     const sample = generateSampleExercises()
     write(EXERCISES_KEY, JSON.stringify(sample))
+    write(MIGRATIONS_KEY, new Date().toISOString())
     return sample
   },
   async saveExercises(exercises) {

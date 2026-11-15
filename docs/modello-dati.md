@@ -11,7 +11,11 @@ Tipi in `src/data/types.ts`, calcoli in `src/lib/`.
 
 ## Muscoli
 
-Elenco fisso di 15 gruppi, con etichetta IT/EN: petto, deltoidi anteriori/laterali/posteriori, bicipiti, tricipiti, avambracci, addominali, dorsali, schiena media (trapezio/romboidi), lombari, glutei, quadricipiti, femorali, polpacci.
+Elenco fisso di 20 gruppi, con etichetta IT/EN, definito **solo** in `src/components/body/groups.ts` (la mappa del corpo e il modello dati usano la stessa fonte): deltoide anteriore/laterale/posteriore, bicipite, tricipite, avambracci, pettorale alto, pettorale, addominali, obliqui, dorsali (lats), schiena media (romboidi/trapezio medio), trapezio alto, lombari, quadricipiti, adduttori, abduttori, glutei, femorali, polpacci.
+
+Muscolo **principale** di un esercizio: quello con la % più alta (a pari merito lo sono tutti); gli altri sono secondari.
+
+Migrazione: i dati salvati prima dei 20 gruppi vengono convertiti una sola volta al primo caricamento (`src/lib/muscleMigration.ts`, flag `mm.migrations.muscles20`), con copia di sicurezza in `mm.exercises.backup-v1`.
 
 ## Esercizio (solo forza)
 

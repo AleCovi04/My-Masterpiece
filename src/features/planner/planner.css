@@ -51,8 +51,66 @@
 .pl-search {
   flex: 1 1 220px;
 }
-.pl-select {
-  flex: 0 1 240px;
+.pl-mf {
+  display: inline-flex;
+  align-items: stretch;
+  flex: 0 1 260px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.pl-mf.on {
+  border-color: var(--accent);
+}
+.pl-mf button {
+  border: 0;
+  background: none;
+  color: var(--text);
+  font: 600 14px var(--f-body);
+  cursor: pointer;
+}
+.pl-mf-btn {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 16px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-mf.on .pl-mf-btn {
+  color: var(--accent);
+}
+.pl-mf-x {
+  padding: 0 14px 0 6px;
+  color: var(--muted);
+}
+.pl-hit {
+  color: var(--accent);
+  font-weight: 700;
+  margin-right: 8px;
+}
+.pl-sec {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.pl-sec-h {
+  margin: 8px 0 0;
+  font-family: var(--f-display);
+  font-size: 22px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.pl-sec-h span {
+  font-size: 14px;
+  color: var(--muted);
+  margin-left: 6px;
+}
+.pl-box.wide {
+  width: min(920px, 100%);
 }
 .pl-check {
   display: inline-flex;
@@ -339,7 +397,7 @@
     margin-left: 0;
     flex: 1 1 100%;
   }
-  .pl-select {
+  .pl-mf {
     flex: 1 1 100%;
   }
 }

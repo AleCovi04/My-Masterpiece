@@ -44,6 +44,51 @@ export function involvesMuscle(e: Exercise, muscle: MuscleId): boolean {
   return e.muscles.some((m) => m.muscle === muscle)
 }
 
+/** Muscoli principali: quelli con la % più alta (a pari merito, tutti). */
+export function primaryMuscles(e: Pick<Exercise, 'muscles'>): MuscleId[] {
+  const max = Math.max(0, ...e.muscles.map((m) => m.percent))
+  return e.muscles.filter((m) => m.percent === max).map((m) => m.muscle)
+}
+
+export interface MuscleMatch {
+  exercise: Exercise
+  /** Somma delle % dei soli muscoli scelti. */
+  sum: number
+}
+
+export interface MuscleSections {
+  primary: MuscleMatch[]
+  secondary: MuscleMatch[]
+}
+
+/**
+ * Filtro per muscoli: solo esercizi che li coinvolgono tutti (a qualsiasi %).
+ * Principale = almeno un muscolo scelto è principale; ogni sezione per somma
+ * delle % decrescente, a parità per nome.
+ */
+export function filterByMuscles(
+  exercises: Exercise[],
+  selected: MuscleId[],
+  locale: string,
+): MuscleSections {
+  const primary: MuscleMatch[] = []
+  const secondary: MuscleMatch[] = []
+  for (const exercise of exercises) {
+    if (!selected.every((id) => involvesMuscle(exercise, id))) continue
+    const sum = exercise.muscles
+      .filter((m) => selected.includes(m.muscle))
+      .reduce((acc, m) => acc + m.percent, 0)
+    const main = primaryMuscles(exercise)
+    ;(selected.some((id) => main.includes(id)) ? primary : secondary).push({
+      exercise,
+      sum,
+    })
+  }
+  const byRank = (a: MuscleMatch, b: MuscleMatch) =>
+    b.sum - a.sum || a.exercise.name.localeCompare(b.exercise.name, locale)
+  return { primary: primary.sort(byRank), secondary: secondary.sort(byRank) }
+}
+
 export interface ExerciseUsage {
   templates: number
   sessions: number

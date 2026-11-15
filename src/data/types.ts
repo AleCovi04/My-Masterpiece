@@ -13,29 +13,10 @@ export interface Entity {
 
 // ---------- Muscoli ----------
 
-export const MUSCLES = [
-  { id: 'chest', it: 'Petto', en: 'Chest' },
-  { id: 'front_delts', it: 'Deltoidi anteriori', en: 'Front delts' },
-  { id: 'side_delts', it: 'Deltoidi laterali', en: 'Side delts' },
-  { id: 'rear_delts', it: 'Deltoidi posteriori', en: 'Rear delts' },
-  { id: 'biceps', it: 'Bicipiti', en: 'Biceps' },
-  { id: 'triceps', it: 'Tricipiti', en: 'Triceps' },
-  { id: 'forearms', it: 'Avambracci', en: 'Forearms' },
-  { id: 'abs', it: 'Addominali', en: 'Abs' },
-  { id: 'lats', it: 'Dorsali', en: 'Lats' },
-  {
-    id: 'mid_back',
-    it: 'Schiena media (trapezio/romboidi)',
-    en: 'Mid back (traps/rhomboids)',
-  },
-  { id: 'lower_back', it: 'Lombari', en: 'Lower back' },
-  { id: 'glutes', it: 'Glutei', en: 'Glutes' },
-  { id: 'quads', it: 'Quadricipiti', en: 'Quads' },
-  { id: 'hamstrings', it: 'Femorali', en: 'Hamstrings' },
-  { id: 'calves', it: 'Polpacci', en: 'Calves' },
-] as const
-
-export type MuscleId = (typeof MUSCLES)[number]['id']
+// Unica fonte: i 20 gruppi della mappa del corpo.
+export { BODY_GROUPS as MUSCLES } from '../components/body/groups'
+import type { BodyGroup as MuscleId } from '../components/body/groups'
+export type { MuscleId }
 
 // ---------- Esercizi (solo forza) ----------
 

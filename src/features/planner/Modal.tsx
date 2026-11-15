@@ -5,10 +5,18 @@ interface Props {
   closeLabel: string
   onClose: () => void
   children: ReactNode
+  /** Finestra larga (es. mappa muscolare). */
+  wide?: boolean
 }
 
 /** Finestra modale: Esc e clic fuori chiudono, il focus torna dove era. */
-export default function Modal({ title, closeLabel, onClose, children }: Props) {
+export default function Modal({
+  title,
+  closeLabel,
+  onClose,
+  children,
+  wide,
+}: Props) {
   const boxRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onClose)
 
@@ -39,7 +47,7 @@ export default function Modal({ title, closeLabel, onClose, children }: Props) {
       }}
     >
       <div
-        className="pl-box"
+        className={`pl-box${wide ? ' wide' : ''}`}
         ref={boxRef}
         role="dialog"
         aria-modal="true"
