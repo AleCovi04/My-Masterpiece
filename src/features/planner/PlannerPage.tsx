@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useI18n } from '../../i18n/context'
 import { readPreference, writePreference } from '../../lib/preferences'
 import ExercisesTab from './ExercisesTab'
+import WorkoutsTab from './WorkoutsTab'
 import './planner.css'
 
 const TABS = ['exercises', 'workouts', 'blocks', 'phases'] as const
@@ -48,6 +49,8 @@ export default function PlannerPage() {
       >
         {tab === 'exercises' ? (
           <ExercisesTab />
+        ) : tab === 'workouts' ? (
+          <WorkoutsTab />
         ) : (
           <div className="ph">{t.planner.soon}</div>
         )}

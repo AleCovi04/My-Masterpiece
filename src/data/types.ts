@@ -88,10 +88,38 @@ export type Plan = StrengthPlan | EndurancePlan
 
 // ---------- Template ----------
 
-export interface WorkoutTemplate extends Entity {
-  name: string
-  plan: Plan
+export interface TemplateSet {
+  reps: number
+  kg: number
+  rir: number
 }
+
+/** Una voce del template di forza: un esercizio con le sue serie. */
+export interface TemplateEntry {
+  exerciseId: Id
+  /** Recupero in secondi; in una superserie vale quello dell'ultimo esercizio del giro. */
+  restSeconds: number
+  notes?: string
+  /** Voci consecutive con lo stesso id formano una superserie. */
+  supersetId?: string
+  sets: TemplateSet[]
+}
+
+interface TemplateBase extends Entity {
+  name: string
+  notes?: string
+  /** Inserita a mano, mai calcolata. */
+  estimatedDurationSec?: number
+  archived: boolean // mai cancellato in massa: si archivia
+}
+
+export interface StrengthTemplate extends TemplateBase {
+  discipline: 'strength'
+  entries: TemplateEntry[]
+}
+
+/** Unione per disciplina: corsa, bici e nuoto si aggiungono qui con il proprio contenuto. */
+export type WorkoutTemplate = StrengthTemplate
 
 // ---------- Esecuzione effettiva ----------
 

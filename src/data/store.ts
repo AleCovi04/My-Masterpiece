@@ -10,6 +10,7 @@ export interface DataStore {
   loadExercises(): Promise<Exercise[]>
   saveExercises(exercises: Exercise[]): Promise<void>
   loadTemplates(): Promise<WorkoutTemplate[]>
+  saveTemplates(templates: WorkoutTemplate[]): Promise<void>
   /** `null` = "Nel futuro" (data non ancora scelta). */
   loadRaceDate(): Promise<IsoDate | null>
   saveRaceDate(date: IsoDate | null): Promise<void>

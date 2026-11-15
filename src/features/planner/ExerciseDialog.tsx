@@ -13,6 +13,7 @@ import {
   parseMmSs,
   type ExerciseUsage,
 } from '../../lib/exercises'
+import { newId } from '../../lib/ids'
 import Modal from './Modal'
 
 interface Props {
@@ -25,11 +26,6 @@ interface Props {
   onDelete: () => void
   onClose: () => void
 }
-
-const newId = () =>
-  typeof crypto !== 'undefined' && 'randomUUID' in crypto
-    ? crypto.randomUUID()
-    : `ex-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
 const parsePercent = (raw: string): number | null =>
   /^\d{1,3}$/.test(raw.trim()) && Number(raw) >= 1 && Number(raw) <= 100

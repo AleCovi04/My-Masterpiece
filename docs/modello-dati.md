@@ -23,14 +23,13 @@ Nome, muscoli con coinvolgimento 1–100 % (es. panca: petto 100, deltoidi anter
 
 ## Template (allenamento salvato)
 
-Nome + piano, per disciplina:
+Comuni a tutte le discipline: `id`, `name`, `discipline`, `notes` facoltative, `estimatedDurationSec` facoltativa (**inserita a mano, mai calcolata**), `archived` (si archivia, non si cancella in massa), `createdAt`/`updatedAt`. `WorkoutTemplate` è un'unione discriminata su `discipline`: ogni nuova disciplina aggiunge il proprio tipo con il proprio contenuto.
 
-- **Forza**: esercizi in ordine; per ognuno serie previste (ripetizioni, kg, RIR obiettivo) e recupero (default quello dell'esercizio).
-- **Corsa**: distanza e passo, oppure intervalli (distanza, passo, recupero camminato in s).
-- **Bici**: distanza e velocità media.
-- **Nuoto**: distanza e passo.
+- **Forza** (`StrengthTemplate`): lista ordinata di voci (`entries`). Ogni voce: `exerciseId`, `restSeconds` (default quello dell'esercizio), `notes` facoltative, `supersetId` facoltativo e le serie `sets` (`reps`, `kg`, `rir`).
+  - **Superserie**: voci **consecutive** con lo stesso `supersetId` (almeno due). Il recupero che conta è quello dell'ultima voce del giro. Nel riordino il gruppo si muove unito; le etichette "Superserie A/B…" si calcolano dall'ordine.
+- **Corsa**, **Bici**, **Nuoto**: da aggiungere (distanza e passo / intervalli / velocità media).
 
-La durata stimata dell'endurance è calcolata, non salvata.
+Le sedute continuano ad avere la propria **copia del piano** (`Plan`): modificare un template non le tocca. Salvataggio dei template in `DataStore` (`loadTemplates`/`saveTemplates`).
 
 ## Seduta
 

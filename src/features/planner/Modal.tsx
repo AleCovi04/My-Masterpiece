@@ -7,7 +7,12 @@ interface Props {
   children: ReactNode
   /** Finestra larga (es. mappa muscolare). */
   wide?: boolean
+  /** Il clic fuori chiude (default sì); da disattivare nei moduli lunghi. */
+  backdropClose?: boolean
 }
+
+// Pila delle finestre aperte: Esc chiude solo quella in cima.
+const openStack: symbol[] = []
 
 /** Finestra modale: Esc e clic fuori chiudono, il focus torna dove era. */
 export default function Modal({
@@ -16,6 +21,7 @@ export default function Modal({
   onClose,
   children,
   wide,
+  backdropClose = true,
 }: Props) {
   const boxRef = useRef<HTMLDivElement>(null)
   const closeRef = useRef(onClose)
@@ -26,8 +32,12 @@ export default function Modal({
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
+    const me = Symbol('modal')
+    openStack.push(me)
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeRef.current()
+      if (e.key === 'Escape' && openStack[openStack.length - 1] === me) {
+        closeRef.current()
+      }
     }
     document.addEventListener('keydown', onKey)
     boxRef.current
@@ -35,6 +45,7 @@ export default function Modal({
       ?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
+      openStack.splice(openStack.indexOf(me), 1)
       previous?.focus?.()
     }
   }, [])
@@ -43,7 +54,7 @@ export default function Modal({
     <div
       className="pl-mod"
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) onClose()
+        if (backdropClose && e.target === e.currentTarget) onClose()
       }}
     >
       <div

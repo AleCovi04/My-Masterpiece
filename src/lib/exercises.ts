@@ -104,7 +104,11 @@ export function exerciseUsage(
     plan.discipline === 'strength' &&
     (plan.exercises as { exerciseId: Id }[]).some((x) => x.exerciseId === id)
   return {
-    templates: templates.filter((t) => planUses(t.plan)).length,
+    templates: templates.filter(
+      (t) =>
+        t.discipline === 'strength' &&
+        t.entries.some((x) => x.exerciseId === id),
+    ).length,
     sessions: sessions.filter(
       (s) =>
         planUses(s.plan) ||

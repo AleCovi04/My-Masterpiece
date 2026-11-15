@@ -81,10 +81,21 @@ export const localStorageStore: DataStore = {
     if (!raw) return []
     try {
       const parsed: unknown = JSON.parse(raw)
-      return Array.isArray(parsed) ? (parsed as WorkoutTemplate[]) : []
+      if (!Array.isArray(parsed)) return []
+      // scarta voci di formati precedenti o corrotte
+      return (parsed as WorkoutTemplate[]).filter(
+        (t) =>
+          t &&
+          t.discipline === 'strength' &&
+          typeof t.name === 'string' &&
+          Array.isArray(t.entries),
+      )
     } catch {
       return []
     }
+  },
+  async saveTemplates(templates) {
+    write(TEMPLATES_KEY, JSON.stringify(templates))
   },
   async loadRaceDate() {
     const raw = read(RACE_KEY)
