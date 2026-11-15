@@ -86,10 +86,12 @@ export const it = {
     nameRequired: 'Il nome è obbligatorio.',
     nameTaken: 'Esiste già un esercizio con questo nome.',
     muscles: 'Muscoli coinvolti',
-    musclesHint: 'Scegli i gruppi e indica quanto sono coinvolti (1–100%).',
+    musclesHint:
+      'Tocca i muscoli sulla mappa e indica quanto sono coinvolti (1–100%).',
     musclesRequired: 'Scegli almeno un muscolo.',
     percentInvalid: 'La percentuale deve essere un intero da 1 a 100.',
     percent: 'Percentuale',
+    removeMuscle: 'Rimuovi muscolo',
     restLabel: 'Recupero di default (mm:ss)',
     restInvalid: 'Usa il formato mm:ss, ad esempio 2:45.',
     notes: 'Note',

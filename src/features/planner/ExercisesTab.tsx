@@ -7,11 +7,11 @@ import {
   normalizeName,
   sortedMuscles,
 } from '../../lib/exercises'
+import { ArchiveIcon, RestoreIcon } from '../../components/ui/Icons'
 import ExerciseDialog from './ExerciseDialog'
+import MuscleBars from './MuscleBars'
 import MuscleFilterDialog from './MuscleFilterDialog'
 import { useExercises } from './useExercises'
-
-const MAX_SHOWN = 3
 
 export default function ExercisesTab() {
   const { t, lang } = useI18n()
@@ -47,53 +47,35 @@ export default function ExercisesTab() {
     ? sections.primary.length + sections.secondary.length
     : list.length
 
-  const renderItem = (e: Exercise) => {
-    const ms = sortedMuscles(e)
-    // i muscoli scelti vengono sempre mostrati, in evidenza, davanti agli altri
-    const chosen = ms.filter((m) => muscles.includes(m.muscle))
-    const others = ms
-      .filter((m) => !muscles.includes(m.muscle))
-      .slice(0, Math.max(0, MAX_SHOWN - chosen.length))
-    const hidden = ms.length - chosen.length - others.length
-    const rest = [
-      others.map((m) => `${label(m.muscle)} ${m.percent}%`).join(' · '),
-      hidden > 0 ? `+${hidden} ${p.moreMuscles}` : '',
-    ]
-      .filter(Boolean)
-      .join(' · ')
-    return (
-      <li key={e.id} className={`pl-item${e.archived ? ' arch' : ''}`}>
-        <button
-          type="button"
-          className="pl-item-main"
-          onClick={() => setEditing(e.id)}
-        >
+  const renderItem = (e: Exercise) => (
+    <li key={e.id} className={`pl-item${e.archived ? ' arch' : ''}`}>
+      <button
+        type="button"
+        className="pl-item-main"
+        onClick={() => setEditing(e.id)}
+      >
+        <span className="pl-item-info">
           <b>
             {e.name}
             {e.archived && <span className="pl-tag">{p.archivedTag}</span>}
           </b>
-          <span className="pl-ms">
-            {chosen.map((m) => (
-              <strong key={m.muscle} className="pl-hit">
-                {label(m.muscle)} {m.percent}%
-              </strong>
-            ))}
-            {rest}
-          </span>
           <span className="pl-rest">
             {p.rest} {formatMmSs(e.defaultRestSeconds)}
           </span>
-        </button>
-        <button
-          type="button"
-          className="pl-btn pl-small"
-          onClick={() => setArchived(e.id, !e.archived)}
-        >
-          {e.archived ? p.restore : p.archive}
-        </button>
-      </li>
-    )
-  }
+        </span>
+        <MuscleBars muscles={sortedMuscles(e)} highlight={muscles} />
+      </button>
+      <button
+        type="button"
+        className="pl-ico"
+        title={e.archived ? p.restore : p.archive}
+        aria-label={`${e.archived ? p.restore : p.archive}: ${e.name}`}
+        onClick={() => setArchived(e.id, !e.archived)}
+      >
+        {e.archived ? <RestoreIcon /> : <ArchiveIcon />}
+      </button>
+    </li>
+  )
 
   if (!exercises) return null
   const current: Exercise | null =

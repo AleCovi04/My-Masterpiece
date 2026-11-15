@@ -88,10 +88,12 @@ export const en: Dictionary = {
     nameRequired: 'The name is required.',
     nameTaken: 'An exercise with this name already exists.',
     muscles: 'Muscles involved',
-    musclesHint: 'Pick the groups and set how involved they are (1–100%).',
+    musclesHint:
+      'Tap the muscles on the map and set how involved they are (1–100%).',
     musclesRequired: 'Pick at least one muscle.',
     percentInvalid: 'The percentage must be a whole number from 1 to 100.',
     percent: 'Percentage',
+    removeMuscle: 'Remove muscle',
     restLabel: 'Default rest (mm:ss)',
     restInvalid: 'Use the mm:ss format, for example 2:45.',
     notes: 'Notes',

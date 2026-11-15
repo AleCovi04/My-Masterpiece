@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type CSSProperties, type FormEvent } from 'react'
+import { BodyMap } from '../../components/body'
 import {
   DEFAULT_REST_SECONDS,
   MUSCLES,
@@ -61,7 +62,13 @@ export default function ExerciseDialog({
   const [submitted, setSubmitted] = useState(false)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
 
-  const selected = MUSCLES.filter((m) => muscles[m.id] !== undefined)
+  // Righe ordinate per % (le % non valide in coda, ordine stabile).
+  const selected = MUSCLES.filter((m) => muscles[m.id] !== undefined).sort(
+    (a, b) =>
+      (parsePercent(muscles[b.id] ?? '') ?? 0) -
+      (parsePercent(muscles[a.id] ?? '') ?? 0),
+  )
+  const selectedIds = selected.map((m) => m.id)
   const nameError = !name.trim()
     ? p.nameRequired
     : isNameTaken(all, name, exercise?.id)
@@ -75,11 +82,18 @@ export default function ExerciseDialog({
   const anyPercentBad = selected.some((m) => percentBad(m.id))
   const valid = !nameError && !musclesError && !restError && !anyPercentBad
 
-  const toggle = (id: MuscleId) =>
+  // Dalla mappa: i nuovi muscoli partono da 100 (il primo) o 50; i tolti spariscono.
+  const setSelectedIds = (ids: MuscleId[]) =>
     setMuscles((cur) => {
-      const next = { ...cur }
-      if (next[id] !== undefined) delete next[id]
-      else next[id] = Object.keys(cur).length === 0 ? '100' : '50'
+      const next: Partial<Record<MuscleId, string>> = {}
+      let first = Object.keys(cur).length === 0
+      for (const id of ids) {
+        if (cur[id] !== undefined) next[id] = cur[id]
+        else {
+          next[id] = first ? '100' : '50'
+          first = false
+        }
+      }
       return next
     })
 
@@ -117,6 +131,7 @@ export default function ExerciseDialog({
       title={exercise ? p.editExercise : p.newExercise}
       closeLabel={p.close}
       onClose={onClose}
+      wide
     >
       <form className="pl-form" onSubmit={submit} noValidate>
         <label className="pl-fld">
@@ -134,38 +149,57 @@ export default function ExerciseDialog({
         <fieldset className="pl-fld">
           <legend>{p.muscles} *</legend>
           <small>{p.musclesHint}</small>
+          <BodyMap
+            mode="select"
+            multiple
+            selected={selectedIds}
+            onChange={setSelectedIds}
+          />
           <div className="pl-mlist">
-            {MUSCLES.map((m) => {
-              const raw = muscles[m.id]
-              const on = raw !== undefined
+            {selected.map((m) => {
+              const raw = muscles[m.id] ?? ''
+              const num = parsePercent(raw)
               return (
-                <div className={`pl-mrow${on ? ' on' : ''}`} key={m.id}>
-                  <label>
+                <div className="pl-mrow" key={m.id}>
+                  <span className="pl-mname">{m[lang]}</span>
+                  <input
+                    type="range"
+                    className="pl-range"
+                    min={1}
+                    max={100}
+                    value={num ?? 1}
+                    style={{ '--v': `${num ?? 0}%` } as CSSProperties}
+                    aria-label={`${p.percent} – ${m[lang]}`}
+                    onChange={(e) =>
+                      setMuscles((cur) => ({ ...cur, [m.id]: e.target.value }))
+                    }
+                  />
+                  <span className="pl-pct">
                     <input
-                      type="checkbox"
-                      checked={on}
-                      onChange={() => toggle(m.id)}
+                      className="pl-inp"
+                      inputMode="numeric"
+                      value={raw}
+                      aria-label={`${p.percent} – ${m[lang]}`}
+                      aria-invalid={submitted && percentBad(m.id)}
+                      onChange={(e) =>
+                        setMuscles((cur) => ({
+                          ...cur,
+                          [m.id]: e.target.value,
+                        }))
+                      }
                     />
-                    {m[lang]}
-                  </label>
-                  {on && (
-                    <span className="pl-pct">
-                      <input
-                        className="pl-inp"
-                        inputMode="numeric"
-                        value={raw}
-                        aria-label={`${p.percent} – ${m[lang]}`}
-                        aria-invalid={submitted && percentBad(m.id)}
-                        onChange={(e) =>
-                          setMuscles((cur) => ({
-                            ...cur,
-                            [m.id]: e.target.value,
-                          }))
-                        }
-                      />
-                      %
-                    </span>
-                  )}
+                    %
+                  </span>
+                  <button
+                    type="button"
+                    className="pl-x pl-x-sm"
+                    aria-label={`${p.removeMuscle}: ${m[lang]}`}
+                    onClick={() =>
+                      setSelectedIds(selectedIds.filter((id) => id !== m.id))
+                    }
+                  >
+                    ✕
+                  </button>
                 </div>
               )
             })}

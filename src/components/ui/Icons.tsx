@@ -23,6 +23,18 @@ export const MenuIcon = () => (
   </Svg>
 )
 
+export const ArchiveIcon = () => (
+  <Svg>
+    <path d="M3 4h18v4H3zM5 8v12h14V8M10 12h4" />
+  </Svg>
+)
+
+export const RestoreIcon = () => (
+  <Svg>
+    <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
+  </Svg>
+)
+
 export const MoonIcon = () => (
   <Svg>
     <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
