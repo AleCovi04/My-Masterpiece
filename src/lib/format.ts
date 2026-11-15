@@ -11,6 +11,12 @@ export function formatDuration(seconds: number): string {
   return m === 0 ? `${h}h` : `${h}h${String(m).padStart(2, '0')}`
 }
 
+/** 5400 → "1:30", 2700 → "0:45". */
+export function formatHm(seconds: number): string {
+  const totalMin = Math.max(0, Math.round(seconds / 60))
+  return `${Math.floor(totalMin / 60)}:${String(totalMin % 60).padStart(2, '0')}`
+}
+
 /** Nuoto in metri, altre discipline in km. */
 export function formatDistance(meters: number, discipline: Discipline): string {
   if (discipline === 'swim') return `${Math.round(meters)} m`
