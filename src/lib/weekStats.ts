@@ -1,20 +1,18 @@
 import type { Discipline, IsoDate, Session } from '../data/types'
 import { addDays, parseIsoDate, toIsoDate } from './dates'
-import { estimateDurationSeconds } from './endurance'
-import { estimateStrengthDurationSeconds } from './strength'
+import { sessionDurationSec } from './sessions'
 
 export const DISCIPLINES: Discipline[] = ['swim', 'bike', 'run', 'strength']
 
+/** Durata prevista; 0 se non è nota (forza senza durata, endurance senza intensità). */
 export function plannedSeconds(s: Session): number {
-  return s.plan.discipline === 'strength'
-    ? estimateStrengthDurationSeconds(s.plan)
-    : estimateDurationSeconds(s.plan)
+  return sessionDurationSec(s) ?? 0
 }
 
 export function actualSeconds(s: Session): number {
   const a = s.actual
   if (!a) return 0
-  if (a.discipline === 'strength') {
+  if ('startedAt' in a) {
     if (!a.endedAt) return 0
     return Math.max(
       0,
@@ -70,7 +68,7 @@ export function loadByDiscipline(
     DISCIPLINES.map((d) => [d, { plannedS: 0, actualS: 0 }]),
   ) as Record<Discipline, { plannedS: number; actualS: number }>
   for (const s of sessions) {
-    const d = s.plan.discipline
+    const d = s.discipline
     if (s.status !== 'skipped') out[d].plannedS += plannedSeconds(s)
     if (s.status === 'done') out[d].actualS += actualSeconds(s)
   }

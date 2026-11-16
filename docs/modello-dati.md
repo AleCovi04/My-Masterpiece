@@ -37,11 +37,20 @@ Comuni a tutte le discipline: `id`, `name`, `discipline`, `notes` facoltative, `
   - **Durata mostrata**: `estimatedDurationSec` se presente, altrimenti il tempo totale calcolato (può mancare se nessun passo ha l'intensità). "Ripristina automatico" toglie la sovrascrittura.
   - **Riassunto in lista**: es. `Risc. 15′ · 6×400 m · Def. 10′` (nel blocco compaiono i passi di lavoro).
 
-Le sedute continuano ad avere la propria **copia del piano** (`Plan`): modificare un template non le tocca. Salvataggio dei template in `DataStore` (`loadTemplates`/`saveTemplates`).
+Salvataggio dei template in `DataStore` (`loadTemplates`/`saveTemplates`).
 
-## Seduta
+## Seduta (sessione del Calendario)
 
-Un allenamento in una data: `date`, `order` nel giorno, `status` (`planned`, `in_progress`, `done`, `skipped`), `templateId` facoltativo e **copia del piano**: modificare il template non cambia le sedute esistenti.
+Un allenamento in una data: `id`, `date`, `order` nel giorno (da 0), `discipline`, `status` (`planned`, `in_progress`, `done`, `skipped`), `templateId` facoltativo, `plan` e `estimatedDurationSec` facoltativa. `Session` è un'unione discriminata su `discipline` (`StrengthSession` | `EnduranceSession`), come i template.
+
+- **`plan` è una copia** con la stessa struttura del template: forza = `entries` (voci, serie, superserie); corsa/bici/nuoto = `mode` + `simple` oppure `items` (passi e blocchi). La copia rende la seduta indipendente: modificarla non tocca il template e modificare (o eliminare) il template non cambia le sedute già pianificate.
+- **`name`** (facoltativo) è il nome copiato dal template al momento dell'inserimento; se manca (sessione vuota) si mostra la disciplina. Anche `notes` viene copiato.
+- **Durata stimata**: stessa regola dei template: `estimatedDurationSec` se presente, altrimenti per l'endurance il tempo calcolato dal piano; per la forza senza durata scritta a mano non è nota (nelle statistiche conta zero).
+- **Sessione vuota**: nessun `templateId`; forza con `entries` vuote, endurance in modalità semplice senza obiettivo.
+- **`actual`** (l'eseguito) è solo predisposto come tipo: `StrengthActual` / `EnduranceActual`, descritti sotto. Non c'è ancora nulla che lo scriva.
+- **Operazioni** (`src/lib/sessions.ts`): creazione da template o vuota, inserimento in una posizione esatta del giorno, spostamento (`src/lib/reorder.ts`), duplicazione (copia programmata, subito dopo l'originale), salta/ripristina, eliminazione. Ogni operazione rinumera `order` nei giorni coinvolti.
+- **Modifica piano**: usa gli stessi editor dei template, applicati alla sola seduta (`sessionAsTemplate` / `applyEditedPlan`).
+- **Salvataggio** in `DataStore` (`loadSessions`/`saveSessions`, chiave `mm.sessions`). Non ci sono più sedute dimostrative: l'elenco parte vuoto. Le sedute salvate nel formato precedente (solo dati dimostrativi) vengono scartate al primo caricamento, con copia di sicurezza in `mm.sessions.backup-v1`.
 
 ## Forza dal vivo
 
@@ -53,7 +62,7 @@ Manuale o importato da `.FIT` Garmin (solo Garmin → app), campo `source` (`man
 
 ## Calcoli (`src/lib/`)
 
-- Durata stimata endurance delle sedute (`endurance.ts`); totali, durata e riassunto dei template endurance (`enduranceTemplate.ts`).
+- Totali, durata e riassunto dei piani endurance, di template e sedute (`enduranceTemplate.ts`); durata e operazioni sulle sedute (`sessions.ts`).
 - Volume = kg × ripetizioni (`strength.ts`).
 - PR per esercizio: kg massimo e miglior serie per volume, solo sedute `done`.
 - Serie per muscolo = serie completate × percentuale / 100 (mappa di calore); esercizi saltati esclusi.

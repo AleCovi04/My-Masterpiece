@@ -4,7 +4,8 @@ import { useI18n } from '../../i18n/context'
 import { parseIsoDate, todayIso } from '../../lib/dates'
 import { formatHm } from '../../lib/format'
 import { sessionsOn } from '../../lib/reorder'
-import { actualSeconds, plannedSeconds } from '../../lib/weekStats'
+import { sessionDurationSec } from '../../lib/sessions'
+import { actualSeconds } from '../../lib/weekStats'
 import { weekDates, weekdayShortNames } from './period'
 import { useMediaQuery } from './useMediaQuery'
 import { useReorder } from './useReorder'
@@ -16,6 +17,7 @@ interface Props {
   onSelect: (date: IsoDate | null) => void
   onAdd: (date: IsoDate, index: number) => void
   onMove: (id: Id, date: IsoDate, index: number) => void
+  onOpen: (id: Id) => void
 }
 
 export default function WeekView({
@@ -25,6 +27,7 @@ export default function WeekView({
   onSelect,
   onAdd,
   onMove,
+  onOpen,
 }: Props) {
   const { t } = useI18n()
   const gridRef = useRef<HTMLDivElement>(null)
@@ -81,9 +84,15 @@ export default function WeekView({
               {list.length === 0
                 ? insert(date, 0, 'only')
                 : list.map((s, k) => {
-                    const disc = s.plan.discipline
+                    const disc = s.discipline
+                    const name = s.name ?? t.discipline[disc]
                     const secs =
-                      s.status === 'done' ? actualSeconds(s) : plannedSeconds(s)
+                      s.status === 'done'
+                        ? actualSeconds(s)
+                        : sessionDurationSec(s)
+                    const open = () => {
+                      if (!reorder.shouldSuppressClick()) onOpen(s.id)
+                    }
                     return (
                       <div className="cal-cw" key={s.id}>
                         {k === 0 && insert(date, 0, 'top')}
@@ -91,15 +100,31 @@ export default function WeekView({
                           className={`cal-card${reorder.draggingId === s.id ? ' dragging' : ''}${reorder.liftedId === s.id ? ' lifted' : ''}`}
                           data-sid={s.id}
                           data-discipline={disc}
+                          data-status={s.status}
+                          role="button"
+                          tabIndex={0}
+                          aria-label={`${name}, ${t.status[s.status]}`}
+                          onClick={(e) => {
+                            // il clic sulla card apre il dettaglio, non (de)seleziona il giorno
+                            e.stopPropagation()
+                            open()
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key !== 'Enter' && e.key !== ' ') return
+                            e.preventDefault()
+                            e.stopPropagation()
+                            open()
+                          }}
                           onContextMenu={(e) => {
                             // su telefono il tocco prolungato non deve aprire il menu del browser
                             if (!mouseDrag) e.preventDefault()
                           }}
                           {...reorder.cardProps(s.id)}
                         >
-                          <b>{t.discipline[disc]}</b>
+                          <b>{name}</b>
                           <span>
-                            {formatHm(secs)} · {t.status[s.status]}
+                            {secs ? `${formatHm(secs)} · ` : ''}
+                            {t.status[s.status]}
                           </span>
                         </div>
                         {insert(

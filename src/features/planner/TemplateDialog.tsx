@@ -94,6 +94,11 @@ interface Props {
   onArchive: (archived: boolean) => void
   onDelete: () => void
   onClose: () => void
+  /**
+   * Modifica il piano di una seduta del Calendario: nome facoltativo e
+   * niente duplica/archivia/elimina (non è un template).
+   */
+  forSession?: boolean
 }
 
 export default function TemplateDialog({
@@ -104,6 +109,7 @@ export default function TemplateDialog({
   onArchive,
   onDelete,
   onClose,
+  forSession = false,
 }: Props) {
   const { t } = useI18n()
   const p = t.planner
@@ -134,7 +140,7 @@ export default function TemplateDialog({
   const bs = blocks(entries)
   const labels = supersetLabels(entries)
 
-  const nameError = name.trim() ? null : p.nameRequired
+  const nameError = name.trim() || forSession ? null : p.nameRequired
   const durationError =
     duration.trim() !== '' && parseHm(duration) === null
       ? p.durationInvalid
@@ -243,7 +249,9 @@ export default function TemplateDialog({
   return (
     <>
       <Modal
-        title={template ? p.editWorkout : p.newWorkout}
+        title={
+          forSession ? p.editPlan : template ? p.editWorkout : p.newWorkout
+        }
         closeLabel={p.close}
         onClose={onClose}
         wide
@@ -252,7 +260,7 @@ export default function TemplateDialog({
         <form className="pl-form" onSubmit={submit} noValidate>
           <div className="tp-top">
             <label className="pl-fld tp-name">
-              <span>{p.name} *</span>
+              <span>{forSession ? p.name : `${p.name} *`}</span>
               <input
                 className="pl-inp"
                 value={name}
@@ -354,7 +362,7 @@ export default function TemplateDialog({
           </section>
 
           <TemplateFooter
-            template={template}
+            template={forSession ? null : template}
             onDuplicate={onDuplicate}
             onArchive={onArchive}
             onDelete={onDelete}

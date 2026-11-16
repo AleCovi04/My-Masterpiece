@@ -131,6 +131,11 @@ interface Props {
   onArchive: (archived: boolean) => void
   onDelete: () => void
   onClose: () => void
+  /**
+   * Modifica il piano di una seduta del Calendario: nome facoltativo e
+   * niente duplica/archivia/elimina (non è un template).
+   */
+  forSession?: boolean
 }
 
 interface DragTarget extends DropTarget {
@@ -145,6 +150,7 @@ export default function EnduranceDialog({
   onArchive,
   onDelete,
   onClose,
+  forSession = false,
 }: Props) {
   const { t } = useI18n()
   const p = t.planner
@@ -233,7 +239,7 @@ export default function EnduranceDialog({
 
   // ---------- validazione ----------
 
-  const nameError = name.trim() ? null : p.nameRequired
+  const nameError = name.trim() || forSession ? null : p.nameRequired
   const overrideError =
     override !== null && override.trim() !== '' && parseClock(override) === null
       ? p.clockInvalid
@@ -490,7 +496,7 @@ export default function EnduranceDialog({
 
   return (
     <Modal
-      title={template ? p.editWorkout : p.newWorkout}
+      title={forSession ? p.editPlan : template ? p.editWorkout : p.newWorkout}
       closeLabel={p.close}
       onClose={onClose}
       wide
@@ -510,7 +516,7 @@ export default function EnduranceDialog({
         </div>
 
         <label className="pl-fld">
-          <span>{p.name} *</span>
+          <span>{forSession ? p.name : `${p.name} *`}</span>
           <input
             className="pl-inp"
             value={name}
@@ -802,7 +808,7 @@ export default function EnduranceDialog({
         )}
 
         <TemplateFooter
-          template={template}
+          template={forSession ? null : template}
           onDuplicate={onDuplicate}
           onArchive={onArchive}
           onDelete={onDelete}

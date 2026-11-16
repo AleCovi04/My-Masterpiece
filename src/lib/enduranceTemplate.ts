@@ -3,7 +3,6 @@ import type {
   EnduranceItem,
   EnduranceSimple,
   EnduranceStep,
-  EnduranceTemplate,
   RepeatBlock,
   WorkoutTemplate,
 } from '../data/types'
@@ -174,9 +173,17 @@ export function simpleStats(d: EnduranceDiscipline, s: EnduranceSimple): Stats {
   )
 }
 
-/** Totali di un template endurance (`null` se un totale non è noto) e se valgono per tutti i passi. */
+/** Contenuto endurance di un template o di una seduta. */
+export interface EnduranceContent {
+  discipline: EnduranceDiscipline
+  mode: 'simple' | 'structured'
+  simple?: EnduranceSimple
+  items?: EnduranceItem[]
+}
+
+/** Totali di un piano endurance (`null` se un totale non è noto) e se valgono per tutti i passi. */
 export function templateTotals(
-  t: EnduranceTemplate,
+  t: EnduranceContent,
 ): Stats & { distanceComplete: boolean; durationComplete: boolean } {
   if (t.mode === 'simple') {
     const st = t.simple

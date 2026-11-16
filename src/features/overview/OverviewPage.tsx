@@ -9,6 +9,7 @@ import {
   todayIso,
 } from '../../lib/dates'
 import { formatDuration } from '../../lib/format'
+import { sessionDurationSec } from '../../lib/sessions'
 import { DISCIPLINES, sessionsInWeek, summarize } from '../../lib/weekStats'
 import LoadChart from './LoadChart'
 import RaceDatePicker from './RaceDatePicker'
@@ -30,7 +31,7 @@ export default function OverviewPage() {
   const monday = mondayOf(new Date())
   const sunday = addDays(monday, 6)
   const week = sessionsInWeek(data.sessions, toIsoDate(monday))
-  const filtered = week.filter((s) => active.has(s.plan.discipline))
+  const filtered = week.filter((s) => active.has(s.discipline))
   const sum = summarize(filtered, today)
 
   const days = data.raceDate
@@ -168,7 +169,9 @@ export default function OverviewPage() {
             </div>
           </section>
         </div>
-        <div className="note">{o.sampleNote}</div>
+        {week.some(
+          (s) => s.status !== 'skipped' && sessionDurationSec(s) === null,
+        ) && <div className="note">{o.unknownNote}</div>}
       </section>
     </>
   )

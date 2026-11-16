@@ -3,9 +3,8 @@ import type { Session } from '../data/types'
 import { moveSession, sessionsOn } from './reorder'
 
 const plan = {
-  discipline: 'swim',
-  distanceM: 1000,
-  paceSecPer100m: 120,
+  mode: 'simple',
+  simple: { goal: 'distance', distanceM: 1000, intensity: 120 },
 } as const
 
 function s(id: string, date: string, order: number): Session {
@@ -14,6 +13,7 @@ function s(id: string, date: string, order: number): Session {
     date,
     order,
     status: 'planned',
+    discipline: 'swim',
     plan,
     createdAt: '2026-01-01T00:00:00.000Z',
     updatedAt: '2026-01-01T00:00:00.000Z',

@@ -6,8 +6,6 @@ import type {
   IsoDate,
   MuscleId,
   Session,
-  StrengthActual,
-  StrengthPlan,
 } from '../data/types'
 import { MUSCLES } from '../data/types'
 
@@ -24,8 +22,8 @@ export interface PersonalRecords {
 
 function doneStrength(sessions: Session[]) {
   return sessions.flatMap((s) =>
-    s.status === 'done' && s.actual?.discipline === 'strength'
-      ? [{ date: s.date, order: s.order, actual: s.actual as StrengthActual }]
+    s.status === 'done' && s.discipline === 'strength' && s.actual
+      ? [{ date: s.date, order: s.order, actual: s.actual }]
       : [],
   )
 }
@@ -100,21 +98,4 @@ export function setsPerMuscle(
     }
   }
   return result
-}
-
-const SECONDS_PER_SET = 60
-const SECONDS_PER_TRANSITION = 120
-
-/** Durata stimata di una seduta di forza (serie + recuperi + cambi attrezzo). */
-export function estimateStrengthDurationSeconds(plan: StrengthPlan): number {
-  return plan.exercises.reduce((sum, ex) => {
-    const n = ex.sets.length
-    if (n === 0) return sum
-    return (
-      sum +
-      n * SECONDS_PER_SET +
-      (n - 1) * ex.restSeconds +
-      SECONDS_PER_TRANSITION
-    )
-  }, 0)
 }

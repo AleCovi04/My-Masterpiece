@@ -4,25 +4,12 @@ import {
   DisciplineIcon,
   RestoreIcon,
 } from '../../components/ui/Icons'
-import {
-  MUSCLES,
-  type Discipline,
-  type MuscleId,
-  type WorkoutTemplate,
-} from '../../data/types'
+import type { Discipline, WorkoutTemplate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { normalizeName } from '../../lib/exercises'
-import { formatDuration } from '../../lib/format'
-import {
-  formatDist,
-  formatIntensity,
-  structureSummary,
-  templateDurationSec,
-  templateTotals,
-} from '../../lib/enduranceTemplate'
-import { topMuscles } from '../../lib/templates'
 import EnduranceDialog from './EnduranceDialog'
 import Modal from './Modal'
+import TemplateCardBody from './TemplateCardBody'
 import TemplateDialog from './TemplateDialog'
 import { useTemplates } from './useTemplates'
 
@@ -42,8 +29,6 @@ export default function WorkoutsTab() {
   const [editing, setEditing] = useState<
     string | { discipline: Discipline } | undefined
   >(undefined)
-
-  const label = (id: MuscleId) => MUSCLES.find((m) => m.id === id)?.[lang] ?? id
 
   const visible = useMemo(() => {
     const q = normalizeName(query)
@@ -171,34 +156,6 @@ export default function WorkoutsTab() {
       ) : (
         <ul className="pl-list">
           {visible.map((w) => {
-            const muscles =
-              w.discipline === 'strength' ? topMuscles(w, exercises) : []
-            const seconds = templateDurationSec(w)
-            let meta: string
-            let summary = ''
-            if (w.discipline === 'strength') {
-              meta = `${w.entries.length} ${p.exercisesCount}`
-              if (seconds) meta += ` · ${formatDuration(seconds)}`
-            } else {
-              const totals = templateTotals(w)
-              meta = [
-                totals.distanceM !== null &&
-                  `${totals.distanceComplete ? '' : '≥ '}${formatDist(totals.distanceM, w.discipline)}`,
-                seconds &&
-                  `${!w.estimatedDurationSec && !totals.durationComplete ? '≥ ' : ''}${formatDuration(seconds)}`,
-              ]
-                .filter(Boolean)
-                .join(' · ')
-              if (w.mode === 'structured') {
-                summary = structureSummary(w.items ?? [], w.discipline, {
-                  warmup: p.stepShort.warmup,
-                  recovery: p.stepShort.recovery,
-                  cooldown: p.stepShort.cooldown,
-                })
-              } else if (w.simple?.intensity !== undefined) {
-                summary = `@ ${formatIntensity(w.simple.intensity, w.discipline)}`
-              }
-            }
             return (
               <li
                 key={w.id}
@@ -210,28 +167,7 @@ export default function WorkoutsTab() {
                   className="pl-item-main"
                   onClick={() => setEditing(w.id)}
                 >
-                  <span className="wk-head">
-                    <span className="wk-ic">
-                      <DisciplineIcon discipline={w.discipline} />
-                    </span>
-                    <b className="pl-item-name">
-                      {w.name}
-                      {w.archived && (
-                        <span className="pl-tag">{p.archivedTag}</span>
-                      )}
-                    </b>
-                  </span>
-                  {meta && <span className="wk-meta">{meta}</span>}
-                  {summary && <span className="wk-sum">{summary}</span>}
-                  {muscles.length > 0 && (
-                    <span className="wk-chips">
-                      {muscles.map((m) => (
-                        <span key={m} className="wk-chip">
-                          {label(m)}
-                        </span>
-                      ))}
-                    </span>
-                  )}
+                  <TemplateCardBody template={w} exercises={exercises} />
                 </button>
                 <button
                   type="button"

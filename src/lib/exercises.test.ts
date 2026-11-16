@@ -1,12 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import {
-  generateSampleExercises,
-  generateSampleSessions,
-} from '../data/sampleData'
+import { generateSampleExercises } from '../data/sampleData'
 import type { Exercise, MuscleId } from '../data/types'
 import { migrateExercise } from './muscleMigration'
 import {
-  exerciseUsage,
   filterByMuscles,
   formatMmSs,
   isNameTaken,
@@ -32,16 +28,6 @@ describe('esercizi', () => {
   })
   it('muscoli ordinati per percentuale', () => {
     expect(sortedMuscles(ex[0]).map((m) => m.percent)).toEqual([100, 60, 40])
-  })
-  it('uso negli esercizi di esempio', () => {
-    const sessions = generateSampleSessions(new Date(2026, 10, 14, 12))
-    expect(
-      exerciseUsage('sample-panca', [], sessions).sessions,
-    ).toBeGreaterThan(0)
-    expect(exerciseUsage('nuovo', [], sessions)).toEqual({
-      templates: 0,
-      sessions: 0,
-    })
   })
 })
 

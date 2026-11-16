@@ -1,10 +1,11 @@
 import type { DataStore } from './store'
 import type { Exercise, IsoDate, Session, WorkoutTemplate } from './types'
-import { generateSampleExercises, generateSampleSessions } from './sampleData'
+import { generateSampleExercises } from './sampleData'
 import { isIsoDate } from '../lib/dates'
 import { migrateExercise } from '../lib/muscleMigration'
 
 const SESSIONS_KEY = 'mm.sessions'
+const SESSIONS_BACKUP_KEY = 'mm.sessions.backup-v1'
 const EXERCISES_KEY = 'mm.exercises'
 const TEMPLATES_KEY = 'mm.templates'
 const MIGRATIONS_KEY = 'mm.migrations.muscles20'
@@ -38,22 +39,38 @@ function migrateOnce(exercises: Exercise[], raw: string): Exercise[] {
   return migrated
 }
 
+const DISCIPLINE_SET = new Set(['strength', 'run', 'bike', 'swim'])
+
+/** Seduta nel formato attuale (piano con la stessa struttura dei template). */
+function isSession(v: unknown): v is Session {
+  if (!v || typeof v !== 'object') return false
+  const s = v as Partial<Session> & { plan?: Record<string, unknown> }
+  if (typeof s.id !== 'string' || !isIsoDate(s.date) || !s.plan) return false
+  if (typeof s.discipline !== 'string' || !DISCIPLINE_SET.has(s.discipline)) {
+    return false
+  }
+  return s.discipline === 'strength'
+    ? Array.isArray(s.plan.entries)
+    : s.plan.mode === 'simple' || s.plan.mode === 'structured'
+}
+
 export const localStorageStore: DataStore = {
   async loadSessions() {
     const raw = read(SESSIONS_KEY)
-    if (raw) {
-      try {
-        const parsed: unknown = JSON.parse(raw)
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed as Session[]
-        }
-      } catch {
-        // dati corrotti: si rigenerano sotto
+    if (!raw) return []
+    try {
+      const parsed: unknown = JSON.parse(raw)
+      if (!Array.isArray(parsed)) return []
+      const valid = (parsed as unknown[]).filter(isSession)
+      if (valid.length !== parsed.length) {
+        // formato precedente (dati dimostrativi): copia di sicurezza, poi restano solo le sedute valide
+        if (!read(SESSIONS_BACKUP_KEY)) write(SESSIONS_BACKUP_KEY, raw)
+        write(SESSIONS_KEY, JSON.stringify(valid))
       }
+      return valid
+    } catch {
+      return []
     }
-    const sample = generateSampleSessions()
-    write(SESSIONS_KEY, JSON.stringify(sample))
-    return sample
   },
   async saveSessions(sessions) {
     write(SESSIONS_KEY, JSON.stringify(sessions))

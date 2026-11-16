@@ -2,24 +2,18 @@ import type { Session } from '../../data/types'
 import { DisciplineIcon } from '../../components/ui/Icons'
 import { useI18n } from '../../i18n/context'
 import { parseIsoDate, todayIso } from '../../lib/dates'
+import { formatDist, templateTotals } from '../../lib/enduranceTemplate'
 import { formatDistance, formatDuration } from '../../lib/format'
-import { actualSeconds, plannedSeconds } from '../../lib/weekStats'
+import { sessionDurationSec, sessionSetsCount } from '../../lib/sessions'
+import { actualSeconds } from '../../lib/weekStats'
 
-function sessionDistanceM(s: Session): number {
-  const p = s.plan
-  if (p.discipline === 'strength') return 0
-  if (p.discipline === 'run' && p.mode === 'intervals') {
-    return p.intervals.reduce((n, i) => n + i.distanceM, 0)
-  }
-  return s.actual && s.actual.discipline !== 'strength'
-    ? s.actual.distanceM
-    : p.distanceM
-}
-
-function setsCount(s: Session): number {
-  return s.plan.discipline === 'strength'
-    ? s.plan.exercises.reduce((n, e) => n + e.sets.length, 0)
-    : 0
+/** Distanza: quella eseguita se c'è, altrimenti quella del piano (può mancare). */
+function distanceText(s: Session): string | null {
+  if (s.discipline === 'strength') return null
+  if (s.actual) return formatDistance(s.actual.distanceM, s.discipline)
+  const totals = templateTotals({ discipline: s.discipline, ...s.plan })
+  if (totals.distanceM === null) return null
+  return `${totals.distanceComplete ? '' : '≥ '}${formatDist(totals.distanceM, s.discipline)}`
 }
 
 export default function TodayPanel({ sessions }: { sessions: Session[] }) {
@@ -41,24 +35,27 @@ export default function TodayPanel({ sessions }: { sessions: Session[] }) {
           <div className="rest">{t.overview.restDay}</div>
         ) : (
           list.map((s) => {
-            const disc = s.plan.discipline
+            const disc = s.discipline
             const secs =
-              s.status === 'done' ? actualSeconds(s) : plannedSeconds(s)
-            const meters = sessionDistanceM(s)
+              s.status === 'done' ? actualSeconds(s) : sessionDurationSec(s)
             const extra =
-              disc === 'strength'
-                ? `${setsCount(s)} ${t.sets}`
-                : formatDistance(meters, disc)
+              s.discipline === 'strength'
+                ? `${sessionSetsCount(s)} ${t.sets}`
+                : distanceText(s)
+            const details = [
+              secs ? formatDuration(secs) : t.overview.durationUnknown,
+              extra,
+            ]
+              .filter(Boolean)
+              .join(' · ')
             return (
               <div className="ses" data-discipline={disc} key={s.id}>
                 <div className="ic">
                   <DisciplineIcon discipline={disc} />
                 </div>
                 <div className="tx">
-                  <b>{t.discipline[disc]}</b>
-                  <span>
-                    {formatDuration(secs)} · {extra}
-                  </span>
+                  <b>{s.name ?? t.discipline[disc]}</b>
+                  <span>{details}</span>
                 </div>
                 <span className={`tag ${s.status}`}>{t.status[s.status]}</span>
               </div>

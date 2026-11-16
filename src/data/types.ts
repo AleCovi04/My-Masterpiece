@@ -35,56 +35,9 @@ export interface Exercise extends Entity {
   archived: boolean // mai cancellato, solo archiviato
 }
 
-// ---------- Piani (contenuto di un template / copia in una seduta) ----------
+// ---------- Discipline ----------
 
 export type Discipline = 'strength' | 'run' | 'bike' | 'swim'
-
-export interface PlannedSet {
-  reps: number
-  kg: number
-  targetRir: number
-}
-
-export interface PlannedExercise {
-  exerciseId: Id
-  sets: PlannedSet[]
-  restSeconds: number // default: quello dell'esercizio
-}
-
-export interface StrengthPlan {
-  discipline: 'strength'
-  exercises: PlannedExercise[]
-}
-
-export interface RunInterval {
-  distanceM: number
-  paceSecPerKm: number
-  walkRestSeconds: number
-}
-
-export type RunPlan =
-  | {
-      discipline: 'run'
-      mode: 'steady'
-      distanceM: number
-      paceSecPerKm: number
-    }
-  | { discipline: 'run'; mode: 'intervals'; intervals: RunInterval[] }
-
-export interface BikePlan {
-  discipline: 'bike'
-  distanceM: number
-  avgSpeedKmh: number
-}
-
-export interface SwimPlan {
-  discipline: 'swim'
-  distanceM: number
-  paceSecPer100m: number
-}
-
-export type EndurancePlan = RunPlan | BikePlan | SwimPlan
-export type Plan = StrengthPlan | EndurancePlan
 
 // ---------- Template ----------
 
@@ -234,11 +187,49 @@ export type Actual = StrengthActual | EnduranceActual
 
 export type SessionStatus = 'planned' | 'in_progress' | 'done' | 'skipped'
 
-export interface Session extends Entity {
+/** Piano di forza: stessa struttura del template (voci, serie, superserie). */
+export interface StrengthPlan {
+  entries: TemplateEntry[]
+}
+
+/** Piano endurance: stessa struttura del template (semplice o a passi e blocchi). */
+export interface EndurancePlan {
+  mode: 'simple' | 'structured'
+  simple?: EnduranceSimple
+  items?: EnduranceItem[]
+}
+
+export type Plan = StrengthPlan | EndurancePlan
+
+interface SessionBase extends Entity {
   date: IsoDate
   order: number // ordine nel giorno, da 0
   status: SessionStatus
+  /** Template d'origine; assente nelle sessioni vuote. */
   templateId?: Id
-  plan: Plan // copia: modificare il template non tocca le sedute
-  actual?: Actual
+  /** Nome copiato dal template; assente = si mostra la disciplina. */
+  name?: string
+  notes?: string
+  /** Stesso significato del template: forza a mano, endurance solo se sovrascritta. */
+  estimatedDurationSec?: number
 }
+
+/**
+ * `plan` è una copia: modificarlo non tocca il template e modificare il
+ * template non cambia le sedute già pianificate. `actual` (l'eseguito) è
+ * solo predisposto.
+ */
+export interface StrengthSession extends SessionBase {
+  discipline: 'strength'
+  plan: StrengthPlan
+  actual?: StrengthActual
+}
+
+export interface EnduranceSession extends SessionBase {
+  discipline: EnduranceDiscipline
+  plan: EndurancePlan
+  actual?: EnduranceActual
+}
+
+/** Unione discriminata per disciplina. */
+export type Session = StrengthSession | EnduranceSession

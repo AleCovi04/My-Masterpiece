@@ -56,3 +56,9 @@ export function periodLabel(
   }
   return `${first.getDate()}–${last.getDate()} ${ms[last.getMonth()]} ${last.getFullYear()}`
 }
+
+/** "Lunedì 16 novembre 2026". */
+export function fullDateLabel(date: IsoDate, t: Names): string {
+  const d = parseIsoDate(date)
+  return `${capitalize(t.weekdaysLong[d.getDay()])} ${d.getDate()} ${t.monthsLong[d.getMonth()]} ${d.getFullYear()}`
+}

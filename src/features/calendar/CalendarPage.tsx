@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import type { IsoDate } from '../../data/types'
+import type { Id, IsoDate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { todayIso } from '../../lib/dates'
+import { emptySession, sessionFromTemplate } from '../../lib/sessions'
 import MonthView from './MonthView'
-import NewWorkoutDialog from './NewWorkoutDialog'
+import SessionDetail from './SessionDetail'
+import TemplatePickerDialog from './TemplatePickerDialog'
 import WeekView from './WeekView'
 import YearView from './YearView'
 import { periodLabel, shiftAnchor, type CalendarView } from './period'
@@ -14,7 +16,8 @@ const VIEWS: CalendarView[] = ['week', 'month', 'year']
 
 export default function CalendarPage() {
   const { t } = useI18n()
-  const { sessions, move } = useCalendarSessions()
+  const cal = useCalendarSessions()
+  const { sessions } = cal
   // entrando si apre sempre la settimana corrente
   const [view, setView] = useState<CalendarView>('week')
   const [anchor, setAnchor] = useState<IsoDate>(todayIso)
@@ -22,7 +25,9 @@ export default function CalendarPage() {
   const [adding, setAdding] = useState<{ date: IsoDate; index: number } | null>(
     null,
   )
+  const [openId, setOpenId] = useState<Id | null>(null)
   const c = t.calendar
+  const opened = openId ? sessions?.find((s) => s.id === openId) : undefined
 
   const go = (nextView: CalendarView, nextAnchor: IsoDate) => {
     setView(nextView)
@@ -79,7 +84,8 @@ export default function CalendarPage() {
           selected={selected}
           onSelect={setSelected}
           onAdd={(date, index) => setAdding({ date, index })}
-          onMove={move}
+          onMove={cal.move}
+          onOpen={setOpenId}
         />
       )}
       {sessions && view === 'month' && (
@@ -98,10 +104,49 @@ export default function CalendarPage() {
       )}
 
       {adding && (
-        <NewWorkoutDialog
+        <TemplatePickerDialog
           date={adding.date}
           index={adding.index}
+          templates={cal.templates}
+          exercises={cal.exercises}
+          onPickTemplate={(template) => {
+            cal.add(
+              sessionFromTemplate(template, adding.date),
+              adding.date,
+              adding.index,
+            )
+            setAdding(null)
+          }}
+          onPickEmpty={(discipline) => {
+            cal.add(
+              emptySession(discipline, adding.date),
+              adding.date,
+              adding.index,
+            )
+            setAdding(null)
+          }}
           onClose={() => setAdding(null)}
+        />
+      )}
+
+      {opened && (
+        <SessionDetail
+          key={opened.id}
+          session={opened}
+          templates={cal.templates}
+          exercises={cal.exercises}
+          onEditPlan={(edited) => cal.editPlan(opened.id, edited)}
+          onMoveDate={(date) => cal.moveToDate(opened.id, date)}
+          onDuplicate={() => {
+            cal.duplicate(opened.id)
+            setOpenId(null)
+          }}
+          onStatus={(status) => cal.setStatus(opened.id, status)}
+          onDelete={() => {
+            cal.remove(opened.id)
+            setOpenId(null)
+          }}
+          onClose={() => setOpenId(null)}
         />
       )}
     </div>

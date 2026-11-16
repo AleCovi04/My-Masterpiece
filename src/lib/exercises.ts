@@ -100,9 +100,6 @@ export function exerciseUsage(
   templates: WorkoutTemplate[],
   sessions: Session[],
 ): ExerciseUsage {
-  const planUses = (plan: { discipline: string; exercises?: unknown }) =>
-    plan.discipline === 'strength' &&
-    (plan.exercises as { exerciseId: Id }[]).some((x) => x.exerciseId === id)
   return {
     templates: templates.filter(
       (t) =>
@@ -111,9 +108,9 @@ export function exerciseUsage(
     ).length,
     sessions: sessions.filter(
       (s) =>
-        planUses(s.plan) ||
-        (s.actual?.discipline === 'strength' &&
-          s.actual.exercises.some((x) => x.exerciseId === id)),
+        s.discipline === 'strength' &&
+        (s.plan.entries.some((x) => x.exerciseId === id) ||
+          !!s.actual?.exercises.some((x) => x.exerciseId === id)),
     ).length,
   }
 }

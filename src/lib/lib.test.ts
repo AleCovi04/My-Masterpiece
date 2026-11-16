@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest'
 import type { ActualExercise, Exercise, Session } from '../data/types'
-import { estimateDurationSeconds } from './endurance'
 import {
   lastPerformance,
   personalRecords,
@@ -27,47 +26,9 @@ const session = (
   date,
   order: 0,
   status,
-  plan: { discipline: 'strength', exercises: [] },
+  discipline: 'strength',
+  plan: { entries: [] },
   actual: { discipline: 'strength', startedAt: t, exercises },
-})
-
-describe('durata endurance', () => {
-  it('corsa continua', () =>
-    expect(
-      estimateDurationSeconds({
-        discipline: 'run',
-        mode: 'steady',
-        distanceM: 10000,
-        paceSecPerKm: 300,
-      }),
-    ).toBe(3000))
-  it('corsa a intervalli', () =>
-    expect(
-      estimateDurationSeconds({
-        discipline: 'run',
-        mode: 'intervals',
-        intervals: [
-          { distanceM: 400, paceSecPerKm: 240, walkRestSeconds: 60 },
-          { distanceM: 400, paceSecPerKm: 240, walkRestSeconds: 60 },
-        ],
-      }),
-    ).toBe(312))
-  it('bici', () =>
-    expect(
-      estimateDurationSeconds({
-        discipline: 'bike',
-        distanceM: 30000,
-        avgSpeedKmh: 30,
-      }),
-    ).toBe(3600))
-  it('nuoto', () =>
-    expect(
-      estimateDurationSeconds({
-        discipline: 'swim',
-        distanceM: 1000,
-        paceSecPer100m: 110,
-      }),
-    ).toBe(1100))
 })
 
 describe('forza', () => {

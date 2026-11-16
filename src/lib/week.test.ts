@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { generateSampleSessions } from '../data/sampleData'
+import type { Session } from '../data/types'
 import { daysBetween, mondayOf, toIsoDate } from './dates'
 import { loadByDiscipline, sessionsInWeek, summarize } from './weekStats'
 
@@ -14,34 +14,61 @@ describe('dates', () => {
   })
 })
 
-describe('dati di esempio', () => {
-  const now = new Date(2026, 10, 14, 12) // sabato
-  const sessions = generateSampleSessions(now)
+describe('settimana', () => {
+  const stamp = '2026-11-09T00:00:00.000Z'
+  const mk = (
+    id: string,
+    date: string,
+    status: Session['status'],
+    durationS?: number,
+  ): Session => ({
+    id,
+    createdAt: stamp,
+    updatedAt: stamp,
+    date,
+    order: 0,
+    status,
+    discipline: 'bike',
+    // 30 km a 30 km/h = 1 h
+    plan: {
+      mode: 'simple',
+      simple: { goal: 'distance', distanceM: 30000, intensity: 30 },
+    },
+    ...(durationS !== undefined && {
+      actual: {
+        discipline: 'bike' as const,
+        source: 'manual' as const,
+        distanceM: 30000,
+        durationS,
+        laps: [],
+      },
+    }),
+  })
+  const sessions = [
+    mk('a', '2026-11-09', 'done', 3300),
+    mk('b', '2026-11-11', 'skipped'),
+    mk('c', '2026-11-14', 'planned'),
+    mk('d', '2026-11-15', 'planned'),
+    mk('fuori', '2026-11-16', 'planned'),
+  ]
 
-  it('copre 12 settimane', () => {
-    const dates = sessions.map((s) => s.date).sort()
-    expect(dates[0] >= '2026-08-24').toBe(true) // lunedì di 11 settimane prima
-    expect(dates.at(-1)).toBe('2026-11-15')
+  it('solo le sedute da lunedì a domenica', () => {
+    const week = sessionsInWeek(sessions, '2026-11-09')
+    expect(week.map((s) => s.id)).toEqual(['a', 'b', 'c', 'd'])
   })
-  it('oggi ha un nuoto completato e una corsa da fare', () => {
-    const today = sessions.filter((s) => s.date === '2026-11-14')
-    expect(today.map((s) => [s.plan.discipline, s.status])).toEqual([
-      ['swim', 'done'],
-      ['run', 'planned'],
-    ])
-  })
-  it('le sedute completate hanno actual coerente con la disciplina', () => {
-    for (const s of sessions.filter((x) => x.status === 'done')) {
-      expect(s.actual?.discipline).toBe(s.plan.discipline)
-    }
-  })
-  it('riepilogo settimana', () => {
+  it('riepilogo: le saltate non contano nelle ore pianificate', () => {
     const week = sessionsInWeek(sessions, '2026-11-09')
     const sum = summarize(week, '2026-11-14')
-    expect(sum.totalCount).toBe(week.length)
-    expect(sum.adherencePct).toBeGreaterThan(0)
-    expect(sum.adherencePct).toBeLessThanOrEqual(100)
-    const load = loadByDiscipline(week)
-    expect(load.bike.plannedS).toBeGreaterThan(0)
+    expect(sum.plannedS).toBe(3 * 3600)
+    expect(sum.doneS).toBe(3300)
+    expect(sum.doneCount).toBe(1)
+    expect(sum.totalCount).toBe(4)
+    // dovute fino a oggi: a (fatta), b (saltata), c (da fare)
+    expect(sum.adherencePct).toBe(33)
+  })
+  it('carico per disciplina', () => {
+    const load = loadByDiscipline(sessionsInWeek(sessions, '2026-11-09'))
+    expect(load.bike).toEqual({ plannedS: 3 * 3600, actualS: 3300 })
+    expect(load.run).toEqual({ plannedS: 0, actualS: 0 })
   })
 })

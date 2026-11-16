@@ -53,7 +53,7 @@ export default function MonthView({ anchor, sessions, onPickDay }: Props) {
                   <b>{d.getDate()}</b>
                   <span className="cal-dots">
                     {list.map((s) => (
-                      <i key={s.id} data-discipline={s.plan.discipline} />
+                      <i key={s.id} data-discipline={s.discipline} />
                     ))}
                   </span>
                 </button>

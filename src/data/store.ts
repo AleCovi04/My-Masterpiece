@@ -3,10 +3,10 @@
 import type { Exercise, IsoDate, Session, WorkoutTemplate } from './types'
 
 export interface DataStore {
-  /** Se non ci sono dati genera e salva sedute d'esempio. */
+  /** Solo sedute reali: all'inizio l'elenco è vuoto. */
   loadSessions(): Promise<Session[]>
   saveSessions(sessions: Session[]): Promise<void>
-  /** Catalogo esercizi; la prima volta parte dagli esercizi delle sedute di esempio. */
+  /** Catalogo esercizi; la prima volta parte da quattro esercizi di base. */
   loadExercises(): Promise<Exercise[]>
   saveExercises(exercises: Exercise[]): Promise<void>
   loadTemplates(): Promise<WorkoutTemplate[]>
