@@ -3,7 +3,7 @@ import type {
   Id,
   MuscleId,
   TemplateSet,
-  WorkoutTemplate,
+  StrengthTemplate,
 } from '../data/types'
 
 /** Elemento che può far parte di una superserie. */
@@ -135,7 +135,7 @@ export function parseHm(value: string): number | null {
 
 /** I muscoli più coinvolti di un template: serie × % per muscolo, decrescente. */
 export function topMuscles(
-  template: Pick<WorkoutTemplate, 'entries'>,
+  template: Pick<StrengthTemplate, 'entries'>,
   exercises: Pick<Exercise, 'id' | 'muscles'>[],
   limit = 4,
 ): MuscleId[] {

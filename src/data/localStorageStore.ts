@@ -86,9 +86,13 @@ export const localStorageStore: DataStore = {
       return (parsed as WorkoutTemplate[]).filter(
         (t) =>
           t &&
-          t.discipline === 'strength' &&
           typeof t.name === 'string' &&
-          Array.isArray(t.entries),
+          (t.discipline === 'strength'
+            ? Array.isArray(t.entries)
+            : (t.discipline === 'run' ||
+                t.discipline === 'bike' ||
+                t.discipline === 'swim') &&
+              (t.mode === 'simple' || t.mode === 'structured')),
       )
     } catch {
       return []

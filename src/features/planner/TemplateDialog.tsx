@@ -29,6 +29,7 @@ import {
 import ActionMenu, { type MenuAction } from './ActionMenu'
 import ExercisePicker from './ExercisePicker'
 import Modal from './Modal'
+import TemplateFooter from './TemplateFooter'
 import { useSortable } from './useSortable'
 
 // ---------- bozza del modulo: i numeri restano stringhe finché si digita ----------
@@ -123,7 +124,6 @@ export default function TemplateDialog({
   )
   const [picking, setPicking] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const listRef = useRef<HTMLDivElement>(null)
 
   const { drag, handleProps } = useSortable({
@@ -353,56 +353,13 @@ export default function TemplateDialog({
             {submitted && anyBad && <em className="pl-err">{p.checkFields}</em>}
           </section>
 
-          <div className="pl-actions">
-            <button type="submit" className="pl-btn acc">
-              {p.save}
-            </button>
-            <button type="button" className="pl-btn" onClick={onClose}>
-              {p.cancel}
-            </button>
-          </div>
-
-          {template && (
-            <div className="pl-danger">
-              <button type="button" className="pl-btn" onClick={onDuplicate}>
-                {p.duplicate}
-              </button>
-              <button
-                type="button"
-                className="pl-btn"
-                onClick={() => onArchive(!template.archived)}
-              >
-                {template.archived ? p.restore : p.archive}
-              </button>
-              {confirmingDelete ? (
-                <span className="pl-confirm">
-                  <small>{p.confirmDeleteWorkout}</small>
-                  <button
-                    type="button"
-                    className="pl-btn warn"
-                    onClick={onDelete}
-                  >
-                    {p.confirmYes}
-                  </button>
-                  <button
-                    type="button"
-                    className="pl-btn"
-                    onClick={() => setConfirmingDelete(false)}
-                  >
-                    {p.cancel}
-                  </button>
-                </span>
-              ) : (
-                <button
-                  type="button"
-                  className="pl-btn warn"
-                  onClick={() => setConfirmingDelete(true)}
-                >
-                  {p.deleteWorkout}
-                </button>
-              )}
-            </div>
-          )}
+          <TemplateFooter
+            template={template}
+            onDuplicate={onDuplicate}
+            onArchive={onArchive}
+            onDelete={onDelete}
+            onClose={onClose}
+          />
         </form>
       </Modal>
       {picking && (

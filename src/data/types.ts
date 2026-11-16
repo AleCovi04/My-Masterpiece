@@ -108,7 +108,10 @@ export interface TemplateEntry {
 interface TemplateBase extends Entity {
   name: string
   notes?: string
-  /** Inserita a mano, mai calcolata. */
+  /**
+   * Forza: inserita a mano, mai calcolata. Corsa/bici/nuoto: presente solo se
+   * l'utente ha sovrascritto la durata calcolata (altrimenti si calcola).
+   */
   estimatedDurationSec?: number
   archived: boolean // mai cancellato in massa: si archivia
 }
@@ -118,8 +121,68 @@ export interface StrengthTemplate extends TemplateBase {
   entries: TemplateEntry[]
 }
 
-/** Unione per disciplina: corsa, bici e nuoto si aggiungono qui con il proprio contenuto. */
-export type WorkoutTemplate = StrengthTemplate
+// ---------- Template endurance (corsa, bici, nuoto) ----------
+
+export type EnduranceDiscipline = 'run' | 'bike' | 'swim'
+
+/**
+ * Intensità: corsa = passo in s/km, nuoto = passo in s/100 m,
+ * bici = velocità in km/h. Sempre facoltativa.
+ */
+export type Intensity = number
+
+export type StepType = 'warmup' | 'work' | 'recovery' | 'cooldown'
+
+/** Un passo: dura una distanza (m) **oppure** un tempo (s), mai entrambi. */
+export interface EnduranceStep {
+  kind: 'step'
+  id: string
+  type: StepType
+  distanceM?: number
+  durationS?: number
+  intensity?: Intensity
+  notes?: string
+}
+
+/** "Ripeti N volte": contiene più passi (mai altri blocchi). */
+export interface RepeatBlock {
+  kind: 'repeat'
+  id: string
+  times: number // 2–99
+  steps: EnduranceStep[]
+}
+
+export type EnduranceItem = EnduranceStep | RepeatBlock
+
+/** Modalità semplice: un solo obiettivo, a distanza o a tempo. */
+export interface EnduranceSimple {
+  goal: 'distance' | 'time'
+  distanceM?: number
+  durationS?: number
+  intensity?: Intensity
+}
+
+interface EnduranceTemplateBase extends TemplateBase {
+  mode: 'simple' | 'structured'
+  /** Presente se `mode` è `simple`. */
+  simple?: EnduranceSimple
+  /** Presente se `mode` è `structured`: passi e blocchi in ordine. */
+  items?: EnduranceItem[]
+}
+
+export interface RunTemplate extends EnduranceTemplateBase {
+  discipline: 'run'
+}
+export interface BikeTemplate extends EnduranceTemplateBase {
+  discipline: 'bike'
+}
+export interface SwimTemplate extends EnduranceTemplateBase {
+  discipline: 'swim'
+}
+export type EnduranceTemplate = RunTemplate | BikeTemplate | SwimTemplate
+
+/** Unione discriminata per disciplina. */
+export type WorkoutTemplate = StrengthTemplate | EnduranceTemplate
 
 // ---------- Esecuzione effettiva ----------
 

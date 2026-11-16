@@ -23,11 +23,19 @@ Nome, muscoli con coinvolgimento 1–100 % (es. panca: petto 100, deltoidi anter
 
 ## Template (allenamento salvato)
 
-Comuni a tutte le discipline: `id`, `name`, `discipline`, `notes` facoltative, `estimatedDurationSec` facoltativa (**inserita a mano, mai calcolata**), `archived` (si archivia, non si cancella in massa), `createdAt`/`updatedAt`. `WorkoutTemplate` è un'unione discriminata su `discipline`: ogni nuova disciplina aggiunge il proprio tipo con il proprio contenuto.
+Comuni a tutte le discipline: `id`, `name`, `discipline`, `notes` facoltative, `estimatedDurationSec` facoltativa (forza: **inserita a mano, mai calcolata**; corsa/bici/nuoto: presente solo se l'utente sovrascrive la durata calcolata), `archived` (si archivia, non si cancella in massa), `createdAt`/`updatedAt`. `WorkoutTemplate` è un'unione discriminata su `discipline`: ogni nuova disciplina aggiunge il proprio tipo con il proprio contenuto.
 
 - **Forza** (`StrengthTemplate`): lista ordinata di voci (`entries`). Ogni voce: `exerciseId`, `restSeconds` (default quello dell'esercizio), `notes` facoltative, `supersetId` facoltativo e le serie `sets` (`reps`, `kg`, `rir`).
   - **Superserie**: voci **consecutive** con lo stesso `supersetId` (almeno due). Il recupero che conta è quello dell'ultima voce del giro. Nel riordino il gruppo si muove unito; le etichette "Superserie A/B…" si calcolano dall'ordine.
-- **Corsa**, **Bici**, **Nuoto**: da aggiungere (distanza e passo / intervalli / velocità media).
+- **Corsa**, **Bici**, **Nuoto** (`RunTemplate`, `BikeTemplate`, `SwimTemplate`): stessa struttura, con `mode`:
+  - **Intensità** (`intensity`, sempre facoltativa): corsa = passo in **s/km**, nuoto = passo in **s/100 m**, bici = velocità in **km/h**. Distanze in metri, tempi in secondi.
+  - `mode: 'simple'` → `simple`: `goal` (`distance` | `time`), il valore dell'obiettivo (`distanceM` o `durationS`) e l'`intensity`. Il campo complementare **non si salva**: si calcola (distanza = tempo × velocità, tempo = distanza / velocità) e solo se c'è l'intensità.
+  - `mode: 'structured'` → `items`: lista ordinata di **passi** e **blocchi**.
+    - Passo (`EnduranceStep`): `type` (`warmup` | `work` | `recovery` | `cooldown`), una durata a distanza (`distanceM`) **oppure** a tempo (`durationS`), `intensity` facoltativa, `notes` facoltative.
+    - Blocco (`RepeatBlock`, "Ripeti N volte"): `times` (2–99) e `steps`. Contiene solo passi, mai altri blocchi; un blocco senza passi sparisce. I passi si possono anche usare singoli, fuori dai blocchi.
+  - **Totali** (`src/lib/enduranceTemplate.ts`): ogni passo vale per la parte calcolabile (distanza e intensità → tempo; tempo e intensità → distanza); un passo senza intensità conta solo per il dato che ha, e il totale è indicato come parziale ("≥"). I blocchi contano N volte.
+  - **Durata mostrata**: `estimatedDurationSec` se presente, altrimenti il tempo totale calcolato (può mancare se nessun passo ha l'intensità). "Ripristina automatico" toglie la sovrascrittura.
+  - **Riassunto in lista**: es. `Risc. 15′ · 6×400 m · Def. 10′` (nel blocco compaiono i passi di lavoro).
 
 Le sedute continuano ad avere la propria **copia del piano** (`Plan`): modificare un template non le tocca. Salvataggio dei template in `DataStore` (`loadTemplates`/`saveTemplates`).
 
@@ -45,7 +53,7 @@ Manuale o importato da `.FIT` Garmin (solo Garmin → app), campo `source` (`man
 
 ## Calcoli (`src/lib/`)
 
-- Durata stimata endurance (`endurance.ts`).
+- Durata stimata endurance delle sedute (`endurance.ts`); totali, durata e riassunto dei template endurance (`enduranceTemplate.ts`).
 - Volume = kg × ripetizioni (`strength.ts`).
 - PR per esercizio: kg massimo e miglior serie per volume, solo sedute `done`.
 - Serie per muscolo = serie completate × percentuale / 100 (mappa di calore); esercizi saltati esclusi.
