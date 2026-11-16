@@ -76,11 +76,15 @@ export function useDragSort<K, T>({
       const p = press.current
       const list = listRef.current
       if (!p || !p.lifted || !list) return
-      const scroller = list.closest<HTMLElement>('.pl-box')
-      if (scroller) {
+      // finestra modale o schermata con `data-scroller`; se non scorre, scorre la pagina
+      const scroller = list.closest<HTMLElement>('.pl-box, [data-scroller]')
+      if (scroller && scroller.scrollHeight > scroller.clientHeight + 1) {
         const r = scroller.getBoundingClientRect()
         if (p.lastY < r.top + EDGE_PX) scroller.scrollTop -= 14
         else if (p.lastY > r.bottom - EDGE_PX) scroller.scrollTop += 14
+      } else if (scroller && !scroller.classList.contains('pl-box')) {
+        if (p.lastY < EDGE_PX) window.scrollBy(0, -14)
+        else if (p.lastY > window.innerHeight - EDGE_PX) window.scrollBy(0, 14)
       }
       const target = locateRef.current(p.key, p.lastX, p.lastY)
       setDrag(target ? { key: p.key, target } : null)

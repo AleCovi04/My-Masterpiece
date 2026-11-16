@@ -8,6 +8,7 @@ import type {
   SessionStatus,
   WorkoutTemplate,
 } from '../../data/types'
+import { createLiveWorkout, startSession } from '../../lib/liveWorkout'
 import { moveSession } from '../../lib/reorder'
 import {
   applyEditedPlan,
@@ -101,6 +102,24 @@ export function useCalendarSessions() {
     [change],
   )
 
+  /**
+   * Inizia la registrazione dal vivo: la seduta passa "in corso" con l'ora di
+   * inizio e si crea la bozza della schermata live. Attende il salvataggio,
+   * così la schermata live trova già tutto in IndexedDB.
+   */
+  const start = useCallback(async (id: Id) => {
+    const current = latest.current
+    if (!current) return
+    const now = new Date().toISOString()
+    const next = startSession(current, id, now)
+    const session = next.find((s) => s.id === id)
+    if (session?.discipline !== 'strength') return
+    latest.current = next
+    setData((d) => (d ? { ...d, sessions: next } : d))
+    await dataStore.saveSessions(next)
+    await dataStore.saveLiveWorkout(createLiveWorkout(session, now))
+  }, [])
+
   const remove = useCallback(
     (id: Id) => change((cur) => removeSession(cur, id)),
     [change],
@@ -116,6 +135,7 @@ export function useCalendarSessions() {
     moveToDate,
     duplicate,
     setStatus,
+    start,
     remove,
   }
 }

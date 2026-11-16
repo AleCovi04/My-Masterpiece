@@ -7,6 +7,7 @@ import type {
   Exercise,
   IsoDate,
   IsoDateTime,
+  LiveWorkout,
   Session,
   WorkoutTemplate,
 } from './types'
@@ -41,6 +42,10 @@ export interface DataStore {
   /** `null` = "Nel futuro" (data non ancora scelta). */
   loadRaceDate(): Promise<IsoDate | null>
   saveRaceDate(date: IsoDate | null): Promise<void>
+  /** Allenamento di forza in corso (bozza della schermata live); `null` = nessuno. */
+  loadLiveWorkout(): Promise<LiveWorkout | null>
+  /** Si chiama a ogni azione; `null` cancella la bozza (allenamento terminato). */
+  saveLiveWorkout(workout: LiveWorkout | null): Promise<void>
 
   /** Apre il salvataggio: migrazioni, persistenza, backup automatico. Si può chiamare più volte. */
   init(): Promise<void>

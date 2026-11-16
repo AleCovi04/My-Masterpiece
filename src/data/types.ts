@@ -166,6 +166,8 @@ export interface StrengthActual {
   startedAt: IsoDateTime
   endedAt?: IsoDateTime
   exercises: ActualExercise[] // ordine effettivo
+  /** Note scritte nel riepilogo finale. */
+  notes?: string
 }
 
 export interface Lap {
@@ -225,8 +227,8 @@ interface SessionBase extends Entity {
 
 /**
  * `plan` è una copia: modificarlo non tocca il template e modificare il
- * template non cambia le sedute già pianificate. `actual` (l'eseguito) è
- * solo predisposto.
+ * template non cambia le sedute già pianificate. `actual` è l'eseguito
+ * (forza: scritto dalla registrazione dal vivo).
  */
 export interface StrengthSession extends SessionBase {
   discipline: 'strength'
@@ -242,6 +244,50 @@ export interface EnduranceSession extends SessionBase {
 
 /** Unione discriminata per disciplina. */
 export type Session = StrengthSession | EnduranceSession
+
+// ---------- Allenamento di forza in corso (bozza della registrazione dal vivo) ----------
+
+/**
+ * Stato della schermata live, salvato a ogni azione (`DataStore.saveLiveWorkout`)
+ * per riprendere dopo una chiusura. Non fa parte di `AppData`: alla fine diventa
+ * lo `StrengthActual` della seduta, con le sole serie completate.
+ */
+export interface LiveSet {
+  id: string
+  targetReps?: number
+  targetRir?: number
+  /** Testo digitato; vuoto = si usa il valore in grigio. */
+  kg: string
+  reps: string
+  /** Presente se la serie è completata (✓). */
+  done?: ActualSet
+}
+
+export interface LiveExercise {
+  id: string
+  exerciseId: Id
+  restSeconds: number
+  supersetId?: string
+  notes?: string
+  skipped: boolean
+  sets: LiveSet[]
+}
+
+export interface LiveRest {
+  /** Fine del recupero (ms da epoch): il conto alla rovescia si ricalcola da qui. */
+  endsAt: number
+  totalS: number
+}
+
+export interface LiveWorkout {
+  version: 1
+  sessionId: Id
+  startedAt: IsoDateTime
+  exercises: LiveExercise[]
+  /** Serie corrente (esercizio per id, serie per indice); `null` = tutto completato. */
+  focus: { exercise: string; set: number } | null
+  rest: LiveRest | null
+}
 
 // ---------- Insieme dei dati (salvataggio, export, backup) ----------
 

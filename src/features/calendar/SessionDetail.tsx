@@ -28,6 +28,12 @@ interface Props {
   onStatus: (status: SessionStatus) => void
   onDelete: () => void
   onClose: () => void
+  /** Avvia la registrazione dal vivo (solo forza programmata). */
+  onStart: () => void
+  /** Apre l'allenamento in corso (questo o un altro). */
+  onResume: () => void
+  /** Un'altra seduta di forza è già in corso. */
+  liveElsewhere: boolean
 }
 
 const noop = () => {}
@@ -43,6 +49,9 @@ export default function SessionDetail({
   onStatus,
   onDelete,
   onClose,
+  onStart,
+  onResume,
+  liveElsewhere,
 }: Props) {
   const { t } = useI18n()
   const c = t.calendar
@@ -108,10 +117,36 @@ export default function SessionDetail({
             )}
           </dl>
 
-          <button type="button" className="pl-btn acc sd-start" disabled>
-            {c.start}
-            <small>{c.comingSoon}</small>
-          </button>
+          {s.discipline !== 'strength' ? (
+            <button type="button" className="pl-btn acc sd-start" disabled>
+              {c.start}
+              <small>{c.comingSoon}</small>
+            </button>
+          ) : s.status === 'in_progress' ? (
+            <button
+              type="button"
+              className="pl-btn acc sd-start"
+              onClick={onResume}
+            >
+              {c.resume}
+            </button>
+          ) : s.status === 'done' ? null : liveElsewhere ? (
+            <div className="sd-live-other">
+              <small>{c.otherLive}</small>
+              <button type="button" className="pl-btn" onClick={onResume}>
+                {c.goToLive}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="pl-btn acc sd-start"
+              disabled={s.status === 'skipped'}
+              onClick={onStart}
+            >
+              {c.start}
+            </button>
+          )}
 
           <section className="sd-sec">
             <h4>{c.plan}</h4>

@@ -9,8 +9,8 @@ import {
 import { migrate, SCHEMA_VERSION, type RawData } from './migrations'
 import { generateSampleExercises } from './sampleData'
 import type { BackupInfo, BackupReason, DataStore } from './store'
-import type { AppData, IsoDate, IsoDateTime } from './types'
-import { countData, sanitize } from './validate'
+import type { AppData, IsoDate, IsoDateTime, LiveWorkout } from './types'
+import { countData, isLiveWorkout, sanitize } from './validate'
 
 export const DB_NAME = 'my-masterpiece'
 export const DEFAULT_RACE_DATE: IsoDate = '2028-08-20'
@@ -29,7 +29,12 @@ interface Row {
 }
 
 interface MetaRow {
-  key: 'schemaVersion' | 'raceDate' | 'lastExportAt' | 'legacyImportedAt'
+  key:
+    | 'schemaVersion'
+    | 'raceDate'
+    | 'lastExportAt'
+    | 'legacyImportedAt'
+    | 'liveWorkout'
   value: unknown
 }
 
@@ -87,6 +92,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
 
   /** Se IndexedDB non è disponibile i dati vivono solo in memoria, per questa sessione. */
   let mem: AppData | null = null
+  let memLive: LiveWorkout | null = null
   let ready: Promise<void> | null = null
 
   const freshData = (): AppData => ({
@@ -260,6 +266,26 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         await db.meta.put({ key: 'raceDate', value: date })
       } catch (error) {
         console.error('Salvataggio non riuscito (raceDate)', error)
+      }
+    },
+
+    async loadLiveWorkout() {
+      await init()
+      if (mem) return memLive
+      const value = (await db.meta.get('liveWorkout'))?.value
+      return isLiveWorkout(value) ? value : null
+    },
+    async saveLiveWorkout(workout) {
+      await init()
+      if (mem) {
+        memLive = workout
+        return
+      }
+      try {
+        if (workout) await db.meta.put({ key: 'liveWorkout', value: workout })
+        else await db.meta.delete('liveWorkout')
+      } catch (error) {
+        console.error('Salvataggio non riuscito (liveWorkout)', error)
       }
     },
 

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { PageContainer } from '../components/layout'
+import LiveBanner from '../features/live/LiveBanner'
 import { readPreference, writePreference } from '../lib/preferences'
 import Header from './Header'
 import Sidebar from './Sidebar'
@@ -34,6 +35,7 @@ export default function AppShell() {
         <Header onMenu={() => setMenuOpen(true)} />
         <main>
           <PageContainer>
+            <LiveBanner />
             <Outlet />
           </PageContainer>
         </main>

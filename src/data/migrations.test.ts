@@ -132,6 +132,11 @@ describe('migrazioni', () => {
     ])
   })
 
+  it('v2 → v3: nessun dato cambia (note facoltative nell’eseguito)', () => {
+    const d = MIGRATIONS[1].migrate(v0())
+    expect(MIGRATIONS[2].migrate(d)).toEqual(d)
+  })
+
   it('migrate applica solo le migrazioni mancanti ed è valida alla fine', () => {
     const d = migrate(v0(), 0)
     expect(sanitize(d).dropped).toBe(0)

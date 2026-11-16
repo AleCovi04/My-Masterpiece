@@ -70,26 +70,46 @@ export function lastPerformance(
 
 /**
  * Valori "dell'ultima volta" per la serie `setIndex` (da 0) di un esercizio:
- * la seduta conclusa più recente, di qualsiasi allenamento, in cui
- * quell'esercizio ha quella serie. Sono i valori in grigio della registrazione dal vivo.
+ * l'ultima seduta conclusa, di qualsiasi allenamento, in cui l'esercizio è
+ * stato eseguito; se quella seduta non aveva la serie `setIndex`, nessun
+ * valore (non si risale alle sedute precedenti). Sono i valori in grigio
+ * della registrazione dal vivo.
  */
 export function previousSet(
   exerciseId: Id,
   setIndex: number,
   sessions: Session[],
 ): Pick<ActualSet, 'kg' | 'reps'> | undefined {
-  const sorted = doneStrength(sessions).sort(
-    (a, b) => a.date.localeCompare(b.date) || a.order - b.order,
-  )
-  for (let i = sorted.length - 1; i >= 0; i--) {
-    for (const ex of sorted[i].actual.exercises) {
-      const set = ex.sets[setIndex]
-      if (ex.exerciseId === exerciseId && !ex.skipped && set) {
-        return { kg: set.kg, reps: set.reps }
+  const set = lastPerformance(exerciseId, sessions)?.[setIndex]
+  return set && { kg: set.kg, reps: set.reps }
+}
+
+/** 1RM stimato con la formula di Epley: kg × (1 + reps / 30). */
+export const epley1Rm = (kg: number, reps: number): number =>
+  kg * (1 + reps / 30)
+
+export interface ExerciseBests {
+  maxKg: number
+  best1Rm: number
+}
+
+/** Migliori valori di ogni esercizio nelle sedute concluse (kg massimo e 1RM stimato). */
+export function exerciseBests(sessions: Session[]): Map<Id, ExerciseBests> {
+  const out = new Map<Id, ExerciseBests>()
+  for (const { actual } of doneStrength(sessions)) {
+    for (const ex of actual.exercises) {
+      if (ex.skipped) continue
+      for (const s of ex.sets) {
+        const cur = out.get(ex.exerciseId)
+        const e1rm = epley1Rm(s.kg, s.reps)
+        out.set(ex.exerciseId, {
+          maxKg: Math.max(cur?.maxKg ?? -Infinity, s.kg),
+          best1Rm: Math.max(cur?.best1Rm ?? -Infinity, e1rm),
+        })
       }
     }
   }
-  return undefined
+  return out
 }
 
 /** Serie per muscolo = serie completate × percentuale / 100 (mappa di calore). */

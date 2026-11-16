@@ -51,8 +51,8 @@ describe('forza', () => {
     expect(lastPerformance('a', sessions)).toEqual([set(70, 8)]))
   it('ultima volta, stessa serie, qualsiasi allenamento', () => {
     expect(previousSet('a', 0, sessions)).toEqual({ kg: 70, reps: 8 })
-    // l'ultima seduta ha una sola serie: per la seconda si risale a quella prima
-    expect(previousSet('a', 1, sessions)).toEqual({ kg: 60, reps: 12 })
+    // l'ultima seduta ha una sola serie: la seconda resta vuota (non si risale a quella prima)
+    expect(previousSet('a', 1, sessions)).toBeUndefined()
     expect(previousSet('a', 2, sessions)).toBeUndefined()
     expect(previousSet('b', 0, sessions)).toBeUndefined()
   })

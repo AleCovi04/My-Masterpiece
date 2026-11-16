@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import type { Id, IsoDate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { todayIso } from '../../lib/dates'
+import { liveSessions } from '../../lib/liveWorkout'
 import { emptySession, sessionFromTemplate } from '../../lib/sessions'
+import { LIVE_PATH } from '../live/hooks'
 import MonthView from './MonthView'
 import SessionDetail from './SessionDetail'
 import TemplatePickerDialog from './TemplatePickerDialog'
@@ -17,6 +20,7 @@ const VIEWS: CalendarView[] = ['week', 'month', 'year']
 export default function CalendarPage() {
   const { t } = useI18n()
   const cal = useCalendarSessions()
+  const navigate = useNavigate()
   const { sessions } = cal
   // entrando si apre sempre la settimana corrente
   const [view, setView] = useState<CalendarView>('week')
@@ -147,6 +151,14 @@ export default function CalendarPage() {
             setOpenId(null)
           }}
           onClose={() => setOpenId(null)}
+          liveElsewhere={liveSessions(sessions ?? []).some(
+            (x) => x.id !== opened.id,
+          )}
+          onStart={async () => {
+            await cal.start(opened.id)
+            navigate(LIVE_PATH)
+          }}
+          onResume={() => navigate(LIVE_PATH)}
         />
       )}
     </div>

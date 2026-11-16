@@ -10,7 +10,7 @@ import {
 } from './dexieStore'
 import type { LegacyStorage } from './legacyLocalStorage'
 import { SCHEMA_VERSION } from './migrations'
-import type { Exercise, StrengthTemplate } from './types'
+import type { Exercise, LiveWorkout, StrengthTemplate } from './types'
 
 const t0 = new Date('2026-11-16T08:00:00.000Z')
 const DAY = 864e5
@@ -244,6 +244,32 @@ describe('store IndexedDB', () => {
     await migrated.restoreBackup(backup.id)
     const [restored] = (await migrated.loadTemplates()) as StrengthTemplate[]
     expect(restored.entries[0].sets).toEqual([{ reps: 8, rir: 2 }])
+  })
+
+  it('allenamento in corso: la bozza sopravvive alla riapertura e si cancella con null', async () => {
+    const b = browser()
+    const store = b.open()
+    expect(await store.loadLiveWorkout()).toBeNull()
+    const live: LiveWorkout = {
+      version: 1,
+      sessionId: 's1',
+      startedAt: t0.toISOString(),
+      exercises: [
+        {
+          id: 'e1',
+          exerciseId: 'a',
+          restSeconds: 90,
+          skipped: false,
+          sets: [{ id: 'x', kg: '60', reps: '', targetReps: 8 }],
+        },
+      ],
+      focus: { exercise: 'e1', set: 0 },
+      rest: { endsAt: t0.getTime() + 90_000, totalS: 90 },
+    }
+    await store.saveLiveWorkout(live)
+    expect(await b.open().loadLiveWorkout()).toEqual(live)
+    await store.saveLiveWorkout(null)
+    expect(await b.open().loadLiveWorkout()).toBeNull()
   })
 
   it('senza IndexedDB l’app parte lo stesso, con i dati in memoria', async () => {

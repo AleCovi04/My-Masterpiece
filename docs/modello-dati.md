@@ -49,21 +49,22 @@ Un allenamento in una data: `id`, `date`, `order` nel giorno (da 0), `discipline
 - **`name`** (facoltativo) è il nome copiato dal template al momento dell'inserimento; se manca (sessione vuota) si mostra la disciplina. Anche `notes` viene copiato.
 - **Durata stimata**: stessa regola dei template: `estimatedDurationSec` se presente, altrimenti per l'endurance il tempo calcolato dal piano; per la forza senza durata scritta a mano non è nota (nelle statistiche conta zero).
 - **Sessione vuota**: nessun `templateId`; forza con `entries` vuote, endurance in modalità semplice senza obiettivo.
-- **`actual`** (l'eseguito) è solo predisposto come tipo: `StrengthActual` / `EnduranceActual`, descritti sotto. Non c'è ancora nulla che lo scriva. Nel piano di una seduta la durata stimata resta facoltativa (una sessione vuota non ce l'ha).
+- **`actual`** (l'eseguito): `StrengthActual` lo scrive la registrazione dal vivo (vedi sotto); `EnduranceActual` è solo predisposto. Nel piano di una seduta la durata stimata resta facoltativa (una sessione vuota non ce l'ha).
 - **Operazioni** (`src/lib/sessions.ts`): creazione da template o vuota, inserimento in una posizione esatta del giorno, spostamento (`src/lib/reorder.ts`), duplicazione (copia programmata, subito dopo l'originale), salta/ripristina, eliminazione. Ogni operazione rinumera `order` nei giorni coinvolti.
 - **Modifica piano**: usa gli stessi editor dei template, applicati alla sola seduta (`sessionAsTemplate` / `applyEditedPlan`).
 - **Salvataggio** in `DataStore` (`loadSessions`/`saveSessions`). Non ci sono sedute dimostrative: l'elenco parte vuoto. Le sedute del vecchio formato dimostrativo vengono scartate quando si migra da localStorage (restano nella copia di backup delle chiavi vecchie).
 
-## Forza dal vivo (da fare: il modello è già pronto)
+## Forza dal vivo (`src/lib/liveWorkout.ts`, schermata `src/features/live/`)
 
-La registrazione in palestra non è ancora implementata; i tipi (`StrengthActual`, `ActualExercise`, `ActualSet`) sono già compatibili con questo disegno:
-
-- Inizio e fine; esercizi effettivi in ordine (si possono aggiungere, saltare, riordinare rispetto al piano).
-- **Ogni serie ha due campi da compilare: kg e ripetizioni** (`ActualSet`: `kg`, `reps`, `completedAt`). La serie n dell'eseguito corrisponde alla serie n del piano.
-- **In grigio, come suggerimento**, i valori dell'**ultima volta** in cui quell'esercizio è stato fatto: stessa serie (stesso numero d'ordine), in qualsiasi allenamento. Li calcola `previousSet(exerciseId, setIndex, sessions)` in `src/lib/strength.ts`: guarda le sedute `done` dalla più recente e prende la prima in cui l'esercizio ha quella serie. Non si salvano: si ricalcolano.
-- Accanto, l'**obiettivo di ripetizioni** del piano (`plan.entries[].sets[n].reps`, copiato dal template).
-- Il **RIR non è un campo**: è solo un'indicazione letta dal piano (`sets[n].rir`). Per questo `ActualSet` non ha `rir` e `TemplateSet` non ha `kg`.
-- Il timer di recupero è solo a schermo, non salvato.
+- **Avvio**: "Inizia allenamento" nel dettaglio di una seduta di forza programmata. La seduta passa `in_progress` con `actual = { startedAt, exercises: [] }` e si crea la bozza `LiveWorkout` dal piano (`createLiveWorkout`). Nessun allenamento libero; un solo allenamento in corso alla volta. Schermata `/allenamento`, a schermo intero su telefono, con schermo sempre acceso (Wake Lock, richiesto di nuovo al ritorno in primo piano).
+- **Bozza** (`LiveWorkout` in `types.ts`): esercizi in ordine (`LiveExercise`: `exerciseId`, `restSeconds`, `supersetId`, `notes`, `skipped`, serie `LiveSet` con `targetReps`/`targetRir` copiati dal piano, testo digitato `kg`/`reps` e `done` = l'`ActualSet` registrato), `focus` (serie corrente) e `rest` (`endsAt` in ms + `totalS`). Si salva **a ogni azione** con `DataStore.saveLiveWorkout` (IndexedDB, `meta.liveWorkout`); non fa parte di `AppData`, quindi non va in export e backup.
+- **Ripresa** (`resumeLive`): se la seduta della bozza è ancora `in_progress` si riprende tutto, timer compreso; se la bozza manca si riparte dal piano con lo `startedAt` salvato nella seduta; una bozza di una seduta non più in corso si scarta. Su ogni pagina un banner "Allenamento in corso → Riprendi".
+- **Valori in grigio**: kg e reps dell'**ultima volta** = l'ultima seduta `done` (qualsiasi allenamento) in cui l'esercizio è stato eseguito, stessa serie per indice (`previousSet` in `strength.ts`). Se quella seduta non aveva la serie, il campo resta vuoto: non si risale alle sedute precedenti. Accanto alle reps l'obiettivo del piano ("8 · obj 10"). Il **RIR** è solo testo dal piano: `ActualSet` non ha `rir` e `TemplateSet` non ha `kg`.
+- **✓** (`resolveSet` + `completeSet`): i campi vuoti prendono i valori in grigio (reps: ultima volta, altrimenti obiettivo). Se manca il kg e non c'è storico (o un valore non è valido: kg 0–1000, reps intere ≥ 1) il campo si evidenzia e la serie non si completa. Un secondo tocco annulla (`uncompleteSet`).
+- **Focus e recupero**: dopo il ✓ il focus va alla prossima serie da fare (stesso esercizio, poi i successivi, con scorrimento automatico) e parte il recupero dell'esercizio. **Superserie** = voci consecutive con lo stesso `supersetId` (almeno due), ricalcolate dall'ordine attuale: le serie si fanno a giri (serie 1 di ogni esercizio, poi serie 2…); finché nel giro c'è un esercizio da fare il focus passa a quello senza recupero, poi parte il recupero dell'ultimo esercizio del gruppo. Gli esercizi saltati non contano.
+- **Timer di recupero**: calcolato da `rest.endsAt` (giusto anche in background o dopo la riapertura); −15 s, +15 s (a recupero finito riparte da adesso), Salta, tempo a mano (m:ss o secondi). Nessun suono né vibrazione per ora.
+- **Durante la sessione**: aggiungi serie (stessi obiettivi dell'ultima) o togli l'ultima se non completata; aggiungi esercizi dal catalogo (recupero di default, tante serie quante l'ultima volta, altrimenti 3); salta/riprendi esercizio; riordina trascinando (tenendo premuto su telefono). Niente "sostituisci".
+- **Termina** → conferma → riepilogo (`liveSummary`): durata reale, serie completate, volume Σ kg × reps, record per esercizio (kg massimo e 1RM stimato con Epley, kg × (1 + reps/30), solo se superano lo storico delle altre sedute concluse; un esercizio mai fatto non dà record), note. **Salvando** (`liveActual` + `finishSession`): la seduta diventa `done` con `actual.endedAt`, gli esercizi con le sole serie completate (le altre si ignorano, non diventano "saltate"), quelli senza serie solo se saltati (`skipped: true`), le note in `actual.notes`; la bozza si cancella. Nel calendario la card diventa verde e la Panoramica conta la durata reale.
 
 ## Endurance effettivo
 
@@ -72,7 +73,7 @@ Manuale o importato da `.FIT` Garmin (solo Garmin → app), campo `source` (`man
 ## Salvataggio (`src/data/`)
 
 - **IndexedDB tramite Dexie** (`dexieStore.ts`), database `my-masterpiece`. L'app usa solo l'interfaccia `DataStore` (`store.ts`), esportata come `dataStore` da `src/data/index.ts`: è l'**unico punto di accesso** ai dati, ed è lì che si aggancerà la sincronizzazione con Supabase. Nessun altro modulo tocca IndexedDB.
-- Tabelle: `exercises`, `templates`, `sessions` (una riga per entità: `id`, `pos` = posizione nell'elenco, `item` = l'entità), `meta` (`schemaVersion`, `raceDate`, `lastExportAt`, `legacyImportedAt`), `backups`.
+- Tabelle: `exercises`, `templates`, `sessions` (una riga per entità: `id`, `pos` = posizione nell'elenco, `item` = l'entità), `meta` (`schemaVersion`, `raceDate`, `lastExportAt`, `legacyImportedAt`, `liveWorkout` = bozza dell'allenamento in corso), `backups`.
 - **localStorage** resta solo per le preferenze leggere del dispositivo (`src/lib/preferences.ts`: tema, lingua, scheda del Planner, sidebar).
 - **Primo avvio**: se IndexedDB è vuoto e ci sono dati nel vecchio localStorage (`mm.sessions`, `mm.exercises`, `mm.templates`, `mm.raceDate`), vengono migrati in automatico (`legacyLocalStorage.ts`). Le chiavi vecchie non si perdono: diventano copie di backup `<chiave>.backup-idb` (es. `mm.templates.backup-idb`). Se un giorno IndexedDB venisse svuotato, si riparte da quelle copie.
 - **Persistenza**: all'avvio si chiama `navigator.storage.persist()`, così il browser non cancella i dati quando lo spazio scarseggia. Lo stato si vede nella pagina Dati.
@@ -87,6 +88,7 @@ I dati hanno un **numero di versione dello schema** (`SCHEMA_VERSION`, salvato i
 | 0        | Formato iniziale (15 gruppi muscolari, serie con i kg)                                                        |
 | 1        | Muscoli nei 20 gruppi della mappa del corpo                                                                   |
 | 2        | Serie previste solo con `reps` e `rir` obiettivo (via i `kg` da template e piani); serie eseguite senza `rir` |
+| 3        | Eseguito di forza con note facoltative (`actual.notes`); nessun dato da convertire                            |
 
 **Come aggiungere una migrazione**
 

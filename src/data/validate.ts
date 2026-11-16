@@ -5,6 +5,7 @@ import type {
   AppData,
   DataCounts,
   Exercise,
+  LiveWorkout,
   Session,
   WorkoutTemplate,
 } from './types'
@@ -60,6 +61,29 @@ export function isSession(v: unknown): v is Session {
   return v.discipline === 'strength'
     ? isEntryList(v.plan.entries)
     : ENDURANCE.has(v.discipline as string) && isMode(v.plan.mode)
+}
+
+/** Bozza dell'allenamento in corso con la forma attesa (altrimenti si ignora). */
+export function isLiveWorkout(v: unknown): v is LiveWorkout {
+  return (
+    isObj(v) &&
+    v.version === 1 &&
+    typeof v.sessionId === 'string' &&
+    typeof v.startedAt === 'string' &&
+    Array.isArray(v.exercises) &&
+    v.exercises.every(
+      (e) =>
+        isObj(e) &&
+        typeof e.id === 'string' &&
+        typeof e.exerciseId === 'string' &&
+        typeof e.restSeconds === 'number' &&
+        Array.isArray(e.sets) &&
+        e.sets.every(
+          (s) =>
+            isObj(s) && typeof s.kg === 'string' && typeof s.reps === 'string',
+        ),
+    )
+  )
 }
 
 /** Ha la forma di un insieme di dati (tre elenchi)? Il contenuto si controlla con `sanitize`. */

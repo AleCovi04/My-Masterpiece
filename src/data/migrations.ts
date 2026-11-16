@@ -105,6 +105,14 @@ export const MIGRATIONS: Migration[] = [
       }),
     }),
   },
+  {
+    to: 3,
+    description:
+      'Forza: l’eseguito può avere note (`actual.notes`); nessun dato da convertire',
+    // solo un campo facoltativo in più: la versione cambia perché le app più
+    // vecchie non devono importare file che lo contengono (lo perderebbero)
+    migrate: (d) => d,
+  },
 ]
 
 /** Versione attuale dello schema dei dati. */

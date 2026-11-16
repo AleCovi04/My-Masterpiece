@@ -1,0 +1,524 @@
+/* ---------- registrazione dal vivo della forza ---------- */
+.lv {
+  --lv-h: 52px; /* altezza minima di campi e pulsanti: comodi con una mano */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+.lv > * {
+  flex-shrink: 0; /* a schermo intero la colonna ha altezza fissa: niente schiacciamenti */
+}
+
+/* telefono: schermo intero sopra intestazione e menu */
+@media (max-width: 1023.98px) {
+  .lv {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0
+      max(16px, env(safe-area-inset-left, 0px));
+  }
+}
+
+.lv-top {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 0 10px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+}
+.lv-title {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lv-title small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--c);
+}
+.lv-title h1 {
+  margin: 0;
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.05;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lv-clock {
+  font: 700 22px var(--f-body);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+.lv-end {
+  flex: none;
+  min-height: 44px;
+  padding-inline: 18px;
+}
+
+/* lista degli esercizi */
+.lv-list {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.lv-ex {
+  scroll-margin-top: 84px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.lv-ex.cur {
+  border-color: var(--c);
+  box-shadow: 0 0 0 1px var(--c);
+}
+.lv-ex.skipped {
+  opacity: 0.6;
+}
+.lv-ex.skipped .lv-ex-name b {
+  text-decoration: line-through;
+}
+.lv-ex.dragging {
+  opacity: 0.4;
+}
+.lv-ex-h {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.lv-handle {
+  flex: none;
+  width: 36px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--muted);
+  font-size: 18px;
+  letter-spacing: -3px;
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.lv-handle:hover {
+  background: var(--surface-2);
+}
+.lv-ex-name {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.lv-ex-name b {
+  font-size: 17px;
+  overflow-wrap: anywhere;
+}
+.lv-ex-name small {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.lv-ss {
+  font-weight: 700;
+  color: var(--c);
+}
+.lv-cur {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--c) 18%, var(--bg));
+  color: var(--c);
+}
+.lv-cur.off {
+  background: var(--surface-2);
+  color: var(--muted);
+}
+.lv-note {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  white-space: pre-line;
+}
+
+/* righe delle serie: # | kg | reps | RIR | ✓ */
+.lv-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.lv-set {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) minmax(0, 1.15fr) 34px var(--lv-h);
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 12px;
+}
+.lv-set-h {
+  padding-block: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lv-set-h span:nth-child(4),
+.lv-n,
+.lv-rir {
+  text-align: center;
+}
+.lv-set.focus {
+  background: color-mix(in srgb, var(--c) 10%, var(--surface));
+}
+.lv-set.done {
+  background: color-mix(in srgb, var(--ok) 16%, var(--surface));
+}
+.lv-n {
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.lv-rir {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.lv-inp {
+  width: 100%;
+  min-width: 0;
+  height: var(--lv-h);
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 0 10px;
+  font: 700 22px var(--f-body);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.lv-inp::placeholder {
+  color: var(--muted);
+  opacity: 0.75;
+  font-size: 16px;
+  font-weight: 500;
+}
+.lv-inp:focus-visible {
+  outline: 2px solid var(--c);
+  outline-offset: -1px;
+}
+.lv-inp[aria-invalid='true'] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.lv-inp[readonly] {
+  background: transparent;
+  border-color: transparent;
+  color: var(--ok);
+}
+.lv-check {
+  width: var(--lv-h);
+  height: var(--lv-h);
+  border-radius: 14px;
+  border: 2px solid var(--line);
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 24px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lv-check[aria-pressed='true'] {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: var(--bg);
+}
+.lv-err {
+  grid-column: 2 / -1;
+  font-style: normal;
+  font-size: 13px;
+  color: var(--accent);
+}
+.lv-ex-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.lv-ex-actions .pl-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.lv-skip {
+  margin-left: auto;
+}
+.lv-add {
+  align-self: stretch;
+  min-height: var(--lv-h);
+  border-style: dashed;
+}
+
+/* barra del recupero, fissa in basso */
+.lv-rest {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 10px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-radius: 16px 16px 0 0;
+  background: var(--text);
+  color: var(--bg);
+  overflow: hidden;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+}
+.lv-rest-fill {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--c);
+  transition: width 0.9s linear;
+}
+.lv-rest.over {
+  background: var(--ok);
+}
+.lv-rest-time {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--lv-h);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.lv-rest-time small {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+.lv-rest-time b {
+  font: 800 30px var(--f-body);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+.lv-rest-btn {
+  flex: none;
+  min-width: 56px;
+  min-height: var(--lv-h);
+  padding: 0 10px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--bg) 35%, transparent);
+  background: transparent;
+  color: inherit;
+  font: 700 15px var(--f-body);
+  cursor: pointer;
+}
+.lv-rest-btn.acc {
+  background: var(--bg);
+  color: var(--text);
+  border-color: var(--bg);
+}
+.lv-rest-btn:disabled {
+  opacity: 0.5;
+}
+.lv-rest-edit {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+.lv-rest-edit .lv-inp {
+  flex: 1;
+}
+
+/* riepilogo */
+.lv-sum {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.lv-sum > div {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 12px;
+  min-width: 0;
+}
+.lv-sum dt {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.lv-sum dd {
+  margin: 4px 0 0;
+  font: 800 22px var(--f-body);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.lv-recs h4 {
+  margin: 0 0 8px;
+  font-family: var(--f-display);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+.lv-recs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lv-recs li {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ok) 14%, var(--bg));
+}
+.lv-recs li span {
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.lv-recs small,
+.lv-muted {
+  color: var(--muted);
+}
+.lv-muted {
+  margin: 0;
+}
+.lv-none {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+.lv-none p {
+  margin: 0;
+}
+.lv-none a {
+  text-decoration: none;
+}
+
+@media (max-width: 420px) {
+  .lv-sum {
+    grid-template-columns: 1fr 1fr;
+  }
+  .lv-rest-btn {
+    min-width: 48px;
+    padding: 0 6px;
+    font-size: 14px;
+  }
+  .lv-title h1 {
+    font-size: 22px;
+  }
+  .lv-clock {
+    font-size: 19px;
+  }
+}
+
+/* PC: dentro la pagina, con le righe un po' più larghe */
+@media (min-width: 1024px) {
+  .lv {
+    max-width: 880px;
+  }
+  .lv-top {
+    padding-top: 12px;
+  }
+  .lv-rest {
+    border-radius: 16px;
+    margin-bottom: 8px;
+    padding-bottom: 10px;
+  }
+}
+
+/* banner "Allenamento in corso → Riprendi" */
+.live-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px 10px 16px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+.live-banner span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.live-banner b {
+  flex: none;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--accent-ink);
+  color: var(--accent);
+}
+.live-banner i {
+  font-style: normal;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent-ink);
+  animation: live-pulse 1.4s ease-in-out infinite;
+  flex: none;
+}
+@keyframes live-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-banner i {
+    animation: none;
+  }
+}
