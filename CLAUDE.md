@@ -1,31 +1,42 @@
 # My Masterpiece
 
+## All'inizio di ogni compito
+
+Leggi `docs/roadmap.md` e `docs/decisioni.md`. Leggi `docs/modello-dati.md` se tocchi i dati.
+
 ## Stack
 
-React 19 + TypeScript + Vite, ESLint + Prettier.
+React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 ## Struttura
 
-- `docs/` documentazione (`modello-dati.md`: regole del modello dati)
-- `src/app/` entry dell'app (`App.tsx`)
+- `docs/` roadmap, decisioni, modello dati
+- `src/app/` entry e cornice dell'app
 - `src/features/` moduli per funzionalità
-- `src/components/ui/` componenti UI riutilizzabili
-- `src/lib/` utilità e helper
-- `src/data/` tipi (`types.ts`), salvataggio IndexedDB dietro `dataStore` (unico accesso ai dati) e migrazioni versionate (`migrations.ts`)
-- `src/i18n/` traduzioni
-- `src/styles/` stili globali
+- `src/components/` UI riutilizzabile (`ui/`, `layout/`, `body/`)
+- `src/lib/` calcoli puri e helper
+- `src/data/` tipi, `dataStore`, migrazioni
+- `src/i18n/` traduzioni IT/EN; `src/styles/` stili e tema
 
-## Convenzioni
+## Regole
 
-- Componenti in PascalCase (`MyComponent.tsx`)
-- Commit in italiano, piccoli e frequenti
-- Ogni schermata si progetta mobile-first e poi si adatta al desktop (≥ 1024 px) con sidebar e PageContainer (`src/components/layout/`). Ogni modifica va verificata a entrambe le larghezze.
+- Dati solo tramite `dataStore`; ogni cambio di schema = migrazione + test.
+- Tutti i testi in IT/EN tramite i18n.
+- Colori solo dalle variabili del tema.
+- Mobile-first, poi desktop ≥ 1024 px (sidebar + PageContainer).
+- Nessun dato personale nel codice (data gara, nome…): tutto configurabile, l'app diventerà multi-utente.
+- Niente nuove dipendenze senza motivo; se aggiunte, dichiararle nella risposta.
+- Mai azioni distruttive su dati, git o processi senza chiedere.
+- Componenti in PascalCase; commit in italiano, piccoli e frequenti.
+
+## Definizione di "fatto"
+
+`npm run lint`, `npm test` e `npm run build` passano; verifica a 390 px e 1440 px; documentazione aggiornata (modello dati, decisioni, roadmap); commit con messaggio chiaro e push.
+
+## Risposte
+
+Brevi, al massimo 4 righe, più eventuali domande aperte o dubbi.
 
 ## Comandi
 
-- `npm run dev` avvio sviluppo
-- `npm run build` build di produzione
-- `npm run lint` ESLint
-- `npm test` test (Vitest)
-- `npm run format` Prettier (scrive)
-- `npm run format:check` Prettier (solo verifica)
+`npm run dev` · `npm run build` · `npm run lint` · `npm test` · `npm run format` · `npm run format:check`
