@@ -117,14 +117,16 @@ export function separate<T extends Linked>(
   return normalizeSupersets(next)
 }
 
-/** "N × reps @ kg, RIR" → N serie uguali. */
+/** "N × reps, RIR" → N serie uguali; un valore assente resta assente (mai 0). */
 export function expandSets(
   n: number,
-  reps: number,
-  kg: number,
-  rir: number,
+  reps?: number | null,
+  rir?: number | null,
 ): TemplateSet[] {
-  return Array.from({ length: n }, () => ({ reps, kg, rir }))
+  return Array.from({ length: n }, () => ({
+    ...(reps != null && { reps }),
+    ...(rir != null && { rir }),
+  }))
 }
 
 /** "1:15" → 4500 s; `null` se non è h:mm valido (minuti 00–59). */

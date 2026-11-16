@@ -41,10 +41,15 @@ export type Discipline = 'strength' | 'run' | 'bike' | 'swim'
 
 // ---------- Template ----------
 
+/**
+ * Serie prevista: solo obiettivi. I kg non si pianificano: si registrano dal
+ * vivo (`ActualSet`). Un campo assente = obiettivo non indicato (mai 0).
+ */
 export interface TemplateSet {
-  reps: number
-  kg: number
-  rir: number
+  /** Ripetizioni obiettivo (≥ 1). */
+  reps?: number
+  /** RIR obiettivo (0–10): solo un'indicazione, non si registra. */
+  rir?: number
 }
 
 /** Una voce del template di forza: un esercizio con le sue serie. */
@@ -62,8 +67,9 @@ interface TemplateBase extends Entity {
   name: string
   notes?: string
   /**
-   * Forza: inserita a mano, mai calcolata. Corsa/bici/nuoto: presente solo se
-   * l'utente ha sovrascritto la durata calcolata (altrimenti si calcola).
+   * Forza: inserita a mano, mai calcolata, obbligatoria nei template.
+   * Corsa/bici/nuoto: presente solo se l'utente ha sovrascritto la durata
+   * calcolata (altrimenti si calcola).
    */
   estimatedDurationSec?: number
   archived: boolean // mai cancellato in massa: si archivia
@@ -139,10 +145,13 @@ export type WorkoutTemplate = StrengthTemplate | EnduranceTemplate
 
 // ---------- Esecuzione effettiva ----------
 
+/**
+ * Serie eseguita: kg e ripetizioni. Il RIR non si registra (è solo
+ * l'indicazione del piano). La serie n corrisponde alla serie n del piano.
+ */
 export interface ActualSet {
   kg: number
   reps: number
-  rir: number
   completedAt: IsoDateTime
 }
 
@@ -187,7 +196,7 @@ export type Actual = StrengthActual | EnduranceActual
 
 export type SessionStatus = 'planned' | 'in_progress' | 'done' | 'skipped'
 
-/** Piano di forza: stessa struttura del template (voci, serie, superserie). */
+/** Piano di forza: stessa struttura del template (voci, serie con reps e RIR obiettivo, superserie). */
 export interface StrengthPlan {
   entries: TemplateEntry[]
 }
@@ -233,3 +242,19 @@ export interface EnduranceSession extends SessionBase {
 
 /** Unione discriminata per disciplina. */
 export type Session = StrengthSession | EnduranceSession
+
+// ---------- Insieme dei dati (salvataggio, export, backup) ----------
+
+export interface AppData {
+  exercises: Exercise[]
+  templates: WorkoutTemplate[]
+  sessions: Session[]
+  /** `null` = "Nel futuro" (data non ancora scelta). */
+  raceDate: IsoDate | null
+}
+
+export interface DataCounts {
+  exercises: number
+  templates: number
+  sessions: number
+}

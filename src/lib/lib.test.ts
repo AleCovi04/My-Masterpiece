@@ -4,17 +4,12 @@ import {
   lastPerformance,
   personalRecords,
   setsPerMuscle,
-  suggestSet,
+  previousSet,
   totalVolume,
 } from './strength'
 
 const t = '2026-01-01T00:00:00.000Z'
-const set = (kg: number, reps: number, rir = 2) => ({
-  kg,
-  reps,
-  rir,
-  completedAt: t,
-})
+const set = (kg: number, reps: number) => ({ kg, reps, completedAt: t })
 const session = (
   date: string,
   exercises: ActualExercise[],
@@ -54,14 +49,12 @@ describe('forza', () => {
   })
   it('ultima volta', () =>
     expect(lastPerformance('a', sessions)).toEqual([set(70, 8)]))
-  it('proposta: ultima volta, altrimenti piano', () => {
-    expect(suggestSet(0, { kg: 50, reps: 10 }, [set(70, 8)])).toMatchObject({
-      kg: 70,
-    })
-    expect(suggestSet(0, { kg: 50, reps: 10 }, undefined)).toEqual({
-      kg: 50,
-      reps: 10,
-    })
+  it('ultima volta, stessa serie, qualsiasi allenamento', () => {
+    expect(previousSet('a', 0, sessions)).toEqual({ kg: 70, reps: 8 })
+    // l'ultima seduta ha una sola serie: per la seconda si risale a quella prima
+    expect(previousSet('a', 1, sessions)).toEqual({ kg: 60, reps: 12 })
+    expect(previousSet('a', 2, sessions)).toBeUndefined()
+    expect(previousSet('b', 0, sessions)).toBeUndefined()
   })
   it('serie per muscolo', () => {
     const panca: Pick<Exercise, 'id' | 'muscles'> = {

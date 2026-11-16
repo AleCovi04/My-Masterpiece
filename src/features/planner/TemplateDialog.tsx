@@ -37,7 +37,6 @@ import { useSortable } from './useSortable'
 interface DSet {
   key: string
   reps: string
-  kg: string
   rir: string
 }
 
@@ -48,9 +47,14 @@ interface DEntry {
   notes: string
   supersetId?: string
   sets: DSet[]
+  /** Righe modificate a mano: "Genera serie" chiede conferma prima di sovrascriverle. */
+  manual: boolean
 }
 
-const blankSet = (): DSet => ({ key: newId(), reps: '10', kg: '0', rir: '2' })
+const blankSet = (): DSet => ({ key: newId(), reps: '10', rir: '2' })
+
+/** Campo vuoto = obiettivo non indicato: è valido e resta vuoto. */
+const blank = (raw: string) => raw.trim() === ''
 
 const parseIntIn = (raw: string, min: number, max: number): number | null => {
   const v = raw.trim()
@@ -59,10 +63,8 @@ const parseIntIn = (raw: string, min: number, max: number): number | null => {
   return n >= min && n <= max ? n : null
 }
 
-const parseKg = (raw: string): number | null => {
-  const v = raw.trim().replace(',', '.')
-  return /^\d{1,4}(\.\d{1,2})?$/.test(v) ? Number(v) : null
-}
+const repsBad = (raw: string) => !blank(raw) && parseIntIn(raw, 1, 999) === null
+const rirBad = (raw: string) => !blank(raw) && parseIntIn(raw, 0, 10) === null
 
 const toDraft = (e: TemplateEntry): DEntry => ({
   key: newId(),
@@ -72,16 +74,16 @@ const toDraft = (e: TemplateEntry): DEntry => ({
   supersetId: e.supersetId,
   sets: e.sets.map((s) => ({
     key: newId(),
-    reps: String(s.reps),
-    kg: String(s.kg),
-    rir: String(s.rir),
+    reps: s.reps === undefined ? '' : String(s.reps),
+    rir: s.rir === undefined ? '' : String(s.rir),
   })),
+  // serie diverse tra loro: sono state scritte a mano
+  manual: e.sets.some(
+    (s) => s.reps !== e.sets[0].reps || s.rir !== e.sets[0].rir,
+  ),
 })
 
-const setBad = (s: DSet) =>
-  parseIntIn(s.reps, 1, 999) === null ||
-  parseKg(s.kg) === null ||
-  parseIntIn(s.rir, 0, 10) === null
+const setBad = (s: DSet) => repsBad(s.reps) || rirBad(s.rir)
 
 // ---------- finestra ----------
 
@@ -141,10 +143,15 @@ export default function TemplateDialog({
   const labels = supersetLabels(entries)
 
   const nameError = name.trim() || forSession ? null : p.nameRequired
+  // obbligatoria nei template di forza (mai calcolata); facoltativa nel piano di una seduta
   const durationError =
-    duration.trim() !== '' && parseHm(duration) === null
-      ? p.durationInvalid
-      : null
+    duration.trim() === ''
+      ? forSession
+        ? null
+        : p.durationRequired
+      : parseHm(duration)
+        ? null
+        : p.durationInvalid
   const entriesError = entries.length === 0 ? p.entriesRequired : null
   const restBad = (e: DEntry) =>
     e.rest.trim() !== '' && parseMmSs(e.rest) === null
@@ -165,6 +172,7 @@ export default function TemplateDialog({
         ),
         notes: '',
         sets: [blankSet(), blankSet(), blankSet()],
+        manual: false,
       })),
     ])
     setPicking(false)
@@ -186,11 +194,14 @@ export default function TemplateDialog({
           DEFAULT_REST_SECONDS,
         ...(en && { notes: en }),
         ...(e.supersetId && { supersetId: e.supersetId }),
-        sets: e.sets.map((s) => ({
-          reps: parseIntIn(s.reps, 1, 999) ?? 1,
-          kg: parseKg(s.kg) ?? 0,
-          rir: parseIntIn(s.rir, 0, 10) ?? 0,
-        })),
+        sets: e.sets.map((s) => {
+          const reps = parseIntIn(s.reps, 1, 999)
+          const rir = parseIntIn(s.rir, 0, 10)
+          return {
+            ...(reps !== null && { reps }),
+            ...(rir !== null && { rir }),
+          }
+        }),
       }
     })
     const seconds = duration.trim() ? parseHm(duration) : null
@@ -273,13 +284,14 @@ export default function TemplateDialog({
               )}
             </label>
             <label className="pl-fld">
-              <span>{p.duration}</span>
+              <span>{forSession ? p.duration : `${p.duration} *`}</span>
               <input
                 className="pl-inp pl-short"
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 placeholder="1:15"
                 inputMode="numeric"
+                aria-required={!forSession}
                 aria-invalid={submitted && !!durationError}
               />
               {submitted && durationError && (
@@ -361,6 +373,14 @@ export default function TemplateDialog({
             {submitted && anyBad && <em className="pl-err">{p.checkFields}</em>}
           </section>
 
+          {submitted && !valid && (
+            <em className="pl-err" role="alert">
+              {durationError === p.durationRequired
+                ? p.durationRequired
+                : p.cannotSave}
+            </em>
+          )}
+
           <TemplateFooter
             template={forSession ? null : template}
             onDuplicate={onDuplicate}
@@ -407,33 +427,35 @@ function EntryCard({
 }: EntryCardProps) {
   const { t } = useI18n()
   const p = t.planner
-  const [quick, setQuick] = useState({ n: '3', reps: '10', kg: '', rir: '2' })
+  const [quick, setQuick] = useState({ n: '3', reps: '10', rir: '2' })
+  const [confirmingGenerate, setConfirmingGenerate] = useState(false)
 
-  const setField = (key: string, field: 'reps' | 'kg' | 'rir', v: string) =>
+  const setField = (key: string, field: 'reps' | 'rir', v: string) =>
     update((e) => ({
       ...e,
+      manual: true,
       sets: e.sets.map((s) => (s.key === key ? { ...s, [field]: v } : s)),
     }))
 
+  // "N × reps, RIR": reps e RIR lasciati vuoti restano vuoti nelle serie (mai 0)
   const quickN = parseIntIn(quick.n, 1, 20)
-  const quickReps = parseIntIn(quick.reps, 1, 999)
-  const quickRir = parseIntIn(quick.rir, 0, 10)
-  const quickKg = quick.kg.trim() === '' ? 0 : parseKg(quick.kg)
-  const quickOk =
-    quickN !== null &&
-    quickReps !== null &&
-    quickRir !== null &&
-    quickKg !== null
+  const quickOk = quickN !== null && !repsBad(quick.reps) && !rirBad(quick.rir)
 
   const generate = () => {
-    if (!quickOk) return
+    setConfirmingGenerate(false)
+    if (quickN === null || !quickOk) return
+    const sets = expandSets(
+      quickN,
+      parseIntIn(quick.reps, 1, 999),
+      parseIntIn(quick.rir, 0, 10),
+    )
     update((e) => ({
       ...e,
-      sets: expandSets(quickN, quickReps, quickKg, quickRir).map((s) => ({
+      manual: false,
+      sets: sets.map((s) => ({
         key: newId(),
-        reps: String(s.reps),
-        kg: String(s.kg),
-        rir: String(s.rir),
+        reps: s.reps === undefined ? '' : String(s.reps),
+        rir: s.rir === undefined ? '' : String(s.rir),
       })),
     }))
   }
@@ -461,7 +483,6 @@ function EntryCard({
           <tr>
             <th>{p.setNo}</th>
             <th>{p.reps}</th>
-            <th>kg</th>
             <th>RIR</th>
             <th />
           </tr>
@@ -470,21 +491,16 @@ function EntryCard({
           {entry.sets.map((s, i) => (
             <tr key={s.key}>
               <td className="tp-n">{i + 1}</td>
-              {(['reps', 'kg', 'rir'] as const).map((f) => {
+              {(['reps', 'rir'] as const).map((f) => {
                 const bad =
-                  submitted &&
-                  (f === 'kg'
-                    ? parseKg(s.kg) === null
-                    : f === 'reps'
-                      ? parseIntIn(s.reps, 1, 999) === null
-                      : parseIntIn(s.rir, 0, 10) === null)
+                  submitted && (f === 'reps' ? repsBad(s.reps) : rirBad(s.rir))
                 return (
                   <td key={f}>
                     <input
                       className="pl-inp pl-num"
-                      inputMode={f === 'kg' ? 'decimal' : 'numeric'}
+                      inputMode="numeric"
                       value={s[f]}
-                      aria-label={`${f === 'reps' ? p.reps : f === 'kg' ? 'kg' : 'RIR'} – ${p.setNo} ${i + 1}`}
+                      aria-label={`${f === 'reps' ? p.reps : 'RIR'} – ${p.setNo} ${i + 1}`}
                       aria-invalid={bad}
                       onChange={(e) => setField(s.key, f, e.target.value)}
                     />
@@ -559,38 +575,49 @@ function EntryCard({
             inputMode="numeric"
             value={quick.reps}
             aria-label={p.reps}
-            aria-invalid={quickReps === null}
+            aria-invalid={repsBad(quick.reps)}
             onChange={(e) => setQuick({ ...quick, reps: e.target.value })}
           />
-          @
-          <input
-            className="pl-inp pl-num"
-            inputMode="decimal"
-            value={quick.kg}
-            placeholder="kg"
-            aria-label="kg"
-            aria-invalid={quickKg === null}
-            onChange={(e) => setQuick({ ...quick, kg: e.target.value })}
-          />
-          , RIR
+          {p.reps.toLowerCase()}, RIR
           <input
             className="pl-inp pl-num"
             inputMode="numeric"
             value={quick.rir}
             aria-label="RIR"
-            aria-invalid={quickRir === null}
+            aria-invalid={rirBad(quick.rir)}
             onChange={(e) => setQuick({ ...quick, rir: e.target.value })}
           />
           <button
             type="button"
             className="pl-btn pl-small"
             disabled={!quickOk}
-            onClick={generate}
+            onClick={() =>
+              entry.manual ? setConfirmingGenerate(true) : generate()
+            }
           >
             {p.generate}
           </button>
         </span>
       </div>
+      {confirmingGenerate && (
+        <div className="pl-confirm tp-confirm" role="alert">
+          <small>{p.confirmGenerate}</small>
+          <button
+            type="button"
+            className="pl-btn warn pl-small"
+            onClick={generate}
+          >
+            {p.confirmGenerateYes}
+          </button>
+          <button
+            type="button"
+            className="pl-btn pl-small"
+            onClick={() => setConfirmingGenerate(false)}
+          >
+            {p.cancel}
+          </button>
+        </div>
+      )}
 
       <div className="tp-meta">
         {showRest ? (

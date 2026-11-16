@@ -8,7 +8,12 @@ export const it = {
   language: 'Lingua',
   switchToDark: 'Passa al tema scuro',
   switchToLight: 'Passa al tema chiaro',
-  nav: { overview: 'Panoramica', calendar: 'Calendario', planner: 'Planner' },
+  nav: {
+    overview: 'Panoramica',
+    calendar: 'Calendario',
+    planner: 'Planner',
+    data: 'Dati',
+  },
   discipline: {
     swim: 'Nuoto',
     bike: 'Bici',
@@ -152,17 +157,23 @@ export const it = {
     noEntries: 'Nessun esercizio: aggiungine uno dal catalogo.',
     entriesRequired: 'Aggiungi almeno un esercizio.',
     checkFields:
-      'Controlla i campi evidenziati: reps (≥1), kg (≥0), RIR (0–10), recupero mm:ss.',
+      'Controlla i campi evidenziati: reps (≥1 o vuoto), RIR (0–10 o vuoto), recupero mm:ss.',
     duration: 'Durata stimata (h:mm)',
+    durationRequired:
+      'La durata stimata è obbligatoria: indicala in h:mm, ad esempio 1:15.',
+    cannotSave: 'Non salvato: controlla i campi evidenziati.',
     durationInvalid: 'Usa il formato h:mm, ad esempio 1:15.',
     setNo: 'Serie',
     reps: 'Reps',
     addSet: 'Serie',
     duplicateSet: 'Duplica la riga',
     deleteSet: 'Elimina la riga',
-    quickLabel: 'Genera serie uguali',
+    quickLabel: 'Genera serie uguali: N × reps, RIR',
     quickSets: 'Numero di serie',
-    generate: 'Genera',
+    generate: 'Genera serie',
+    confirmGenerate:
+      'Le serie di questo esercizio sono state modificate a mano: sovrascriverle?',
+    confirmGenerateYes: 'Sì, sovrascrivi',
     restLabelShort: 'Recupero (mm:ss)',
     restAfterRound: 'Recupero dopo il giro (mm:ss)',
     restInSuperset: 'Il recupero è dopo l’ultimo esercizio del giro.',
@@ -237,6 +248,61 @@ export const it = {
     checkEnduranceFields:
       'Controlla i campi evidenziati: distanza o tempo (mm:ss), intensità, ripetizioni (2–99).',
     notesStep: 'Note del passo',
+  },
+  data: {
+    title: 'Dati',
+    intro:
+      'I dati sono salvati su questo dispositivo. Esportali ogni tanto per averne una copia.',
+    persistent:
+      'Archiviazione persistente attiva: il browser non cancella i dati.',
+    notPersistent:
+      'Archiviazione non garantita: il browser potrebbe cancellare i dati se lo spazio scarseggia. Installa l’app o esporta spesso.',
+    exportTitle: 'Esporta',
+    exportAll: 'Esporta tutto (JSON)',
+    exportHint: 'Un file con tutti i dati, la versione dello schema e la data.',
+    lastExport: 'Ultimo export manuale',
+    never: 'mai',
+    exportReminder: 'L’ultimo export ha più di 30 giorni: fanne uno nuovo.',
+    exportNeverReminder:
+      'Non hai ancora esportato i dati: fai il primo export.',
+    importTitle: 'Importa',
+    importChoose: 'Scegli un file…',
+    importHint:
+      'Sostituisce tutti i dati con quelli del file. Prima viene salvato un backup dei dati attuali.',
+    importInvalid: 'File non valido: non è un export di My Masterpiece.',
+    importNewer:
+      'Il file è stato creato da una versione più recente dell’app: aggiorna l’app e riprova.',
+    failed: 'Operazione non riuscita. I dati non sono stati modificati.',
+    previewTitle: 'Anteprima dell’import',
+    previewFile: 'File',
+    previewDate: 'Esportato il',
+    previewVersion: 'Versione dello schema',
+    previewMigrated: 'verrà aggiornato alla versione',
+    dropped: 'elementi non validi verranno scartati',
+    exercises: 'esercizi',
+    templates: 'template',
+    sessions: 'sessioni',
+    confirmReplace:
+      'Tutti i dati attuali verranno sostituiti da quelli del file. Continuare?',
+    replace: 'Sì, sostituisci i dati',
+    cancel: 'Annulla',
+    close: 'Chiudi',
+    imported: 'Dati importati.',
+    backupsTitle: 'Backup automatici',
+    backupsHint:
+      'All’avvio, se l’ultimo ha più di 7 giorni, viene salvata una copia su questo dispositivo. Si tengono gli ultimi 8.',
+    noBackups: 'Nessun backup.',
+    reason: {
+      auto: 'Automatico',
+      'pre-import': 'Prima di un import',
+      'pre-restore': 'Prima di un ripristino',
+      'pre-migration': 'Prima di un aggiornamento dei dati',
+    },
+    restore: 'Ripristina',
+    confirmRestore: 'Sostituire i dati attuali con questo backup?',
+    restoreYes: 'Sì, ripristina',
+    restored: 'Backup ripristinato.',
+    schemaVersion: 'Versione dello schema dei dati',
   },
   quote: {
     text: "L'impedimento all'azione fa avanzare l'azione. Ciò che ostacola la via diventa la via.",

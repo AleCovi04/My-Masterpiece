@@ -68,15 +68,28 @@ export function lastPerformance(
   return undefined
 }
 
-/** Valori proposti per la serie n: ultima volta se esiste, altrimenti il piano. */
-export function suggestSet<T extends { kg: number; reps: number }>(
-  index: number,
-  planned: T | undefined,
-  last: Pick<ActualSet, 'kg' | 'reps' | 'rir'>[] | undefined,
-): { kg: number; reps: number; rir?: number } | undefined {
-  const l = last?.[index] ?? last?.[last.length - 1]
-  if (l) return { kg: l.kg, reps: l.reps, rir: l.rir }
-  return planned
+/**
+ * Valori "dell'ultima volta" per la serie `setIndex` (da 0) di un esercizio:
+ * la seduta conclusa più recente, di qualsiasi allenamento, in cui
+ * quell'esercizio ha quella serie. Sono i valori in grigio della registrazione dal vivo.
+ */
+export function previousSet(
+  exerciseId: Id,
+  setIndex: number,
+  sessions: Session[],
+): Pick<ActualSet, 'kg' | 'reps'> | undefined {
+  const sorted = doneStrength(sessions).sort(
+    (a, b) => a.date.localeCompare(b.date) || a.order - b.order,
+  )
+  for (let i = sorted.length - 1; i >= 0; i--) {
+    for (const ex of sorted[i].actual.exercises) {
+      const set = ex.sets[setIndex]
+      if (ex.exerciseId === exerciseId && !ex.skipped && set) {
+        return { kg: set.kg, reps: set.reps }
+      }
+    }
+  }
+  return undefined
 }
 
 /** Serie per muscolo = serie completate × percentuale / 100 (mappa di calore). */

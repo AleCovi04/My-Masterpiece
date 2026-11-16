@@ -1,5 +1,10 @@
 import type { ReactNode } from 'react'
-import { CalendarIcon, OverviewIcon, PlannerIcon } from '../components/ui/Icons'
+import {
+  CalendarIcon,
+  DataIcon,
+  OverviewIcon,
+  PlannerIcon,
+} from '../components/ui/Icons'
 import type { Dictionary } from '../i18n/it'
 
 export interface NavItem {
@@ -14,4 +19,5 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/', end: true, icon: <OverviewIcon />, label: (t) => t.nav.overview },
   { to: '/calendario', icon: <CalendarIcon />, label: (t) => t.nav.calendar },
   { to: '/planner', icon: <PlannerIcon />, label: (t) => t.nav.planner },
+  { to: '/dati', icon: <DataIcon />, label: (t) => t.nav.data },
 ]

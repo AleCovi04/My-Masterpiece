@@ -10,7 +10,12 @@ export const en: Dictionary = {
   language: 'Language',
   switchToDark: 'Switch to dark theme',
   switchToLight: 'Switch to light theme',
-  nav: { overview: 'Overview', calendar: 'Calendar', planner: 'Planner' },
+  nav: {
+    overview: 'Overview',
+    calendar: 'Calendar',
+    planner: 'Planner',
+    data: 'Data',
+  },
   discipline: {
     swim: 'Swim',
     bike: 'Bike',
@@ -154,17 +159,23 @@ export const en: Dictionary = {
     noEntries: 'No exercises: add one from the catalog.',
     entriesRequired: 'Add at least one exercise.',
     checkFields:
-      'Check the highlighted fields: reps (≥1), kg (≥0), RIR (0–10), rest mm:ss.',
+      'Check the highlighted fields: reps (≥1 or empty), RIR (0–10 or empty), rest mm:ss.',
     duration: 'Estimated duration (h:mm)',
+    durationRequired:
+      'The estimated duration is required: enter it as h:mm, for example 1:15.',
+    cannotSave: 'Not saved: check the highlighted fields.',
     durationInvalid: 'Use the h:mm format, for example 1:15.',
     setNo: 'Set',
     reps: 'Reps',
     addSet: 'Set',
     duplicateSet: 'Duplicate row',
     deleteSet: 'Delete row',
-    quickLabel: 'Generate identical sets',
+    quickLabel: 'Generate identical sets: N × reps, RIR',
     quickSets: 'Number of sets',
-    generate: 'Generate',
+    generate: 'Generate sets',
+    confirmGenerate:
+      'The sets of this exercise were edited by hand: overwrite them?',
+    confirmGenerateYes: 'Yes, overwrite',
     restLabelShort: 'Rest (mm:ss)',
     restAfterRound: 'Rest after the round (mm:ss)',
     restInSuperset: 'Rest comes after the last exercise of the round.',
@@ -239,6 +250,61 @@ export const en: Dictionary = {
     checkEnduranceFields:
       'Check the highlighted fields: distance or time (mm:ss), intensity, repeats (2–99).',
     notesStep: 'Step notes',
+  },
+  data: {
+    title: 'Data',
+    intro:
+      'Your data is stored on this device. Export it now and then to keep a copy.',
+    persistent:
+      'Persistent storage is on: the browser will not delete the data.',
+    notPersistent:
+      'Storage is not guaranteed: the browser may delete the data when space runs low. Install the app or export often.',
+    exportTitle: 'Export',
+    exportAll: 'Export everything (JSON)',
+    exportHint: 'One file with all the data, the schema version and the date.',
+    lastExport: 'Last manual export',
+    never: 'never',
+    exportReminder: 'The last export is more than 30 days old: make a new one.',
+    exportNeverReminder:
+      'You have not exported your data yet: make the first export.',
+    importTitle: 'Import',
+    importChoose: 'Choose a file…',
+    importHint:
+      'Replaces all the data with the file’s. A backup of the current data is saved first.',
+    importInvalid: 'Invalid file: this is not a My Masterpiece export.',
+    importNewer:
+      'This file was created by a newer version of the app: update the app and try again.',
+    failed: 'The operation failed. Your data was not changed.',
+    previewTitle: 'Import preview',
+    previewFile: 'File',
+    previewDate: 'Exported on',
+    previewVersion: 'Schema version',
+    previewMigrated: 'will be upgraded to version',
+    dropped: 'invalid items will be discarded',
+    exercises: 'exercises',
+    templates: 'templates',
+    sessions: 'sessions',
+    confirmReplace:
+      'All current data will be replaced by the file’s data. Continue?',
+    replace: 'Yes, replace the data',
+    cancel: 'Cancel',
+    close: 'Close',
+    imported: 'Data imported.',
+    backupsTitle: 'Automatic backups',
+    backupsHint:
+      'At startup, if the last one is more than 7 days old, a copy is saved on this device. The last 8 are kept.',
+    noBackups: 'No backups.',
+    reason: {
+      auto: 'Automatic',
+      'pre-import': 'Before an import',
+      'pre-restore': 'Before a restore',
+      'pre-migration': 'Before a data upgrade',
+    },
+    restore: 'Restore',
+    confirmRestore: 'Replace the current data with this backup?',
+    restoreYes: 'Yes, restore',
+    restored: 'Backup restored.',
+    schemaVersion: 'Data schema version',
   },
   quote: {
     text: 'The impediment to action advances action. What stands in the way becomes the way.',

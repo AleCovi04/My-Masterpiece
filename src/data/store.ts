@@ -1,6 +1,33 @@
-// Interfaccia di salvataggio: oggi localStorage, domani Supabase.
+// Interfaccia di salvataggio: oggi IndexedDB (Dexie), domani anche Supabase.
 // L'app usa solo `DataStore`; per cambiare backend basta un'altra implementazione.
-import type { Exercise, IsoDate, Session, WorkoutTemplate } from './types'
+import type { ExportFile } from './exportFile'
+import type {
+  AppData,
+  DataCounts,
+  Exercise,
+  IsoDate,
+  IsoDateTime,
+  Session,
+  WorkoutTemplate,
+} from './types'
+
+export type BackupReason =
+  /** Automatico, all'avvio, se l'ultimo ha più di 7 giorni. */
+  | 'auto'
+  /** Prima di sostituire i dati con un file importato. */
+  | 'pre-import'
+  /** Prima di ripristinare un altro backup. */
+  | 'pre-restore'
+  /** Prima di una migrazione dello schema. */
+  | 'pre-migration'
+
+export interface BackupInfo {
+  id: number
+  createdAt: IsoDateTime
+  reason: BackupReason
+  schemaVersion: number
+  counts: DataCounts
+}
 
 export interface DataStore {
   /** Solo sedute reali: all'inizio l'elenco è vuoto. */
@@ -14,4 +41,22 @@ export interface DataStore {
   /** `null` = "Nel futuro" (data non ancora scelta). */
   loadRaceDate(): Promise<IsoDate | null>
   saveRaceDate(date: IsoDate | null): Promise<void>
+
+  /** Apre il salvataggio: migrazioni, persistenza, backup automatico. Si può chiamare più volte. */
+  init(): Promise<void>
+  /** Il browser ha garantito di non cancellare i dati? */
+  isPersistent(): Promise<boolean>
+
+  /** Tutti i dati in un file di export (non lo scarica e non lo registra). */
+  exportAll(): Promise<ExportFile>
+  /** Registra che l'export manuale è stato fatto adesso. */
+  markExported(): Promise<void>
+  lastExportAt(): Promise<IsoDateTime | null>
+  /** Sostituisce tutti i dati (import); prima salva un backup di quelli attuali. */
+  replaceAll(data: AppData): Promise<void>
+
+  /** Backup salvati, dal più recente. */
+  listBackups(): Promise<BackupInfo[]>
+  /** Ripristina un backup (applicando le migrazioni se è vecchio); prima salva i dati attuali. */
+  restoreBackup(id: number): Promise<void>
 }

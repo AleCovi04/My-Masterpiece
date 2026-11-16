@@ -39,12 +39,7 @@ function groupSets(sets: TemplateSet[]): { n: number; set: TemplateSet }[] {
   const out: { n: number; set: TemplateSet }[] = []
   for (const set of sets) {
     const last = out[out.length - 1]
-    if (
-      last &&
-      last.set.reps === set.reps &&
-      last.set.kg === set.kg &&
-      last.set.rir === set.rir
-    ) {
+    if (last && last.set.reps === set.reps && last.set.rir === set.rir) {
       last.n += 1
     } else {
       out.push({ n: 1, set })
@@ -91,10 +86,9 @@ function StrengthView({
                   {groupSets(en.sets).map(({ n, set }, i) => (
                     <li key={i}>
                       <span>
-                        {n} × {set.reps} {t.planner.reps.toLowerCase()}
+                        {n} × {set.reps ?? '—'} {t.planner.reps.toLowerCase()}
                       </span>
-                      <span>{set.kg} kg</span>
-                      <span>RIR {set.rir}</span>
+                      {set.rir !== undefined && <span>RIR {set.rir}</span>}
                     </li>
                   ))}
                 </ul>

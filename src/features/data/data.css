@@ -1,0 +1,151 @@
+/* Pagina Dati: export, import e backup. Mobile-first; da 1024 px le card di
+   export e import stanno affiancate (Grid). */
+.dt {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.dt-intro,
+.dt-foot {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 70ch;
+}
+.dt-foot {
+  font-size: 12px;
+}
+.dt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  min-width: 0;
+}
+.dt-card h2 {
+  margin: 0;
+  font: 800 22px var(--f-display);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.dt-card p,
+.dt-preview p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+.dt-card .dt-meta b {
+  color: var(--text);
+}
+.dt-card .dt-reminder,
+.dt-preview .dt-reminder {
+  color: var(--text);
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.dt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: auto;
+  padding-top: 4px;
+}
+.dt-notice {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  border: 1px solid var(--line);
+}
+.dt-notice.ok {
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, var(--bg));
+}
+.dt-notice.err {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.dt-backups {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.dt-backups li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.dt-b-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 220px;
+  font-variant-numeric: tabular-nums;
+}
+.dt-b-main small,
+.dt-backups .pl-confirm small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.dt-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.dt-preview dl {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+.dt-preview dl div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+}
+.dt-preview dt {
+  color: var(--muted);
+}
+.dt-preview dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.dt-counts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.dt-counts li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 6px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+}
+.dt-counts b {
+  font: 800 28px var(--f-display);
+  color: var(--text);
+  line-height: 1;
+}

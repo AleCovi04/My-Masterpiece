@@ -65,11 +65,14 @@ describe('superserie', () => {
 
 describe('template', () => {
   it('serie e durata', () => {
-    expect(expandSets(3, 10, 40, 2)).toEqual([
-      { reps: 10, kg: 40, rir: 2 },
-      { reps: 10, kg: 40, rir: 2 },
-      { reps: 10, kg: 40, rir: 2 },
+    expect(expandSets(3, 10, 2)).toEqual([
+      { reps: 10, rir: 2 },
+      { reps: 10, rir: 2 },
+      { reps: 10, rir: 2 },
     ])
+    // i campi vuoti restano vuoti, mai 0
+    expect(expandSets(2, null, 1)).toEqual([{ rir: 1 }, { rir: 1 }])
+    expect(expandSets(1)).toEqual([{}])
     expect(parseHm('1:15')).toBe(4500)
     expect(parseHm('0:45')).toBe(2700)
     expect(parseHm('1:75')).toBeNull()
@@ -81,7 +84,7 @@ describe('template', () => {
         {
           exerciseId: 'a',
           restSeconds: 90,
-          sets: [1, 2, 3].map(() => ({ reps: 8, kg: 50, rir: 2 })),
+          sets: [1, 2, 3].map(() => ({ reps: 8, rir: 2 })),
         },
       ],
     }

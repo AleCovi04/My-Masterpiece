@@ -36,8 +36,8 @@ const strength: StrengthTemplate = {
       exerciseId: 'panca',
       restSeconds: 165,
       sets: [
-        { reps: 8, kg: 60, rir: 2 },
-        { reps: 8, kg: 60, rir: 2 },
+        { reps: 8, rir: 2 },
+        { reps: 8, rir: 2 },
       ],
     },
   ],
@@ -93,9 +93,9 @@ describe('seduta da template', () => {
   it('la copia è indipendente dal template, nei due sensi', () => {
     const tpl = structuredClone(strength)
     const s = sessionFromTemplate(tpl, day, now, 's1') as StrengthSession
-    tpl.entries[0].sets[0].kg = 100
+    tpl.entries[0].sets[0].reps = 100
     tpl.name = 'Rinominato'
-    expect(s.plan.entries[0].sets[0].kg).toBe(60)
+    expect(s.plan.entries[0].sets[0].reps).toBe(8)
     expect(s.name).toBe('Forza A')
     s.plan.entries[0].sets[1].reps = 1
     expect(tpl.entries[0].sets[1].reps).toBe(8)
@@ -173,9 +173,9 @@ describe('ordine nel giorno', () => {
     expect(copy.actual).toBeUndefined()
     expect(copy.templateId).toBe('tpl-forza')
     // copia profonda: modificarla non tocca l'originale
-    copy.plan.entries[0].sets[0].kg = 1
+    copy.plan.entries[0].sets[0].reps = 1
     const original = r.find((s) => s.id === 'a') as StrengthSession
-    expect(original.plan.entries[0].sets[0].kg).toBe(60)
+    expect(original.plan.entries[0].sets[0].reps).toBe(8)
   })
 
   it('salta e ripristina', () => {

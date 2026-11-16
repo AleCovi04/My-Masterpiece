@@ -11,7 +11,7 @@ React 19 + TypeScript + Vite, ESLint + Prettier.
 - `src/features/` moduli per funzionalità
 - `src/components/ui/` componenti UI riutilizzabili
 - `src/lib/` utilità e helper
-- `src/data/` tipi e dati (`types.ts`)
+- `src/data/` tipi (`types.ts`), salvataggio IndexedDB dietro `dataStore` (unico accesso ai dati) e migrazioni versionate (`migrations.ts`)
 - `src/i18n/` traduzioni
 - `src/styles/` stili globali
 
