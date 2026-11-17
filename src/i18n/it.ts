@@ -276,7 +276,8 @@ export const it = {
     optional: 'facoltativo',
     computedTime: 'Tempo (calcolato)',
     computedDistance: 'Distanza (calcolata)',
-    needIntensity: 'Inserisci l’intensità per calcolarlo.',
+    needIntensity:
+      'Scrivilo a mano, oppure inserisci l’intensità per calcolarlo.',
     stepType: {
       warmup: 'Riscaldamento',
       work: 'Lavoro',
@@ -311,7 +312,7 @@ export const it = {
     durationEst: 'Durata stimata',
     durationAuto: 'Calcolata in automatico',
     durationManual: 'Inserita a mano',
-    durationNone: 'Non calcolabile senza intensità.',
+    durationNone: 'Non calcolabile: inserisci il tempo o l’intensità.',
     restoreAuto: 'Ripristina automatico',
     clockInvalid: 'Usa mm:ss oppure h:mm:ss, ad esempio 45:00 o 1:15:00.',
     valueInvalid: 'Inserisci un valore valido.',
@@ -330,6 +331,8 @@ export const it = {
     transitionsTotal: 'Transizioni',
     transition: 'Transizione',
     checkLegs: 'Controlla le frazioni evidenziate.',
+    noLegs: 'Nessuna frazione: aggiungi nuoto, bici o corsa.',
+    legsRequired: 'Servono almeno 2 frazioni.',
     partialShort: 'parziale',
   },
   data: {

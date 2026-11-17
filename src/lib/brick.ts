@@ -138,9 +138,6 @@ export const newLeg = (
   simple: { goal: 'distance' },
 })
 
-/** Piano di un brick nuovo: bici → corsa. */
-export const defaultLegs = (): BrickLeg[] => [newLeg('bike'), newLeg('run')]
-
 /** Copia profonda delle frazioni con id nuovi (anche per passi e blocchi). */
 export function cloneLegs(legs: BrickLeg[]): BrickLeg[] {
   return legs.map((leg) => ({

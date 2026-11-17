@@ -278,7 +278,7 @@ export const en: Dictionary = {
     optional: 'optional',
     computedTime: 'Time (calculated)',
     computedDistance: 'Distance (calculated)',
-    needIntensity: 'Enter the intensity to calculate it.',
+    needIntensity: 'Type it in, or enter the intensity to calculate it.',
     stepType: {
       warmup: 'Warm-up',
       work: 'Work',
@@ -313,7 +313,7 @@ export const en: Dictionary = {
     durationEst: 'Estimated duration',
     durationAuto: 'Calculated automatically',
     durationManual: 'Entered by hand',
-    durationNone: 'Cannot be calculated without an intensity.',
+    durationNone: 'Cannot be calculated: enter the time or an intensity.',
     restoreAuto: 'Restore automatic',
     clockInvalid: 'Use mm:ss or h:mm:ss, for example 45:00 or 1:15:00.',
     valueInvalid: 'Enter a valid value.',
@@ -331,6 +331,8 @@ export const en: Dictionary = {
     transitionsTotal: 'Transitions',
     transition: 'Transition',
     checkLegs: 'Check the highlighted legs.',
+    noLegs: 'No legs yet: add swim, bike or run.',
+    legsRequired: 'At least 2 legs are needed.',
     partialShort: 'partial',
   },
   data: {

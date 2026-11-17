@@ -6,11 +6,12 @@ import {
   brickSummary,
   brickTotals,
   cloneLegs,
-  defaultLegs,
+  newLeg,
   moveItem,
 } from './brick'
 
 const names = { swim: 'Nuoto', bike: 'Bici', run: 'Corsa' }
+const emptyLegs = () => [newLeg('bike'), newLeg('run')]
 
 // bici 30 km a 30 km/h = 1h; corsa 5 km a 5:00/km = 25′
 const bike: BrickLeg = {
@@ -47,15 +48,15 @@ describe('brick', () => {
     const t = brickTotals([bike, free])
     expect(t.durationS).toBe(3600)
     expect(t.durationComplete).toBe(false)
-    expect(brickDurationSec(defaultLegs())).toBeNull()
-    const [b, r] = defaultLegs()
+    expect(brickDurationSec(emptyLegs())).toBeNull()
+    const [b, r] = emptyLegs()
     // le sole transizioni non danno una durata
     expect(brickDurationSec([b, { ...r, transitionBeforeS: 180 }])).toBeNull()
   })
 
   it('riassunto con le transizioni numerate', () => {
     expect(brickSummary([bike, run], names)).toBe('Bici 1h · T1 3′ · Corsa 25′')
-    expect(brickSummary(defaultLegs(), names)).toBe('Bici · Corsa')
+    expect(brickSummary(emptyLegs(), names)).toBe('Bici · Corsa')
   })
 
   it('durata per sport, scalata se scritta a mano', () => {
@@ -64,7 +65,7 @@ describe('brick', () => {
       bike: 7200,
       run: 3360,
     })
-    expect(brickSecondsBySport(defaultLegs(), 3600)).toEqual({ bike: 3600 })
+    expect(brickSecondsBySport(emptyLegs(), 3600)).toEqual({ bike: 3600 })
   })
 
   it('copia con id nuovi e spostamento in lista', () => {

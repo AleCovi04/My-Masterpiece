@@ -8,7 +8,7 @@ import {
   type EnduranceDiscipline,
 } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { brickTotals, defaultLegs, legAmount, moveItem } from '../../lib/brick'
+import { brickTotals, legAmount, moveItem } from '../../lib/brick'
 import { formatClock, parseClock } from '../../lib/enduranceTemplate'
 import { newId } from '../../lib/ids'
 import ActionMenu, { type MenuAction } from './ActionMenu'
@@ -73,9 +73,9 @@ export default function BrickDialog({
 
   const [name, setName] = useState(template?.name ?? '')
   const [notes, setNotes] = useState(template?.notes ?? '')
-  // un brick nuovo parte con le frazioni aperte, uno esistente chiuse
+  // un brick nuovo parte senza frazioni; quelle esistenti partono chiuse, quelle aggiunte aperte
   const [legs, setLegs] = useState<LegDraft[]>(() =>
-    (template?.legs ?? defaultLegs()).map((l) => legDraft(l, !template)),
+    (template?.legs ?? []).map((l) => legDraft(l, false)),
   )
   const [override, setOverride] = useState<string | null>(
     template?.estimatedDurationSec
@@ -286,6 +286,7 @@ export default function BrickDialog({
           </div>
           <small className="bk-hint">{p.legsHint}</small>
 
+          {legs.length === 0 && <div className="ph">{p.noLegs}</div>}
           <ol
             className={`tp-list bk-list${drag ? ' dragging' : ''}`}
             ref={listRef}
@@ -365,6 +366,9 @@ export default function BrickDialog({
               )
             })}
           </ol>
+          {submitted && !countOk && (
+            <em className="pl-err">{p.legsRequired}</em>
+          )}
           {submitted && !legsOk && <em className="pl-err">{p.checkLegs}</em>}
         </section>
 

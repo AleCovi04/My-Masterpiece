@@ -393,31 +393,71 @@ export default function EndurancePlanEditor({
                 onChange={(e) => set({ sInt: e.target.value })}
               />
             </label>
-            <label className="pl-fld en-calc">
-              <span>
-                {goal === 'distance' ? p.computedTime : p.computedDistance}
-              </span>
-              <input
-                className="pl-inp"
-                readOnly
-                tabIndex={-1}
-                value={
-                  goal === 'distance'
-                    ? sStats.durationS !== null
-                      ? formatClock(sStats.durationS)
-                      : ''
-                    : sStats.distanceM !== null
-                      ? formatDist(sStats.distanceM, d)
-                      : ''
-                }
-                placeholder="—"
-                title={
-                  ev.simple.intensity === undefined
-                    ? p.needIntensity
-                    : undefined
-                }
-              />
-            </label>
+            {ev.simple.intensity !== undefined ? (
+              <label className="pl-fld en-calc">
+                <span>
+                  {goal === 'distance' ? p.computedTime : p.computedDistance}
+                </span>
+                <input
+                  className="pl-inp"
+                  readOnly
+                  tabIndex={-1}
+                  value={
+                    goal === 'distance'
+                      ? sStats.durationS !== null
+                        ? formatClock(sStats.durationS)
+                        : ''
+                      : sStats.distanceM !== null
+                        ? formatDist(sStats.distanceM, d)
+                        : ''
+                  }
+                  placeholder="—"
+                />
+              </label>
+            ) : goal === 'distance' ? (
+              <label className="pl-fld">
+                <span>
+                  {p.time} ({p.optional})
+                </span>
+                <input
+                  className="pl-inp"
+                  inputMode="numeric"
+                  placeholder="45:00"
+                  value={dr.sTime}
+                  title={p.needIntensity}
+                  aria-invalid={
+                    submitted &&
+                    dr.sTime.trim() !== '' &&
+                    parseClock(dr.sTime) === null
+                  }
+                  onChange={(e) => set({ sTime: e.target.value })}
+                />
+              </label>
+            ) : (
+              <label className="pl-fld">
+                <span>
+                  {p.distance} ({p.optional})
+                </span>
+                <span className="en-dist">
+                  <input
+                    className="pl-inp"
+                    inputMode="decimal"
+                    value={dr.sDist}
+                    title={p.needIntensity}
+                    aria-invalid={
+                      submitted &&
+                      dr.sDist.trim() !== '' &&
+                      parseDistanceM(dr.sDist, dr.sUnit) === null
+                    }
+                    onChange={(e) => set({ sDist: e.target.value })}
+                  />
+                  <UnitSelect
+                    value={dr.sUnit}
+                    onChange={(sUnit) => set({ sUnit })}
+                  />
+                </span>
+              </label>
+            )}
           </div>
           {submitted && ev.simpleBad && (
             <em className="pl-err">{p.valueInvalid}</em>

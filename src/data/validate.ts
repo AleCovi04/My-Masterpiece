@@ -37,10 +37,11 @@ const isEntryList = (v: unknown) =>
 
 const isMode = (v: unknown) => v === 'simple' || v === 'structured'
 
-const isLegList = (v: unknown) =>
+/** Frazioni di un brick: 2–6; una seduta vuota (`allowEmpty`) può non averne. */
+const isLegList = (v: unknown, allowEmpty = false) =>
   Array.isArray(v) &&
-  v.length >= BRICK_MIN_LEGS &&
-  v.length <= BRICK_MAX_LEGS &&
+  ((allowEmpty && v.length === 0) ||
+    (v.length >= BRICK_MIN_LEGS && v.length <= BRICK_MAX_LEGS)) &&
   v.every(
     (l) =>
       isObj(l) &&
@@ -74,7 +75,7 @@ export function isTemplate(v: unknown): v is WorkoutTemplate {
 export function isSession(v: unknown): v is Session {
   if (!isObj(v) || typeof v.id !== 'string' || !isIsoDate(v.date)) return false
   if (!isObj(v.plan)) return false
-  if (v.discipline === 'brick') return isLegList(v.plan.legs)
+  if (v.discipline === 'brick') return isLegList(v.plan.legs, true)
   return v.discipline === 'strength'
     ? isEntryList(v.plan.entries)
     : ENDURANCE.has(v.discipline as string) && isMode(v.plan.mode)

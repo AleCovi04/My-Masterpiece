@@ -165,13 +165,21 @@ export function itemsTotals(
   return t
 }
 
+/**
+ * Distanza e tempo della modalità semplice. Con l'intensità il dato
+ * complementare si calcola; senza, vale quello scritto a mano (se c'è).
+ */
 export function simpleStats(d: EnduranceDiscipline, s: EnduranceSimple): Stats {
-  return stepStats(
+  const st = stepStats(
     d,
     s.goal === 'distance'
       ? { distanceM: s.distanceM, intensity: s.intensity }
       : { durationS: s.durationS, intensity: s.intensity },
   )
+  if (s.intensity !== undefined) return st
+  return s.goal === 'distance'
+    ? { ...st, durationS: s.durationS ?? null }
+    : { ...st, distanceM: s.distanceM ?? null }
 }
 
 /** Contenuto endurance di un template o di una seduta. */

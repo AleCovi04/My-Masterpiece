@@ -161,6 +161,7 @@ describe('migrazioni', () => {
         ]),
         brick('una', [leg('a', 'bike')]),
         brick('forza', [leg('a', 'bike'), leg('b', 'strength')]),
+        brick('zero', []),
       ],
       sessions: [
         {
@@ -169,12 +170,19 @@ describe('migrazioni', () => {
           discipline: 'brick',
           plan: { legs: [leg('a', 'swim'), leg('b', 'bike')] },
         },
+        // seduta brick vuota (appena creata dal Calendario): valida
+        {
+          id: 'vuota',
+          date: '2026-11-20',
+          discipline: 'brick',
+          plan: { legs: [] },
+        },
       ],
       raceDate: null,
     })
     expect(data.templates.map((t) => t.id)).toEqual(['ok'])
-    expect(data.sessions).toHaveLength(1)
-    expect(dropped).toBe(2)
+    expect(data.sessions).toHaveLength(2)
+    expect(dropped).toBe(3)
   })
 
   it('migrate applica solo le migrazioni mancanti ed è valida alla fine', () => {

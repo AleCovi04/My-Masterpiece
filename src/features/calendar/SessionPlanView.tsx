@@ -223,6 +223,8 @@ function BrickView({ session }: { session: BrickSession }) {
   const p = t.planner
   const legs = session.plan.legs
   const totals = brickTotals(legs)
+  if (legs.length === 0)
+    return <div className="ph sd-ph">{t.calendar.planEmpty}</div>
   return (
     <div className="sd-plan">
       <div className="sd-totals">

@@ -13,7 +13,7 @@ import type {
   StrengthTemplate,
   WorkoutTemplate,
 } from '../data/types'
-import { brickDurationSec, defaultLegs } from './brick'
+import { brickDurationSec } from './brick'
 import { templateTotals } from './enduranceTemplate'
 import { newId } from './ids'
 import { sessionsOn } from './reorder'
@@ -85,7 +85,7 @@ export function emptySession(
     status: 'planned' as const,
   }
   if (discipline === 'brick') {
-    return { ...base, discipline, plan: { legs: defaultLegs() } }
+    return { ...base, discipline, plan: { legs: [] } }
   }
   return discipline === 'strength'
     ? { ...base, discipline, plan: { entries: [] } }

@@ -272,10 +272,11 @@ describe('brick', () => {
     expect(sessionDurationSec(s)).toBe(3600 + 120 + 1200)
   })
 
-  it('sessione vuota: bici → corsa', () => {
+  it('sessione vuota: nessuna frazione, durata ignota', () => {
     const s = emptySession('brick', day, now, 'e')
     if (s.discipline !== 'brick') throw new Error('atteso un brick')
-    expect(s.plan.legs.map((l) => l.discipline)).toEqual(['bike', 'run'])
+    expect(s.plan.legs).toEqual([])
+    expect(sessionDurationSec(s)).toBeNull()
   })
 
   it('modifica del piano solo sulla seduta', () => {

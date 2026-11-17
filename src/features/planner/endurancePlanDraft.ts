@@ -183,17 +183,26 @@ export function evalDraft(d: EnduranceDiscipline, dr: PlanDraft): DraftEval {
   const intensity = dr.sInt.trim() ? parseIntensity(dr.sInt, d) : null
   const distanceM = parseDistanceM(dr.sDist, dr.sUnit)
   const durationS = parseClock(dr.sTime)
+  // senza intensità il dato complementare (tempo o distanza) si scrive a mano
+  const manual = dr.sInt.trim() === ''
   const simple: EnduranceSimple = {
     goal: dr.goal,
-    ...(dr.goal === 'distance' && distanceM !== null && { distanceM }),
-    ...(dr.goal === 'time' && durationS !== null && { durationS }),
+    ...((dr.goal === 'distance' || manual) &&
+      distanceM !== null && { distanceM }),
+    ...((dr.goal === 'time' || manual) && durationS !== null && { durationS }),
     ...(intensity !== null && { intensity }),
   }
   const sStats = simpleStats(d, simple)
 
+  const complementBad =
+    manual &&
+    (dr.goal === 'distance'
+      ? dr.sTime.trim() !== '' && durationS === null
+      : dr.sDist.trim() !== '' && distanceM === null)
   const simpleBad =
     (dr.goal === 'distance' ? distanceM === null : durationS === null) ||
-    (dr.sInt.trim() !== '' && intensity === null)
+    (dr.sInt.trim() !== '' && intensity === null) ||
+    complementBad
   const allSteps = dr.tree.flatMap((it) =>
     it.kind === 'repeat' ? it.steps : [it],
   )
