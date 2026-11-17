@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import type { EnduranceDiscipline, Session, Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import {
@@ -11,6 +11,7 @@ import {
 } from '../../lib/analysis'
 import { formatDistance, formatDuration } from '../../lib/format'
 import { DISCIPLINES } from '../../lib/weekStats'
+import FilterChips, { NoSeries } from '../../components/ui/FilterChips'
 import BarChart, { PlannedKey } from './BarChart'
 
 interface Props {
@@ -37,15 +38,6 @@ export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
   const timeTot = sumTime(time)
   const distTot = sumDistance(dist)
 
-  const toggle = (d: Sport) =>
-    setShown((cur) =>
-      cur.includes(d)
-        ? cur.length > 1
-          ? cur.filter((x) => x !== d)
-          : cur
-        : DISCIPLINES.filter((x) => x === d || cur.includes(x)),
-    )
-
   const actualS = shown.reduce((s, d) => s + timeTot[d].actualS, 0)
   const plannedS = shown.reduce((s, d) => s + timeTot[d].plannedS, 0)
   // il nuoto si legge in metri, gli altri sport in km
@@ -57,43 +49,43 @@ export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
     <div className="ana-grid">
       <section className="panel">
         <h3>{a.hours}</h3>
-        <div className="chips sm">
-          {DISCIPLINES.map((d) => (
-            <button
-              type="button"
-              key={d}
-              className="chip"
-              data-discipline={d}
-              aria-pressed={shown.includes(d)}
-              onClick={() => toggle(d)}
-            >
-              <i />
-              {t.discipline[d]}
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          size="sm"
+          label={a.hours}
+          items={DISCIPLINES.map((d) => ({
+            key: d,
+            label: t.discipline[d],
+            color: `var(--${d})`,
+          }))}
+          active={shown}
+          onChange={setShown}
+        />
         <p className="sub">
           {a.actual} <b>{formatDuration(actualS)}</b> · {a.planned}{' '}
           {formatDuration(plannedS)}
         </p>
-        <BarChart
-          label={a.hours}
-          ticks={ticks}
-          titles={titles}
-          stacks={shown.map((d) => ({
-            key: d,
-            label: t.discipline[d],
-            color: `var(--${d})`,
-            values: time.map((x) => x[d].actualS / 3600),
-          }))}
-          planned={time.map(
-            (x) => shown.reduce((s, d) => s + x[d].plannedS, 0) / 3600,
-          )}
-          plannedLabel={a.plannedOne}
-          totalLabel={a.total}
-          format={hoursLabel}
-          formatTip={(h) => formatDuration(Math.round(h * 3600))}
-        />
+        {shown.length === 0 ? (
+          <NoSeries />
+        ) : (
+          <BarChart
+            label={a.hours}
+            ticks={ticks}
+            titles={titles}
+            stacks={shown.map((d) => ({
+              key: d,
+              label: t.discipline[d],
+              color: `var(--${d})`,
+              values: time.map((x) => x[d].actualS / 3600),
+            }))}
+            planned={time.map(
+              (x) => shown.reduce((s, d) => s + x[d].plannedS, 0) / 3600,
+            )}
+            plannedLabel={a.plannedOne}
+            totalLabel={a.total}
+            format={hoursLabel}
+            formatTip={(h) => formatDuration(Math.round(h * 3600))}
+          />
+        )}
         <p className="note ana-legend">
           {a.legendBars} · <PlannedKey /> {a.legendDash}
         </p>
@@ -101,18 +93,18 @@ export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
 
       <section className="panel">
         <h3>{a.distance}</h3>
-        <div className="chips sm">
+        <div className="fc sm" role="group" aria-label={a.distance}>
           {ENDURANCE.map((d) => (
             <button
               type="button"
               key={d}
-              className="chip"
-              data-discipline={d}
+              className="fc-chip"
+              style={{ '--c': `var(--${d})` } as CSSProperties}
               aria-pressed={sport === d}
               onClick={() => setSport(d)}
             >
               <i />
-              {t.discipline[d]}
+              <span className="fc-label">{t.discipline[d]}</span>
             </button>
           ))}
         </div>

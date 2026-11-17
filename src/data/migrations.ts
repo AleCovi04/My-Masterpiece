@@ -4,7 +4,7 @@
 // versione `to`. Sono funzioni pure, eseguite in ordine all'avvio, quando si
 // importa un file e quando si ripristina un backup.
 import { migrateExercise } from '../lib/muscleMigration'
-import type { Exercise } from './types'
+import { defaultSettings, type Exercise } from './types'
 
 /** Dati non ancora validati: le migrazioni lavorano su forme vecchie. */
 export interface RawData {
@@ -16,6 +16,8 @@ export interface RawData {
   phases?: unknown[]
   applications?: unknown[]
   raceDate: unknown
+  /** Dalla versione 9 (assenti nei dati più vecchi). */
+  settings?: unknown
 }
 
 export interface Migration {
@@ -189,6 +191,15 @@ export const MIGRATIONS: Migration[] = [
       ...(Array.isArray(d.applications) && {
         applications: d.applications.map(dropColor),
       }),
+    }),
+  },
+  {
+    to: 9,
+    description:
+      'Impostazioni dell’utente (`settings`): fascia di volume settimanale per muscolo, di default 10–20 serie',
+    migrate: (d) => ({
+      ...d,
+      settings: isObj(d.settings) ? d.settings : defaultSettings(),
     }),
   },
 ]

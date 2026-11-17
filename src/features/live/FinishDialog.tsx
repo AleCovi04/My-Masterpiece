@@ -3,6 +3,12 @@ import type { Exercise, LiveWorkout, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { formatDuration } from '../../lib/format'
 import { liveSummary } from '../../lib/liveWorkout'
+import {
+  isVolumeMetric,
+  recordLabel,
+  recordValue,
+  setText,
+} from '../../i18n/records'
 import RpeScale from '../../components/ui/RpeScale'
 import Modal from '../planner/Modal'
 import '../endurance/endurance.css'
@@ -73,22 +79,18 @@ export default function FinishDialog({
             {sum.records.map((r) => (
               <li key={r.exerciseId}>
                 <b>{nameOf(r.exerciseId)}</b>
-                {r.maxKg && (
-                  <span>
-                    {l.maxKg} {num(r.maxKg.value, 2)} {l.kg}{' '}
+                {r.hits.map((h) => (
+                  <span key={h.metric}>
+                    {recordLabel(h.metric, t)}{' '}
+                    {recordValue(h.metric, h.value, lang)}
+                    {isVolumeMetric(h.metric) && h.set && (
+                      <> ({setText(h.set, lang)})</>
+                    )}{' '}
                     <small>
-                      ({l.before} {num(r.maxKg.previous, 2)})
+                      ({l.before} {recordValue(h.metric, h.previous, lang)})
                     </small>
                   </span>
-                )}
-                {r.e1rm && (
-                  <span>
-                    {l.e1rm} {num(r.e1rm.value)} {l.kg}{' '}
-                    <small>
-                      ({l.before} {num(r.e1rm.previous)})
-                    </small>
-                  </span>
-                )}
+                ))}
               </li>
             ))}
           </ul>

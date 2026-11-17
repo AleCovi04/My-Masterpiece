@@ -14,12 +14,8 @@ import type {
   TemplateSet,
 } from '../data/types'
 import { newId } from './ids'
-import {
-  epley1Rm,
-  exerciseBests,
-  lastPerformance,
-  previousSet,
-} from './strength'
+import { lastPerformance, previousSet } from './strength'
+import { newRecords, type RecordHit } from './strengthRecords'
 
 /** Serie di un esercizio aggiunto durante la sessione senza storico. */
 export const DEFAULT_LIVE_SETS = 3
@@ -508,10 +504,8 @@ export function cancelSession(
 
 export interface LiveRecord {
   exerciseId: Id
-  /** Presente se il kg massimo supera lo storico. */
-  maxKg?: { value: number; previous: number }
-  /** Presente se il 1RM stimato (Epley) supera lo storico. */
-  e1rm?: { value: number; previous: number }
+  /** Nuovi record (peso massimo, a N ripetizioni, volume in serie e in seduta). */
+  hits: RecordHit[]
 }
 
 export interface LiveSummary {
@@ -522,8 +516,9 @@ export interface LiveSummary {
 }
 
 /**
- * Riepilogo finale. I record si confrontano con le altre sedute concluse:
- * un esercizio mai fatto prima non ha record (non c'è storico da superare).
+ * Riepilogo finale. I record si confrontano con tutte le altre sedute
+ * concluse (`strengthRecords.ts`): un esercizio mai fatto prima non ha record
+ * (non c'è storico da superare).
  */
 export function liveSummary(
   w: LiveWorkout,
@@ -535,26 +530,13 @@ export function liveSummary(
       s.done ? [{ exerciseId: ex.exerciseId, ...s.done }] : [],
     ),
   )
-  const history = exerciseBests(sessions.filter((s) => s.id !== w.sessionId))
-  const current = new Map<Id, { maxKg: number; best1Rm: number }>()
-  for (const s of done) {
-    const c = current.get(s.exerciseId)
-    current.set(s.exerciseId, {
-      maxKg: Math.max(c?.maxKg ?? -Infinity, s.kg),
-      best1Rm: Math.max(c?.best1Rm ?? -Infinity, epley1Rm(s.kg, s.reps)),
-    })
-  }
-  const records: LiveRecord[] = []
-  for (const [exerciseId, c] of current) {
-    const h = history.get(exerciseId)
-    if (!h) continue
-    const r: LiveRecord = { exerciseId }
-    if (c.maxKg > h.maxKg) r.maxKg = { value: c.maxKg, previous: h.maxKg }
-    if (c.best1Rm > h.best1Rm + 1e-9) {
-      r.e1rm = { value: c.best1Rm, previous: h.best1Rm }
-    }
-    if (r.maxKg || r.e1rm) records.push(r)
-  }
+  const records = newRecords(
+    sessions.filter((s) => s.id !== w.sessionId),
+    w.exercises.map((ex) => ({
+      exerciseId: ex.exerciseId,
+      sets: ex.sets.flatMap((s) => (s.done ? [s.done] : [])),
+    })),
+  )
   return {
     durationS: Math.max(
       0,

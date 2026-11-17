@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildExportFile, parseImportFile } from './exportFile'
 import { migrate, MIGRATIONS, SCHEMA_VERSION, type RawData } from './migrations'
+import { defaultSettings } from './types'
 import { sanitize } from './validate'
 
 const now = '2026-11-16T08:00:00.000Z'
@@ -264,6 +265,7 @@ describe('migrazioni', () => {
       phases: [],
       applications: [],
       raceDate: null,
+      settings: defaultSettings(),
     })
   })
 
@@ -293,7 +295,7 @@ describe('migrazioni', () => {
       'rotto',
     ])
     expect(out.applications).toEqual([{ id: 'a', kind: 'phase' }, { id: 'b' }])
-    expect(SCHEMA_VERSION).toBe(8)
+    expect(SCHEMA_VERSION).toBeGreaterThanOrEqual(8)
   })
 })
 
@@ -360,5 +362,30 @@ describe('import/export', () => {
       }),
     )
     expect(r).toMatchObject({ ok: true, dropped: 1, counts: { exercises: 0 } })
+  })
+
+  it('v8 → v9: impostazioni predefinite (fascia 10–20 serie) se mancano; quelle valide restano', () => {
+    const d = migrate(v0(), 0)
+    expect(d.settings).toEqual(defaultSettings())
+    expect(sanitize(d).data.settings.muscleVolume.default).toEqual({
+      min: 10,
+      max: 20,
+    })
+    const mine = {
+      muscleVolume: {
+        default: { min: 8, max: 16 },
+        muscles: { calves: { min: 4, max: 10 }, chest: { min: 9, max: 3 } },
+      },
+    }
+    const kept = MIGRATIONS[8].migrate({ ...d, settings: mine })
+    expect(kept.settings).toBe(mine)
+    expect(SCHEMA_VERSION).toBe(9)
+    // fascia non valida (minimo sopra il massimo) scartata
+    expect(sanitize(kept).data.settings).toEqual({
+      muscleVolume: {
+        default: { min: 8, max: 16 },
+        muscles: { calves: { min: 4, max: 10 } },
+      },
+    })
   })
 })

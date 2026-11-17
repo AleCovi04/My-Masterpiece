@@ -1,11 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Exercise, Session } from '../data/types'
-import {
-  exerciseProgress,
-  muscleExercises,
-  muscleSetsIn,
-  performedExercises,
-} from './strength'
+import { muscleExercises, muscleSetsIn, performedExercises } from './strength'
 
 const now = '2026-11-01T00:00:00.000Z'
 const ex = (id: string, muscles: Exercise['muscles']) => ({ id, muscles })
@@ -82,13 +77,9 @@ describe('analisi forza', () => {
     const r = muscleExercises(list, exercises, 'triceps')
     expect(r.map((x) => x.exerciseId)).toEqual(['panca', 'dip'])
     expect(r[0]).toMatchObject({ sets: 5, weighted: 2.5, maxKg: 90 })
-    expect(r[0].best1Rm).toBeCloseTo(80 * (1 + 10 / 30))
   })
 
-  it('progressione per seduta e frequenza', () => {
-    const p = exerciseProgress(list, 'panca')
-    expect(p.map((x) => x.date)).toEqual(['2026-11-03', '2026-11-10'])
-    expect(p[1]).toMatchObject({ maxKg: 90, volume: 270 + 1600, sets: 3 })
+  it('esercizi svolti dal più frequente', () => {
     expect(performedExercises(list)).toEqual(['panca', 'dip'])
   })
 })

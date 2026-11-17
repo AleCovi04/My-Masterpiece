@@ -1,18 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { dataStore } from '../../data'
-import type { BlockApplication, Exercise, Id, Session } from '../../data/types'
+import type {
+  BlockApplication,
+  Exercise,
+  Id,
+  Session,
+  Settings,
+} from '../../data/types'
 import { setSessionRpe } from '../../lib/load'
 
 export interface AnalysisData {
   sessions: Session[]
   applications: BlockApplication[]
   exercises: Exercise[]
+  settings: Settings
 }
 
-/** Dati dell'Analisi; l'unica modifica possibile è l'RPE mancante di una seduta. */
+/** Dati dell'Analisi; si possono modificare solo l'RPE mancante di una seduta e le impostazioni. */
 export function useAnalysisData(): {
   data: AnalysisData | null
   setRpe: (id: Id, rpe: number) => void
+  setSettings: (settings: Settings) => void
 } {
   const [data, setData] = useState<AnalysisData | null>(null)
   const latest = useRef<AnalysisData | null>(null)
@@ -23,9 +31,10 @@ export function useAnalysisData(): {
       dataStore.loadSessions(),
       dataStore.loadApplications(),
       dataStore.loadExercises(),
-    ]).then(([sessions, applications, exercises]) => {
+      dataStore.loadSettings(),
+    ]).then(([sessions, applications, exercises, settings]) => {
       if (cancelled) return
-      latest.current = { sessions, applications, exercises }
+      latest.current = { sessions, applications, exercises, settings }
       setData(latest.current)
     })
     return () => {
@@ -43,5 +52,14 @@ export function useAnalysisData(): {
     void dataStore.saveSessions(next.sessions)
   }, [])
 
-  return { data, setRpe }
+  const setSettings = useCallback((settings: Settings) => {
+    const d = latest.current
+    if (!d) return
+    const next = { ...d, settings }
+    latest.current = next
+    setData(next)
+    void dataStore.saveSettings(settings)
+  }, [])
+
+  return { data, setRpe, setSettings }
 }

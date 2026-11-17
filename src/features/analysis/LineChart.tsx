@@ -8,8 +8,11 @@ export interface LineSeries {
   label: string
   /** Colore CSS, da una variabile del tema. */
   color: string
-  values: number[]
+  /** `null` = nessun valore in quel punto (la linea si interrompe). */
+  values: (number | null)[]
   dashed?: boolean
+  /** Punti da evidenziare (es. nuovi record): cerchio vuoto. */
+  marks?: boolean[]
 }
 
 interface Props {
@@ -21,6 +24,28 @@ interface Props {
   format: (v: number) => string
   /** Niente numeri (asse Y e riquadro): conta solo la forma della curva. */
   hideValues?: boolean
+  /** Testo accanto al valore di un punto evidenziato (riquadro). */
+  markLabel?: string
+}
+
+/** Tratti consecutivi senza buchi: indici dei punti con un valore. */
+function segments(values: (number | null)[]): number[][] {
+  const out: number[][] = []
+  let cur: number[] = []
+  values.forEach((v, i) => {
+    if (v === null || !Number.isFinite(v)) {
+      if (cur.length) out.push(cur)
+      cur = []
+    } else cur.push(i)
+  })
+  if (cur.length) out.push(cur)
+  return out
+}
+
+/** Ultimo punto con un valore, fino a `i`. */
+const lastIndex = (values: (number | null)[]) => {
+  for (let i = values.length - 1; i >= 0; i--) if (values[i] !== null) return i
+  return -1
 }
 
 const AXIS_LEFT = 46
@@ -36,6 +61,7 @@ export default function LineChart({
   series,
   format,
   hideValues = false,
+  markLabel,
 }: Props) {
   const { ref, width: W } = useChartWidth()
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
@@ -45,7 +71,10 @@ export default function LineChart({
   const H = chartHeight(W)
   const PH = H - T - B
   const n = ticks.length
-  const top = Math.max(0, ...series.flatMap((s) => s.values))
+  const top = Math.max(
+    0,
+    ...series.flatMap((s) => s.values.filter((v): v is number => v !== null)),
+  )
   const { max, lines } = axisScale(top)
   const y = (v: number) => T + PH - (v / max) * PH
   const x = (i: number) =>
@@ -137,43 +166,74 @@ export default function LineChart({
             </text>
           ) : null,
         )}
-        {n > 1 &&
-          series
-            .filter((s) => !s.dashed)
-            .map((s) => (
-              <path
-                key={`area-${s.key}`}
-                fill={`url(#${uid}-${s.key})`}
-                d={`M${x(0)},${y(0)} ${s.values
-                  .map((v, i) => `L${x(i)},${y(v)}`)
-                  .join(' ')} L${x(n - 1)},${y(0)} Z`}
-              />
-            ))}
-        {series.map((s) => (
-          <polyline
-            key={s.key}
-            fill="none"
-            stroke={s.color}
-            strokeWidth="2.5"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            strokeDasharray={s.dashed ? '6 4' : undefined}
-            points={s.values.map((v, i) => `${x(i)},${y(v)}`).join(' ')}
-          />
-        ))}
-        {current === null &&
-          n > 0 &&
-          series.map((s) => (
-            <circle
-              key={`last-${s.key}`}
-              cx={x(n - 1)}
-              cy={y(s.values[n - 1] ?? 0)}
-              r="4"
-              fill={s.color}
-              stroke="var(--surface)"
-              strokeWidth="2"
+        {/* aree sfumate solo con poche linee: sovrapposte diventano un blocco scuro */}
+        {series
+          .filter((s) => !s.dashed && series.length <= 2)
+          .flatMap((s) =>
+            segments(s.values)
+              .filter((seg) => seg.length > 1)
+              .map((seg) => (
+                <path
+                  key={`area-${s.key}-${seg[0]}`}
+                  fill={`url(#${uid}-${s.key})`}
+                  d={`M${x(seg[0])},${y(0)} ${seg
+                    .map((i) => `L${x(i)},${y(s.values[i] as number)}`)
+                    .join(' ')} L${x(seg[seg.length - 1])},${y(0)} Z`}
+                />
+              )),
+          )}
+        {series.flatMap((s) =>
+          segments(s.values).map((seg) => (
+            <polyline
+              key={`${s.key}-${seg[0]}`}
+              fill="none"
+              stroke={s.color}
+              strokeWidth="2.5"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              strokeDasharray={s.dashed ? '6 4' : undefined}
+              points={seg
+                .map((i) => `${x(i)},${y(s.values[i] as number)}`)
+                .join(' ')}
             />
-          ))}
+          )),
+        )}
+        {series.flatMap((s) => {
+          // punti isolati (senza vicini con un valore): un pallino, altrimenti non si vedono
+          const alone = new Set(
+            segments(s.values)
+              .filter((g) => g.length === 1)
+              .map((g) => g[0]),
+          )
+          return s.values.map((v, i) =>
+            v !== null && (s.marks?.[i] || alone.has(i)) ? (
+              <circle
+                key={`m-${s.key}-${i}`}
+                cx={x(i)}
+                cy={y(v)}
+                r={s.marks?.[i] ? 5.5 : 3}
+                fill={s.marks?.[i] ? 'var(--surface)' : s.color}
+                stroke={s.color}
+                strokeWidth={s.marks?.[i] ? 2.5 : 0}
+              />
+            ) : null,
+          )
+        })}
+        {current === null &&
+          series.map((s) => {
+            const i = lastIndex(s.values)
+            return i < 0 || s.marks?.[i] ? null : (
+              <circle
+                key={`last-${s.key}`}
+                cx={x(i)}
+                cy={y(s.values[i] as number)}
+                r="4"
+                fill={s.color}
+                stroke="var(--surface)"
+                strokeWidth="2"
+              />
+            )
+          })}
         {current !== null && (
           <g>
             <line
@@ -185,17 +245,20 @@ export default function LineChart({
               strokeOpacity="0.6"
               strokeDasharray="3 3"
             />
-            {series.map((s) => (
-              <circle
-                key={s.key}
-                cx={x(current)}
-                cy={y(s.values[current] ?? 0)}
-                r="5"
-                fill={s.color}
-                stroke="var(--surface)"
-                strokeWidth="2"
-              />
-            ))}
+            {series.map((s) => {
+              const v = s.values[current]
+              return v === null || v === undefined ? null : (
+                <circle
+                  key={s.key}
+                  cx={x(current)}
+                  cy={y(v)}
+                  r="5"
+                  fill={s.color}
+                  stroke="var(--surface)"
+                  strokeWidth="2"
+                />
+              )
+            })}
           </g>
         )}
       </svg>
@@ -205,12 +268,22 @@ export default function LineChart({
           width={W}
           top={T}
           title={titles[current]}
-          rows={series.map((s) => ({
-            key: s.key,
-            label: s.label,
-            color: s.color,
-            value: hideValues ? '' : format(s.values[current] ?? 0),
-          }))}
+          rows={series.map((s) => {
+            const v = s.values[current]
+            const mark =
+              s.marks?.[current] && markLabel ? ` · ${markLabel}` : ''
+            return {
+              key: s.key,
+              label: s.label,
+              color: s.color,
+              strong: !!s.marks?.[current],
+              value: hideValues
+                ? ''
+                : v === null || v === undefined
+                  ? '—'
+                  : `${format(v)}${mark}`,
+            }
+          })}
         />
       )}
     </div>

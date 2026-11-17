@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import FilterChips from '../../components/ui/FilterChips'
 import {
   ArchiveIcon,
   DisciplineIcon,
@@ -22,9 +23,7 @@ export default function WorkoutsTab() {
   const { templates, exercises, save, setArchived, duplicate, remove } =
     useTemplates()
   const [query, setQuery] = useState('')
-  const [active, setActive] = useState<Set<Discipline>>(
-    () => new Set(DISCIPLINES),
-  )
+  const [active, setActive] = useState<Discipline[]>(DISCIPLINES)
   const [showArchived, setShowArchived] = useState(false)
   // `undefined` = chiuso, `'new'` = scelta disciplina, `{ discipline }` = nuovo, altrimenti id da modificare
   const [editing, setEditing] = useState<
@@ -36,7 +35,7 @@ export default function WorkoutsTab() {
     return (templates ?? [])
       .filter(
         (w) =>
-          active.has(w.discipline) &&
+          active.includes(w.discipline) &&
           (showArchived || !w.archived) &&
           (!q || normalizeName(w.name).includes(q)),
       )
@@ -52,15 +51,8 @@ export default function WorkoutsTab() {
 
   const newWorkout = () => {
     // con un solo filtro attivo la disciplina è ovvia
-    if (active.size === 1) setEditing({ discipline: [...active][0] })
+    if (active.length === 1) setEditing({ discipline: active[0] })
     else setEditing('new')
-  }
-
-  const toggle = (d: Discipline) => {
-    if (active.has(d) && active.size === 1) return // almeno una attiva
-    const next = new Set(active)
-    if (!next.delete(d)) next.add(d)
-    setActive(next)
   }
 
   const editorDiscipline =
@@ -135,21 +127,17 @@ export default function WorkoutsTab() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <div className="pl-disc" role="group" aria-label={p.disciplineFilter}>
-          {DISCIPLINES.map((d) => (
-            <button
-              key={d}
-              type="button"
-              className="pl-dchip"
-              data-discipline={d}
-              aria-pressed={active.has(d)}
-              onClick={() => toggle(d)}
-            >
-              <i />
-              {t.discipline[d]}
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          size="sm"
+          label={p.disciplineFilter}
+          items={DISCIPLINES.map((d) => ({
+            key: d,
+            label: t.discipline[d],
+            color: `var(--${d})`,
+          }))}
+          active={active}
+          onChange={setActive}
+        />
         <label className="pl-check">
           <input
             type="checkbox"

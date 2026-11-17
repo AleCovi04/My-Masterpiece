@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import FilterChips, { NoSeries } from '../../components/ui/FilterChips'
 import type { Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import {
@@ -25,7 +26,7 @@ import './overview.css'
 export default function OverviewPage() {
   const { t } = useI18n()
   const { data, setRaceDate } = useOverviewData()
-  const [active, setActive] = useState<Set<Sport>>(() => new Set(DISCIPLINES))
+  const [active, setActive] = useState<Sport[]>(DISCIPLINES)
 
   if (!data) return null
 
@@ -35,7 +36,7 @@ export default function OverviewPage() {
   const sunday = addDays(monday, 6)
   const week = sessionsInWeek(data.sessions, toIsoDate(monday))
   const filtered = week.filter((s) =>
-    sessionSports(s).some((d) => active.has(d)),
+    sessionSports(s).some((d) => active.includes(d)),
   )
   const sum = summarize(filtered, today)
 
@@ -43,13 +44,6 @@ export default function OverviewPage() {
     ? Math.max(0, daysBetween(today, data.raceDate))
     : null
   const rangeText = `${monday.getDate()} ${t.monthsShort[monday.getMonth()]} – ${sunday.getDate()} ${t.monthsShort[sunday.getMonth()]} ${sunday.getFullYear()}`
-
-  const toggle = (d: Sport) => {
-    if (active.has(d) && active.size === 1) return // almeno una attiva
-    const next = new Set(active)
-    if (!next.delete(d)) next.add(d)
-    setActive(next)
-  }
 
   const donePct = sum.plannedS
     ? Math.min(100, Math.round((100 * sum.doneS) / sum.plannedS))
@@ -92,63 +86,57 @@ export default function OverviewPage() {
           <h2>{o.thisWeek}</h2>
           <span>{rangeText}</span>
         </div>
-        <div className="chips" role="group" aria-label={o.disciplines}>
-          {DISCIPLINES.map((d) => {
-            const on = active.has(d)
-            const locked = on && active.size === 1
-            return (
-              <button
-                key={d}
-                type="button"
-                className={`chip${locked ? ' locked' : ''}`}
-                data-discipline={d}
-                aria-pressed={on}
-                aria-disabled={locked}
-                onClick={() => toggle(d)}
-              >
-                <i />
-                {t.discipline[d]}
-              </button>
-            )
-          })}
-        </div>
+        <FilterChips
+          label={o.disciplines}
+          items={DISCIPLINES.map((d) => ({
+            key: d,
+            label: t.discipline[d],
+            color: `var(--${d})`,
+          }))}
+          active={active}
+          onChange={setActive}
+        />
 
-        <div className="stats">
-          <div className="stat">
-            <span className="k">{o.plannedHours}</span>
-            <span className="v">{formatDuration(sum.plannedS)}</span>
-            <div className="bar">
-              <b style={{ width: '100%' }} />
+        {active.length === 0 ? (
+          <NoSeries />
+        ) : (
+          <div className="stats">
+            <div className="stat">
+              <span className="k">{o.plannedHours}</span>
+              <span className="v">{formatDuration(sum.plannedS)}</span>
+              <div className="bar">
+                <b style={{ width: '100%' }} />
+              </div>
+            </div>
+            <div className="stat">
+              <span className="k">{o.completedHours}</span>
+              <span className="v">{formatDuration(sum.doneS)}</span>
+              <div className="bar">
+                <b style={{ width: `${donePct}%` }} />
+              </div>
+            </div>
+            <div className="stat main">
+              <span className="k">{o.adherence}</span>
+              <span className="v">
+                {sum.adherencePct}
+                <small>%</small>
+              </span>
+              <div className="bar">
+                <b style={{ width: `${sum.adherencePct}%` }} />
+              </div>
+            </div>
+            <div className="stat">
+              <span className="k">{o.sessions}</span>
+              <span className="v">
+                {sum.doneCount}
+                <small>/{sum.totalCount}</small>
+              </span>
+              <div className="bar">
+                <b style={{ width: `${sessPct}%` }} />
+              </div>
             </div>
           </div>
-          <div className="stat">
-            <span className="k">{o.completedHours}</span>
-            <span className="v">{formatDuration(sum.doneS)}</span>
-            <div className="bar">
-              <b style={{ width: `${donePct}%` }} />
-            </div>
-          </div>
-          <div className="stat main">
-            <span className="k">{o.adherence}</span>
-            <span className="v">
-              {sum.adherencePct}
-              <small>%</small>
-            </span>
-            <div className="bar">
-              <b style={{ width: `${sum.adherencePct}%` }} />
-            </div>
-          </div>
-          <div className="stat">
-            <span className="k">{o.sessions}</span>
-            <span className="v">
-              {sum.doneCount}
-              <small>/{sum.totalCount}</small>
-            </span>
-            <div className="bar">
-              <b style={{ width: `${sessPct}%` }} />
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* grafico e allenamento di oggi non dipendono dai chip */}
         <div className="duo">

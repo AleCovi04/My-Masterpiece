@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import FilterChips from '../../components/ui/FilterChips'
 import { DisciplineIcon } from '../../components/ui/Icons'
 import type {
   Discipline,
@@ -46,9 +47,7 @@ export default function TemplatePickerDialog({
   const { t, lang } = useI18n()
   const c = t.calendar
   const [query, setQuery] = useState('')
-  const [active, setActive] = useState<Set<Discipline>>(
-    () => new Set(DISCIPLINES),
-  )
+  const [active, setActive] = useState<Discipline[]>(DISCIPLINES)
 
   const visible = useMemo(() => {
     const q = normalizeName(query)
@@ -56,18 +55,11 @@ export default function TemplatePickerDialog({
       .filter(
         (w) =>
           !w.archived &&
-          active.has(w.discipline) &&
+          active.includes(w.discipline) &&
           (!q || normalizeName(w.name).includes(q)),
       )
       .sort((a, b) => a.name.localeCompare(b.name, lang))
   }, [templates, query, active, lang])
-
-  const toggle = (d: Discipline) => {
-    if (active.has(d) && active.size === 1) return // almeno una attiva
-    const next = new Set(active)
-    if (!next.delete(d)) next.add(d)
-    setActive(next)
-  }
 
   return (
     <Modal title={c.chooseWorkout} closeLabel={c.close} onClose={onClose} wide>
@@ -87,25 +79,17 @@ export default function TemplatePickerDialog({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <div
-          className="pl-disc"
-          role="group"
-          aria-label={t.planner.disciplineFilter}
-        >
-          {DISCIPLINES.map((d) => (
-            <button
-              key={d}
-              type="button"
-              className="pl-dchip"
-              data-discipline={d}
-              aria-pressed={active.has(d)}
-              onClick={() => toggle(d)}
-            >
-              <i />
-              {t.discipline[d]}
-            </button>
-          ))}
-        </div>
+        <FilterChips
+          size="sm"
+          label={t.planner.disciplineFilter}
+          items={DISCIPLINES.map((d) => ({
+            key: d,
+            label: t.discipline[d],
+            color: `var(--${d})`,
+          }))}
+          active={active}
+          onChange={setActive}
+        />
       </div>
 
       {visible.length === 0 ? (
@@ -132,7 +116,10 @@ export default function TemplatePickerDialog({
       <section className="sp-empty" aria-label={c.emptySession}>
         <h4>{c.emptySession}</h4>
         <div className="sp-empty-row">
-          {DISCIPLINES.filter((d) => active.has(d)).map((d) => (
+          {(active.length > 0
+            ? DISCIPLINES.filter((d) => active.includes(d))
+            : DISCIPLINES
+          ).map((d) => (
             <button
               key={d}
               type="button"

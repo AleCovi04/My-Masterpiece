@@ -6,6 +6,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
+  type ReactNode,
 } from 'react'
 import { useI18n } from '../../i18n/context'
 import { BACK, FRONT, type Figure } from './figures'
@@ -26,6 +27,10 @@ interface HeatProps {
   /** Valore che corrisponde a `--heat-hi`; di default il massimo dei valori. */
   max?: number
   formatValue?: (value: number) => string
+  /** Colore di ogni gruppo (variabili del tema): sostituisce la scala di `values`. */
+  colors?: Partial<Record<BodyGroup, string>>
+  /** Legenda al posto della scala 0 → massimo (`null` = nessuna). */
+  legend?: ReactNode
   /** Gruppo scelto (facoltativo): con `onSelect` i gruppi diventano toccabili. */
   selected?: BodyGroup | null
   onSelect?: (id: BodyGroup | null) => void
@@ -140,7 +145,10 @@ export default function BodyMap(props: BodyMapProps) {
     const interactive = props.mode === 'select' || !!props.onSelect
     const value = heatValues?.[id] ?? 0
     const style: CSSProperties & Record<string, string> = {}
-    if (heatValues && value > 0 && heatMax > 0) {
+    const custom = props.mode === 'heat' ? props.colors?.[id] : undefined
+    if (custom) {
+      style['--bm-fill'] = custom
+    } else if (heatValues && value > 0 && heatMax > 0) {
       const pct = 15 + 85 * Math.min(1, value / heatMax)
       style['--bm-fill'] =
         `color-mix(in srgb, var(--heat-hi) ${pct.toFixed(1)}%, var(--heat-lo))`
@@ -256,7 +264,8 @@ export default function BodyMap(props: BodyMapProps) {
         {renderFigure('front', FRONT)}
         {renderFigure('back', BACK)}
       </div>
-      {props.mode === 'heat' && (
+      {props.mode === 'heat' && props.legend !== undefined && props.legend}
+      {props.mode === 'heat' && props.legend === undefined && (
         <div className="bm-legend" aria-label={L.legend}>
           <span>{fmt(0)}</span>
           <i />

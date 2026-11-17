@@ -418,6 +418,31 @@ export interface BlockApplication extends Entity {
   weeks: AppliedWeek[]
 }
 
+// ---------- Impostazioni (schema v9) ----------
+
+/** Fascia di serie pesate a settimana (minimo e massimo compresi). */
+export interface SetRange {
+  min: number
+  max: number
+}
+
+export const DEFAULT_MUSCLE_VOLUME: SetRange = { min: 10, max: 20 }
+
+/** Impostazioni dell'utente, valide su ogni dispositivo. */
+export interface Settings {
+  /** Fascia di volume settimanale per muscolo (mappa Volume dell'Analisi). */
+  muscleVolume: {
+    /** Fascia globale. */
+    default: SetRange
+    /** Eccezioni per singolo muscolo. */
+    muscles: Partial<Record<MuscleId, SetRange>>
+  }
+}
+
+export const defaultSettings = (): Settings => ({
+  muscleVolume: { default: { ...DEFAULT_MUSCLE_VOLUME }, muscles: {} },
+})
+
 // ---------- Insieme dei dati (salvataggio, export, backup) ----------
 
 export interface AppData {
@@ -429,6 +454,7 @@ export interface AppData {
   applications: BlockApplication[]
   /** `null` = "Nel futuro" (data non ancora scelta). */
   raceDate: IsoDate | null
+  settings: Settings
 }
 
 export interface DataCounts {

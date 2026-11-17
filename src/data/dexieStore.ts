@@ -9,8 +9,19 @@ import {
 import { migrate, SCHEMA_VERSION, type RawData } from './migrations'
 import { generateSampleExercises } from './sampleData'
 import type { BackupInfo, BackupReason, DataStore } from './store'
-import type { AppData, IsoDate, IsoDateTime, LiveWorkout } from './types'
-import { countData, isLiveWorkout, sanitize } from './validate'
+import {
+  defaultSettings,
+  type AppData,
+  type IsoDate,
+  type IsoDateTime,
+  type LiveWorkout,
+} from './types'
+import {
+  countData,
+  isLiveWorkout,
+  sanitize,
+  sanitizeSettings,
+} from './validate'
 
 export const DB_NAME = 'my-masterpiece'
 export const DEFAULT_RACE_DATE: IsoDate = '2028-08-20'
@@ -35,6 +46,7 @@ interface MetaRow {
     | 'lastExportAt'
     | 'legacyImportedAt'
     | 'liveWorkout'
+    | 'settings'
   value: unknown
 }
 
@@ -122,6 +134,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     phases: [],
     applications: [],
     raceDate: DEFAULT_RACE_DATE,
+    settings: defaultSettings(),
   })
 
   /** Dai dati del vecchio salvataggio a quelli attuali; senza catalogo si parte dagli esercizi di base. */
@@ -138,16 +151,25 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     (await db[key].orderBy('pos').toArray()).map((r) => r.item)
 
   const readRaw = async (): Promise<RawData> => {
-    const [exercises, templates, sessions, blocks, phases, applications, race] =
-      await Promise.all([
-        readList('exercises'),
-        readList('templates'),
-        readList('sessions'),
-        readList('blocks'),
-        readList('phases'),
-        readList('applications'),
-        db.meta.get('raceDate'),
-      ])
+    const [
+      exercises,
+      templates,
+      sessions,
+      blocks,
+      phases,
+      applications,
+      race,
+      settings,
+    ] = await Promise.all([
+      readList('exercises'),
+      readList('templates'),
+      readList('sessions'),
+      readList('blocks'),
+      readList('phases'),
+      readList('applications'),
+      db.meta.get('raceDate'),
+      db.meta.get('settings'),
+    ])
     return {
       exercises,
       templates,
@@ -156,6 +178,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
       phases,
       applications,
       raceDate: race?.value ?? null,
+      ...(settings && { settings: settings.value }),
     }
   }
 
@@ -174,6 +197,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     await writeList('phases', data.phases)
     await writeList('applications', data.applications)
     await db.meta.put({ key: 'raceDate', value: data.raceDate })
+    await db.meta.put({ key: 'settings', value: data.settings })
   }
 
   const addBackup = async (
@@ -324,6 +348,24 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         await db.meta.put({ key: 'raceDate', value: date })
       } catch (error) {
         console.error('Salvataggio non riuscito (raceDate)', error)
+      }
+    },
+
+    async loadSettings() {
+      await init()
+      if (mem) return mem.settings
+      return sanitizeSettings((await db.meta.get('settings'))?.value)
+    },
+    async saveSettings(settings) {
+      await init()
+      if (mem) {
+        mem = { ...mem, settings }
+        return
+      }
+      try {
+        await db.meta.put({ key: 'settings', value: settings })
+      } catch (error) {
+        console.error('Salvataggio non riuscito (settings)', error)
       }
     },
 

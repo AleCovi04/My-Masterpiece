@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import RpeScale from '../../components/ui/RpeScale'
-import type { Id, IsoDate, Session } from '../../data/types'
+import type { Id, IsoDate, Session, Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { timeSeries, type Bucket, type Range } from '../../lib/analysis'
 import { parseIsoDate } from '../../lib/dates'
@@ -18,6 +18,7 @@ import {
   type FreshnessZone,
 } from '../../lib/load'
 import { DISCIPLINES } from '../../lib/weekStats'
+import FilterChips, { NoSeries } from '../../components/ui/FilterChips'
 import BarChart, { PlannedKey } from './BarChart'
 import LineChart from './LineChart'
 
@@ -62,6 +63,7 @@ export default function LoadTab({
 }: Props) {
   const { t, lang } = useI18n()
   const a = t.analysis
+  const [shown, setShown] = useState<Sport[]>(DISCIPLINES)
   // gli indicatori si leggono all'ultimo giorno del periodo, mai oltre oggi
   const ref = range.end < today ? range.end : today
   const status = useMemo(() => loadStatus(allSessions, ref), [allSessions, ref])
@@ -159,32 +161,34 @@ export default function LoadTab({
 
       <section className="panel">
         <h3>{a.loadTitle}</h3>
-        <div className="chips sm">
-          {DISCIPLINES.map((d) => (
-            <span
-              key={d}
-              className="chip locked"
-              data-discipline={d}
-              aria-pressed="true"
-            >
-              <i />
-              {t.discipline[d]}
-            </span>
-          ))}
-        </div>
-        <BarChart
+        <FilterChips
+          size="sm"
           label={a.loadTitle}
-          ticks={weeks.ticks}
-          titles={weeks.titles}
-          stacks={DISCIPLINES.map((d) => ({
+          items={DISCIPLINES.map((d) => ({
             key: d,
             label: t.discipline[d],
             color: `var(--${d})`,
-            values: perWeek.map((l) => l[d]),
           }))}
-          totalLabel={a.total}
-          format={int}
+          active={shown}
+          onChange={setShown}
         />
+        {shown.length === 0 ? (
+          <NoSeries />
+        ) : (
+          <BarChart
+            label={a.loadTitle}
+            ticks={weeks.ticks}
+            titles={weeks.titles}
+            stacks={shown.map((d) => ({
+              key: d,
+              label: t.discipline[d],
+              color: `var(--${d})`,
+              values: perWeek.map((l) => l[d]),
+            }))}
+            totalLabel={a.total}
+            format={int}
+          />
+        )}
         <p className="note ana-legend">{a.loadHow}</p>
       </section>
 

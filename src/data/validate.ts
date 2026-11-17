@@ -6,6 +6,8 @@ import {
   BRICK_MAX_LEGS,
   BRICK_MIN_LEGS,
   DAYS_PER_WEEK,
+  defaultSettings,
+  MUSCLES,
 } from './types'
 import type {
   AppData,
@@ -15,6 +17,8 @@ import type {
   LiveWorkout,
   Phase,
   Session,
+  SetRange,
+  Settings,
   TrainingBlock,
   WorkoutTemplate,
 } from './types'
@@ -178,6 +182,37 @@ export function isRawData(v: unknown): v is RawData {
   )
 }
 
+/** Una fascia valida: numeri finiti ≥ 0 con minimo ≤ massimo. */
+export const isSetRange = (v: unknown): v is SetRange =>
+  isObj(v) &&
+  typeof v.min === 'number' &&
+  typeof v.max === 'number' &&
+  Number.isFinite(v.min) &&
+  Number.isFinite(v.max) &&
+  v.min >= 0 &&
+  v.min <= v.max
+
+/** Impostazioni valide: i campi non validi tornano ai valori predefiniti. */
+export function sanitizeSettings(raw: unknown): Settings {
+  const out = defaultSettings()
+  if (!raw || typeof raw !== 'object') return out
+  const mv = (raw as { muscleVolume?: unknown }).muscleVolume
+  if (!mv || typeof mv !== 'object') return out
+  const { default: def, muscles } = mv as {
+    default?: unknown
+    muscles?: unknown
+  }
+  if (isSetRange(def)) out.muscleVolume.default = { min: def.min, max: def.max }
+  if (muscles && typeof muscles === 'object') {
+    for (const m of MUSCLES) {
+      const r = (muscles as Record<string, unknown>)[m.id]
+      if (isSetRange(r))
+        out.muscleVolume.muscles[m.id] = { min: r.min, max: r.max }
+    }
+  }
+  return out
+}
+
 /** Tiene solo gli elementi validi (e senza id doppi); `dropped` = quanti ne ha scartati. */
 export function sanitize(raw: RawData): { data: AppData; dropped: number } {
   let dropped = 0
@@ -206,6 +241,7 @@ export function sanitize(raw: RawData): { data: AppData; dropped: number } {
       phases: keep(raw.phases ?? [], isPhase),
       applications: keep(raw.applications ?? [], isApplication),
       raceDate: isIsoDate(raw.raceDate) ? raw.raceDate : null,
+      settings: sanitizeSettings(raw.settings),
     },
     dropped,
   }

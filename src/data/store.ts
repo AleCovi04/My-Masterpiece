@@ -12,6 +12,7 @@ import type {
   IsoDateTime,
   LiveWorkout,
   Session,
+  Settings,
   WorkoutTemplate,
 } from './types'
 
@@ -58,6 +59,9 @@ export interface DataStore {
   /** `null` = "Nel futuro" (data non ancora scelta). */
   loadRaceDate(): Promise<IsoDate | null>
   saveRaceDate(date: IsoDate | null): Promise<void>
+  /** Impostazioni dell'utente (es. fascia di volume per muscolo). */
+  loadSettings(): Promise<Settings>
+  saveSettings(settings: Settings): Promise<void>
   /** Allenamento di forza in corso (bozza della schermata live); `null` = nessuno. */
   loadLiveWorkout(): Promise<LiveWorkout | null>
   /** Si chiama a ogni azione; `null` cancella la bozza (allenamento terminato). */

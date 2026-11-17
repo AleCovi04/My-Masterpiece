@@ -40,7 +40,7 @@ const readGrain = (): Granularity | null => {
 export default function AnalysisPage() {
   const { t } = useI18n()
   const a = t.analysis
-  const { data, setRpe } = useAnalysisData()
+  const { data, setRpe, setSettings } = useAnalysisData()
   // l'ultimo periodo scelto resta su questo dispositivo
   const [choice, setChoice] = useState<PeriodChoice>(
     () => parseChoice(readPreference(PERIOD_KEY)) ?? DEFAULT_CHOICE,
@@ -164,7 +164,15 @@ export default function AnalysisPage() {
         />
       )}
       {view && data && tab === 'strength' && (
-        <StrengthTab sessions={view.sessions} exercises={data.exercises} />
+        <StrengthTab
+          allSessions={data.sessions}
+          sessions={view.sessions}
+          exercises={data.exercises}
+          range={view.range}
+          today={today}
+          settings={data.settings}
+          onSettingsChange={setSettings}
+        />
       )}
     </div>
   )

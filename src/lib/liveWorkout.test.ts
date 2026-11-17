@@ -32,7 +32,6 @@ import {
   toggleSkip,
   uncompleteSet,
 } from './liveWorkout'
-import { epley1Rm } from './strength'
 
 const t = '2026-11-16T10:00:00.000Z'
 const T = Date.parse(t)
@@ -368,22 +367,41 @@ describe('fine e riepilogo', () => {
     expect(s).toMatchObject({ status: 'done', actual: a })
   })
 
-  it('durata, serie, volume e record sopra lo storico (kg max e 1RM Epley)', () => {
+  it('durata, serie, volume e record sopra tutto lo storico', () => {
     const sum = liveSummary(w, history, end)
     expect(sum.durationS).toBe(3725)
     expect(sum.setsDone).toBe(2)
     expect(sum.volumeKg).toBe(85 * 5 + 80 * 8)
-    // storico panca: kg max 82,5; 1RM migliore 82,5 × (1 + 8/30) = 104,5
-    // 85 × 5 → 99,2 e 80 × 8 → 101,3: record solo di kg
+    // storico panca: kg max 82,5 (anche a 4, 6 e 8 reps); serie migliore
+    // 82,5 × 8 = 660; seduta migliore 640 + 560 + 600 = 1800
     expect(sum.records).toEqual([
-      { exerciseId: 'panca', maxKg: { value: 85, previous: 82.5 } },
+      {
+        exerciseId: 'panca',
+        hits: [
+          {
+            metric: 'maxKg',
+            value: 85,
+            previous: 82.5,
+            set: { kg: 85, reps: 5 },
+          },
+          { metric: 'r4', value: 85, previous: 82.5, set: { kg: 85, reps: 5 } },
+        ],
+      },
     ])
+    // 82,5 × 10: niente record a 10 reps (mai fatto prima), sì in volume
     const more = completeSet(w, p.id, 2, { kg: 82.5, reps: 10 }, T)
-    expect(liveSummary(more, history, end).records[0].e1rm).toEqual({
-      value: epley1Rm(82.5, 10),
-      previous: epley1Rm(82.5, 8),
+    const hits = liveSummary(more, history, end).records[0].hits
+    expect(hits.map((h) => h.metric)).toEqual([
+      'maxKg',
+      'r4',
+      'setVolume',
+      'sessionVolume',
+    ])
+    expect(hits[3]).toEqual({
+      metric: 'sessionVolume',
+      value: 425 + 640 + 825,
+      previous: 1800,
     })
-    expect(epley1Rm(100, 3)).toBeCloseTo(110)
   })
 
   it('nessun record senza storico o se non supera', () => {
