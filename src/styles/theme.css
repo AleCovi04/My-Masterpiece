@@ -15,6 +15,8 @@
   --hero-muted: #ffd9de;
   --planned: #d9d1d2;
   --ok: #1d8c4a;
+  --warn: #e07a00;
+  --miss: #9e2a2f;
   color-scheme: light;
 }
 
@@ -33,6 +35,8 @@
   --hero-muted: #c9bfc1;
   --planned: #4a4245;
   --ok: #3ac473;
+  --warn: #f59e0b;
+  --miss: #b8484d;
   color-scheme: dark;
 }
 

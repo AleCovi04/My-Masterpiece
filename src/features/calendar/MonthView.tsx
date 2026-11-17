@@ -7,6 +7,7 @@ import {
   toIsoDate,
   todayIso,
 } from '../../lib/dates'
+import { dayStatus } from '../../lib/dayStatus'
 import { sessionsOn } from '../../lib/reorder'
 import { weekdayShortNames } from './period'
 
@@ -42,11 +43,12 @@ export default function MonthView({ anchor, sessions, onPickDay }: Props) {
             {week.map((d) => {
               const date = toIsoDate(d)
               const list = sessionsOn(sessions, date)
+              const status = dayStatus(list, date, today)
               return (
                 <button
                   type="button"
                   key={date}
-                  className={`cal-mday${d.getMonth() !== month ? ' out' : ''}${date === today ? ' today' : ''}`}
+                  className={`cal-mday${d.getMonth() !== month ? ' out' : ''}${date === today ? ' today' : ''}${status ? ` st-${status}` : ''}`}
                   aria-label={`${d.getDate()} ${t.monthsLong[d.getMonth()]} ${d.getFullYear()}`}
                   onClick={() => onPickDay(date)}
                 >

@@ -1,5 +1,6 @@
 import type { IsoDate, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
+import { dayStatus } from '../../lib/dayStatus'
 import { parseIsoDate, toIsoDate, todayIso } from '../../lib/dates'
 
 interface Props {
@@ -12,7 +13,12 @@ export default function YearView({ anchor, sessions, onPickMonth }: Props) {
   const { t } = useI18n()
   const today = todayIso()
   const year = parseIsoDate(anchor).getFullYear()
-  const withSessions = new Set(sessions.map((s) => s.date))
+  const byDate = new Map<IsoDate, Session[]>()
+  for (const s of sessions) {
+    const list = byDate.get(s.date)
+    if (list) list.push(s)
+    else byDate.set(s.date, [s])
+  }
 
   return (
     <div className="cal-yr">
@@ -38,8 +44,14 @@ export default function YearView({ anchor, sessions, onPickMonth }: Props) {
               ))}
               {Array.from({ length: days }, (_, i) => {
                 const date = toIsoDate(new Date(year, month, i + 1))
-                const cls =
-                  date === today ? 'td' : withSessions.has(date) ? 'has' : ''
+                const list = byDate.get(date) ?? []
+                const status = dayStatus(list, date, today)
+                const cls = [
+                  date === today ? 'td' : list.length ? 'has' : '',
+                  status ? `st-${status}` : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')
                 return (
                   <span key={date} className={cls}>
                     {i + 1}

@@ -269,6 +269,20 @@
 .cal-mday.today b {
   color: var(--accent);
 }
+/* esito del giorno: svolto, parziale, saltato */
+.cal-mday.st-done {
+  --st: var(--ok);
+}
+.cal-mday.st-partial {
+  --st: var(--warn);
+}
+.cal-mday.st-missed {
+  --st: var(--miss);
+}
+.cal-mday[class*='st-'] {
+  background: color-mix(in srgb, var(--st) 16%, var(--surface));
+  border-color: color-mix(in srgb, var(--st) 70%, var(--line));
+}
 .cal-dots {
   display: flex;
   gap: 4px;
@@ -339,6 +353,23 @@
 .cal-ym-g .has {
   color: var(--text);
   font-weight: 700;
+}
+.cal-ym-g .st-done {
+  --st: var(--ok);
+}
+.cal-ym-g .st-partial {
+  --st: var(--warn);
+}
+.cal-ym-g .st-missed {
+  --st: var(--miss);
+}
+.cal-ym-g [class*='st-'] {
+  background: var(--st);
+  color: var(--accent-ink);
+  border-radius: 5px;
+}
+.cal-ym-g .td[class*='st-'] {
+  box-shadow: inset 0 0 0 2px var(--accent);
 }
 
 /* ---------- finestra ---------- */
