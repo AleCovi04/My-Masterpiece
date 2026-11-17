@@ -283,15 +283,16 @@
   background: color-mix(in srgb, var(--st) 16%, var(--surface));
   border-color: color-mix(in srgb, var(--st) 70%, var(--line));
 }
+/* una barra orizzontale per seduta, colore della disciplina */
 .cal-dots {
   display: flex;
+  flex-direction: column;
   gap: 4px;
-  flex-wrap: wrap;
 }
 .cal-dots i {
-  width: 9px;
-  height: 9px;
-  border-radius: 999px;
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
   background: var(--c);
 }
 @media (hover: hover) {
@@ -474,6 +475,13 @@
   .cal-mday {
     min-height: 58px;
     padding: 5px;
+  }
+  .cal-dots {
+    gap: 3px;
+  }
+  .cal-dots i {
+    height: 6px;
+    border-radius: 3px;
   }
   .cal-mrow,
   .cal-mhead {
