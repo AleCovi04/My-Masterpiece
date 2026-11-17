@@ -64,6 +64,8 @@ describe('bozza del piano endurance', () => {
     })
     expect(paced.autoDuration).toBe(3000)
     expect(evalDraft('run', { ...dr, sTime: 'abc' }).valid).toBe(false)
+    // senza passo il tempo è obbligatorio
+    expect(evalDraft('run', dr).valid).toBe(false)
     // al contrario: obiettivo a tempo, distanza a mano
     const byTime = evalDraft('bike', {
       ...draftFromPlan('bike'),

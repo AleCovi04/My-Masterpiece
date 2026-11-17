@@ -194,10 +194,11 @@ export function evalDraft(d: EnduranceDiscipline, dr: PlanDraft): DraftEval {
   }
   const sStats = simpleStats(d, simple)
 
+  // a distanza senza intensità il tempo è obbligatorio; a tempo la distanza resta facoltativa
   const complementBad =
     manual &&
     (dr.goal === 'distance'
-      ? dr.sTime.trim() !== '' && durationS === null
+      ? durationS === null
       : dr.sDist.trim() !== '' && distanceM === null)
   const simpleBad =
     (dr.goal === 'distance' ? distanceM === null : durationS === null) ||

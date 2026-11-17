@@ -277,7 +277,7 @@ export const it = {
     computedTime: 'Tempo (calcolato)',
     computedDistance: 'Distanza (calcolata)',
     needIntensity:
-      'Scrivilo a mano, oppure inserisci l’intensità per calcolarlo.',
+      'Senza intensità il tempo va scritto a mano; con l’intensità si calcola.',
     stepType: {
       warmup: 'Riscaldamento',
       work: 'Lavoro',

@@ -416,20 +416,14 @@ export default function EndurancePlanEditor({
               </label>
             ) : goal === 'distance' ? (
               <label className="pl-fld">
-                <span>
-                  {p.time} ({p.optional})
-                </span>
+                <span>{p.time} *</span>
                 <input
                   className="pl-inp"
                   inputMode="numeric"
                   placeholder="45:00"
                   value={dr.sTime}
                   title={p.needIntensity}
-                  aria-invalid={
-                    submitted &&
-                    dr.sTime.trim() !== '' &&
-                    parseClock(dr.sTime) === null
-                  }
+                  aria-invalid={submitted && parseClock(dr.sTime) === null}
                   onChange={(e) => set({ sTime: e.target.value })}
                 />
               </label>

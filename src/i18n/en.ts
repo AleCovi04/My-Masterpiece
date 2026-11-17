@@ -278,7 +278,8 @@ export const en: Dictionary = {
     optional: 'optional',
     computedTime: 'Time (calculated)',
     computedDistance: 'Distance (calculated)',
-    needIntensity: 'Type it in, or enter the intensity to calculate it.',
+    needIntensity:
+      'Without an intensity, type the time in; with one, it is calculated.',
     stepType: {
       warmup: 'Warm-up',
       work: 'Work',
