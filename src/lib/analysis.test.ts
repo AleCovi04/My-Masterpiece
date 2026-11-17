@@ -83,12 +83,6 @@ const brick: BrickSession = {
 
 describe('resolveRange', () => {
   const today = '2026-11-18' // mercoledì
-  it('ultime N settimane: da N−1 lunedì fa alla domenica corrente', () => {
-    expect(resolveRange({ kind: 'weeks', weeks: 4 }, [], today)).toEqual({
-      start: '2026-10-26',
-      end: '2026-11-22',
-    })
-  })
   it('tutto: dalla prima seduta all’ultima, almeno fino a oggi', () => {
     const list = [
       run('a', '2026-10-07', 'done', 5),
@@ -124,6 +118,17 @@ describe('bucketsOf', () => {
     const b = bucketsOf(r5)
     expect(b).toHaveLength(5)
     expect(b[0]).toEqual({ start: '2026-10-19', end: '2026-10-25' })
+  })
+  it('per settimana: blocchi di 7 giorni a ritroso dalla fine, il primo può essere corto', () => {
+    const b = bucketsOf({ start: '2026-10-08', end: '2026-11-18' }, 'week')
+    expect(b).toHaveLength(6)
+    expect(b[5]).toEqual({ start: '2026-11-12', end: '2026-11-18' })
+    expect(b[0]).toEqual({ start: '2026-10-08', end: '2026-10-14' })
+    const c = bucketsOf({ start: '2026-11-01', end: '2026-11-18' }, 'week')
+    expect(c[0]).toEqual({ start: '2026-11-01', end: '2026-11-04' })
+    expect(
+      bucketsOf({ start: '2026-11-01', end: '2026-11-18' }, 'day'),
+    ).toHaveLength(18)
   })
 })
 
@@ -161,7 +166,7 @@ describe('volumi', () => {
 
 describe('axisScale', () => {
   it('lascia poco spazio sopra il massimo, griglia su passi tondi', () => {
-    expect(axisScale(0)).toMatchObject({ max: 1, step: 0.25 })
+    expect(axisScale(0)).toMatchObject({ max: 1, step: 0.5 })
     const h = axisScale(10)
     expect(h.max).toBeCloseTo(10.8)
     expect(h.step).toBe(5)

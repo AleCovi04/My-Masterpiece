@@ -22,9 +22,7 @@ export const ENDURANCE: EnduranceDiscipline[] = ['swim', 'bike', 'run']
 
 /** Periodo scelto nel filtro dell'Analisi. */
 export type Period =
-  | { kind: 'weeks'; weeks: number }
-  | { kind: 'all' }
-  | { kind: 'range'; start: IsoDate; end: IsoDate }
+  { kind: 'all' } | { kind: 'range'; start: IsoDate; end: IsoDate }
 
 export interface Range {
   start: IsoDate
@@ -37,7 +35,6 @@ const sundayOf = (date: IsoDate) =>
 
 /**
  * Intervallo di date del periodo.
- * - Ultime N settimane: da N−1 lunedì fa alla domenica di questa settimana.
  * - Tutto: dalla settimana della prima seduta a quella dell'ultima (almeno fino a oggi).
  * - Fase o blocco: le sue date.
  */
@@ -48,12 +45,6 @@ export function resolveRange(
 ): Range {
   if (period.kind === 'range') return { start: period.start, end: period.end }
   const thisMonday = mondayOf(parseIsoDate(today))
-  if (period.kind === 'weeks') {
-    return {
-      start: iso(addDays(thisMonday, -7 * (period.weeks - 1))),
-      end: iso(addDays(thisMonday, 6)),
-    }
-  }
   if (sessions.length === 0) {
     return { start: iso(thisMonday), end: iso(addDays(thisMonday, 6)) }
   }
@@ -66,7 +57,7 @@ export function resolveRange(
   return { start: iso(mondayOf(parseIsoDate(first))), end: sundayOf(last) }
 }
 
-/** Un intervallo dell'asse: un giorno o una settimana (lunedì–domenica). */
+/** Un intervallo dell'asse: un giorno o una settimana (7 giorni). */
 export interface Bucket {
   start: IsoDate
   end: IsoDate
@@ -74,10 +65,15 @@ export interface Bucket {
 
 export type Granularity = 'day' | 'week'
 
-/** Fino a 4 settimane l'asse è per giorno, oltre per settimana. */
+/** Scelta automatica: fino a 4 settimane l'asse è per giorno, oltre per settimana. */
 export const granularityOf = (r: Range): Granularity =>
   daysBetween(r.start, r.end) + 1 <= 28 ? 'day' : 'week'
 
+/**
+ * Intervalli dell'asse. Per settimana: blocchi di 7 giorni contati a ritroso
+ * dall'ultimo giorno (un periodo da lunedì a domenica dà settimane lunedì–domenica,
+ * "ultime 6 settimane" dà settimane che finiscono oggi); il primo può essere più corto.
+ */
 export function bucketsOf(
   r: Range,
   g: Granularity = granularityOf(r),
@@ -89,12 +85,9 @@ export function bucketsOf(
     }
     return out
   }
-  for (
-    let m = mondayOf(parseIsoDate(r.start));
-    iso(m) <= r.end;
-    m = addDays(m, 7)
-  ) {
-    out.push({ start: iso(m), end: iso(addDays(m, 6)) })
+  for (let e = parseIsoDate(r.end); iso(e) >= r.start; e = addDays(e, -7)) {
+    const start = iso(addDays(e, -6))
+    out.unshift({ start: start < r.start ? r.start : start, end: iso(e) })
   }
   return out
 }
@@ -195,7 +188,7 @@ export function axisScale(
   v: number,
   headroom = 0.08,
 ): { max: number; step: number; lines: number[] } {
-  if (v <= 0) return { max: 1, step: 0.25, lines: [0, 0.25, 0.5, 0.75, 1] }
+  if (v <= 0) return { max: 1, step: 0.5, lines: [0, 0.5, 1] }
   const max = v * (1 + headroom)
   const raw = max / 4
   const p = 10 ** Math.floor(Math.log10(raw))
@@ -252,20 +245,57 @@ export function planEntries(items: PlanItem[]): PlanEntry[] {
   })
 }
 
-export const PRESET_WEEKS = [4, 12, 26] as const
+export type LastUnit = 'week' | 'month' | 'year'
+export const LAST_UNITS: LastUnit[] = ['week', 'month', 'year']
+/** Massimo inseribile per unità. */
+export const LAST_MAX: Record<LastUnit, number> = {
+  week: 260,
+  month: 120,
+  year: 20,
+}
 
 /** Quello che l'utente ha scelto nel filtro. */
 export type PeriodChoice =
-  | { kind: 'weeks'; weeks: number; offset: number }
-  | { kind: 'year'; year: number }
+  /** Ultime N settimane/mesi/anni fino a oggi; `offset` = quanti periodi uguali indietro (−) o avanti (+). */
+  | { kind: 'last'; unit: LastUnit; n: number; offset: number }
   | { kind: 'all' }
   | { kind: 'plan'; value: string }
   | { kind: 'custom'; start: IsoDate; end: IsoDate }
 
 export const DEFAULT_CHOICE: PeriodChoice = {
-  kind: 'weeks',
-  weeks: 12,
+  kind: 'last',
+  unit: 'week',
+  n: 12,
   offset: 0,
+}
+
+/** Stessa data `k` mesi dopo (o prima); se il giorno non esiste, l'ultimo del mese. */
+export function addMonthsIso(d: IsoDate, k: number): IsoDate {
+  const [y, m, day] = d.split('-').map(Number)
+  const total = y * 12 + (m - 1) + k
+  const ny = Math.floor(total / 12)
+  const nm = total - ny * 12
+  const last = new Date(ny, nm + 1, 0).getDate()
+  return iso(new Date(ny, nm, Math.min(day, last)))
+}
+
+/**
+ * Intervallo delle ultime N unità che finisce oggi (spostato di `offset` periodi):
+ * 6 settimane = 42 giorni fino a oggi; 3 mesi = dal giorno dopo la stessa data di 3 mesi fa.
+ */
+export function lastRange(
+  unit: LastUnit,
+  n: number,
+  offset: number,
+  today: IsoDate,
+): Range {
+  if (unit === 'week') {
+    const end = shiftIso(today, 7 * n * offset)
+    return { start: shiftIso(end, -7 * n + 1), end }
+  }
+  const months = unit === 'month' ? n : 12 * n
+  const end = addMonthsIso(today, months * offset)
+  return { start: shiftIso(addMonthsIso(end, -months), 1), end }
 }
 
 const shiftIso = (d: IsoDate, days: number) =>
@@ -278,17 +308,8 @@ export function choiceToPeriod(
   today: IsoDate,
 ): Period {
   switch (c.kind) {
-    case 'weeks': {
-      const r = resolveRange({ kind: 'weeks', weeks: c.weeks }, [], today)
-      const days = 7 * c.weeks * c.offset
-      return {
-        kind: 'range',
-        start: shiftIso(r.start, days),
-        end: shiftIso(r.end, days),
-      }
-    }
-    case 'year':
-      return { kind: 'range', start: `${c.year}-01-01`, end: `${c.year}-12-31` }
+    case 'last':
+      return { kind: 'range', ...lastRange(c.unit, c.n, c.offset, today) }
     case 'all':
       return { kind: 'all' }
     case 'custom':
@@ -313,10 +334,8 @@ export function shiftChoice(
   entries: PlanEntry[],
 ): PeriodChoice | null {
   switch (c.kind) {
-    case 'weeks':
+    case 'last':
       return { ...c, offset: c.offset + dir }
-    case 'year':
-      return { ...c, year: c.year + dir }
     case 'all':
       return null
     case 'custom': {
@@ -352,13 +371,32 @@ export function parseChoice(text: string | null): PeriodChoice | null {
   if (!v || typeof v !== 'object') return null
   const o = v as Record<string, unknown>
   if (
-    o.kind === 'weeks' &&
-    typeof o.weeks === 'number' &&
-    (PRESET_WEEKS as readonly number[]).includes(o.weeks)
+    o.kind === 'last' &&
+    LAST_UNITS.includes(o.unit as LastUnit) &&
+    Number.isInteger(o.n) &&
+    (o.n as number) >= 1 &&
+    (o.n as number) <= LAST_MAX[o.unit as LastUnit]
   )
-    return { kind: 'weeks', weeks: o.weeks, offset: 0 }
+    return {
+      kind: 'last',
+      unit: o.unit as LastUnit,
+      n: o.n as number,
+      offset: 0,
+    }
+  // scelte delle versioni precedenti del filtro
+  if (
+    o.kind === 'weeks' &&
+    Number.isInteger(o.weeks) &&
+    (o.weeks as number) >= 1
+  )
+    return {
+      kind: 'last',
+      unit: 'week',
+      n: Math.min(o.weeks as number, LAST_MAX.week),
+      offset: 0,
+    }
   if (o.kind === 'year' && Number.isInteger(o.year))
-    return { kind: 'year', year: o.year as number }
+    return { kind: 'custom', start: `${o.year}-01-01`, end: `${o.year}-12-31` }
   if (o.kind === 'all') return { kind: 'all' }
   if (o.kind === 'plan' && typeof o.value === 'string')
     return { kind: 'plan', value: o.value }

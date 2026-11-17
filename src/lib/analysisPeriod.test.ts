@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { BlockApplication } from '../data/types'
 import {
+  addMonthsIso,
   choiceToPeriod,
   DEFAULT_CHOICE,
   parseChoice,
   planEntries,
   shiftChoice,
+  type LastUnit,
   type PeriodChoice,
 } from './analysis'
 import { buildPlan } from './plan'
@@ -77,21 +79,47 @@ describe('voci del Piano', () => {
 })
 
 describe('periodo scelto', () => {
-  it('settimane con spostamento, anno, personalizzato', () => {
-    expect(
-      choiceToPeriod({ kind: 'weeks', weeks: 4, offset: -1 }, entries, today),
-    ).toEqual({
+  it('ultime N settimane, mesi, anni fino a oggi; le frecce spostano della stessa durata', () => {
+    const last = (unit: LastUnit, n: number, offset = 0) =>
+      choiceToPeriod({ kind: 'last', unit, n, offset }, entries, today)
+    expect(last('week', 6)).toEqual({
       kind: 'range',
-      start: '2026-09-28',
-      end: '2026-10-25',
+      start: '2026-10-08',
+      end: today,
+    })
+    expect(last('week', 6, -1)).toEqual({
+      kind: 'range',
+      start: '2026-08-27',
+      end: '2026-10-07',
+    })
+    expect(last('month', 3)).toEqual({
+      kind: 'range',
+      start: '2026-08-19',
+      end: today,
+    })
+    expect(last('month', 3, -1)).toEqual({
+      kind: 'range',
+      start: '2026-05-19',
+      end: '2026-08-18',
+    })
+    expect(last('year', 1)).toEqual({
+      kind: 'range',
+      start: '2025-11-19',
+      end: today,
     })
     expect(
-      choiceToPeriod({ kind: 'year', year: 2026 }, entries, today),
-    ).toEqual({
-      kind: 'range',
-      start: '2026-01-01',
-      end: '2026-12-31',
-    })
+      shiftChoice(
+        { kind: 'last', unit: 'month', n: 3, offset: 0 },
+        -1,
+        entries,
+      ),
+    ).toEqual({ kind: 'last', unit: 'month', n: 3, offset: -1 })
+  })
+
+  it('mesi: fine mese senza giorno uguale → ultimo giorno', () => {
+    expect(addMonthsIso('2026-05-31', -3)).toBe('2026-02-28')
+    expect(addMonthsIso('2024-03-31', -1)).toBe('2024-02-29')
+    expect(addMonthsIso('2026-01-15', -13)).toBe('2024-12-15')
   })
 
   it('voce del Piano sparita → predefinito', () => {
@@ -130,21 +158,28 @@ describe('periodo scelto', () => {
     ).toEqual({ kind: 'custom', start: '2026-11-11', end: '2026-11-20' })
   })
 
-  it('scelta salvata: solo se valida; le settimane ripartono da oggi', () => {
+  it('scelta salvata: solo se valida; riparte da oggi', () => {
+    expect(
+      parseChoice('{"kind":"last","unit":"month","n":3,"offset":-3}'),
+    ).toEqual({ kind: 'last', unit: 'month', n: 3, offset: 0 })
+    expect(parseChoice('{"kind":"last","unit":"day","n":3}')).toBeNull()
+    expect(parseChoice('{"kind":"last","unit":"year","n":0}')).toBeNull()
+    // versioni precedenti del filtro
     expect(parseChoice('{"kind":"weeks","weeks":12,"offset":-3}')).toEqual({
-      kind: 'weeks',
-      weeks: 12,
+      kind: 'last',
+      unit: 'week',
+      n: 12,
       offset: 0,
     })
-    expect(parseChoice('{"kind":"weeks","weeks":7}')).toBeNull()
     expect(
       parseChoice('{"kind":"custom","start":"2026-11-10","end":"2026-11-01"}'),
     ).toBeNull()
     expect(parseChoice('x')).toBeNull()
     expect(parseChoice(null)).toBeNull()
     expect(parseChoice('{"kind":"year","year":2026}')).toEqual({
-      kind: 'year',
-      year: 2026,
+      kind: 'custom',
+      start: '2026-01-01',
+      end: '2026-12-31',
     })
   })
 })

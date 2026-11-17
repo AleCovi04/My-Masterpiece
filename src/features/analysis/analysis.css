@@ -288,8 +288,59 @@
   width: 100%;
   min-width: 0;
 }
-.ana-tabs {
-  align-self: flex-start;
+.ana-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+/* campi numerici del periodo: "6 sett.", "3 mesi", "1 anno" */
+.pp-num {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 3px 14px 3px 4px;
+  font: 600 14px var(--f-body);
+  cursor: text;
+  white-space: nowrap;
+}
+.pp-num input {
+  width: 3.2ch;
+  min-width: 0;
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 4px;
+  background: var(--bg);
+  color: var(--text);
+  font: 700 14px var(--f-body);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.pp-num input::-webkit-outer-spin-button,
+.pp-num input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.pp-num input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 0;
+}
+.pp-num.on {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--bg);
+}
+.pp-num.on input {
+  background: var(--bg);
+  color: var(--text);
 }
 .pp-list,
 .pp-runs {
