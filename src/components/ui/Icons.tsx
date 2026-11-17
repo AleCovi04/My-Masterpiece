@@ -77,6 +77,14 @@ export const PlannerIcon = () => (
   </Svg>
 )
 
+/** Il Piano: tappe verso il traguardo. */
+export const PlanIcon = () => (
+  <Svg>
+    <path d="M4 20V6M4 6h9l-1.5 3L13 12H4" />
+    <path d="M15 20h5M17.5 20v-6" />
+  </Svg>
+)
+
 export const DataIcon = () => (
   <Svg>
     <ellipse cx="12" cy="6" rx="8" ry="3" />

@@ -17,9 +17,9 @@ import {
   toIsoDate,
 } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
-import { Seg } from './EndurancePlanEditor'
-import Modal from './Modal'
-import './blocks.css'
+import { Seg } from '../planner/EndurancePlanEditor'
+import Modal from '../planner/Modal'
+import '../planner/blocks.css'
 
 interface Props {
   kind: 'block' | 'phase'

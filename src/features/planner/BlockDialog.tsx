@@ -44,8 +44,6 @@ interface Props {
   templates: WorkoutTemplate[]
   exercises: Exercise[]
   onSave: (b: TrainingBlock) => void
-  /** Salva e apre "Applica al calendario". */
-  onApply: (b: TrainingBlock) => void
   onDuplicate: () => void
   onArchive: (archived: boolean) => void
   onDelete: () => void
@@ -60,7 +58,6 @@ export default function BlockDialog({
   templates,
   exercises,
   onSave,
-  onApply,
   onDuplicate,
   onArchive,
   onDelete,
@@ -383,17 +380,6 @@ export default function BlockDialog({
             onChange={(e) => setNotes(e.target.value)}
           />
         </label>
-
-        <button
-          type="button"
-          className="pl-btn bl-apply"
-          onClick={() => {
-            const built = build()
-            if (built) onApply(built)
-          }}
-        >
-          {b.applyToCalendar}
-        </button>
 
         <TemplateFooter
           template={block}

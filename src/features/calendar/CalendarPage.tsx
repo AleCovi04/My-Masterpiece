@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import type { Id, IsoDate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { todayIso } from '../../lib/dates'
+import { isIsoDate, todayIso } from '../../lib/dates'
 import { liveSessions } from '../../lib/liveWorkout'
 import { emptySession, sessionFromTemplate } from '../../lib/sessions'
 import { LIVE_PATH } from '../live/hooks'
@@ -30,7 +30,11 @@ export default function CalendarPage() {
   const { sessions } = cal
   // entrando si apre sempre la settimana corrente
   const [view, setView] = useState<CalendarView>('week')
-  const [anchor, setAnchor] = useState<IsoDate>(todayIso)
+  const [params] = useSearchParams()
+  const [anchor, setAnchor] = useState<IsoDate>(() => {
+    const w = params.get('settimana')
+    return isIsoDate(w) ? w : todayIso()
+  })
   const [selected, setSelected] = useState<IsoDate | null>(null)
   const [adding, setAdding] = useState<{ date: IsoDate; index: number } | null>(
     null,

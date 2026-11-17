@@ -12,7 +12,7 @@ React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 - `docs/` roadmap, decisioni, modello dati
 - `src/app/` entry e cornice dell'app
-- `src/features/` moduli per funzionalità
+- `src/features/` moduli per funzionalità (il Forger è in `planner/`, Il Piano in `plan/`)
 - `src/components/` UI riutilizzabile (`ui/`, `layout/`, `body/`)
 - `src/lib/` calcoli puri e helper
 - `src/data/` tipi, `dataStore`, migrazioni

@@ -1,11 +1,9 @@
 import { useMemo, useState } from 'react'
 import { ArchiveIcon, RestoreIcon } from '../../components/ui/Icons'
-import type { TrainingBlock } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { blockWeeks, phasesUsing, weekTotals } from '../../lib/blocks'
+import { phasesUsing, weekTotals } from '../../lib/blocks'
 import { normalizeName } from '../../lib/exercises'
 import { formatDuration } from '../../lib/format'
-import ApplyDialog from './ApplyDialog'
 import BlockDialog from './BlockDialog'
 import type { usePlanning } from './usePlanning'
 
@@ -20,7 +18,6 @@ export default function BlocksTab({ planning }: { planning: Planning }) {
   const [showArchived, setShowArchived] = useState(false)
   // `undefined` = chiuso, `'new'` = nuovo, altrimenti id
   const [editing, setEditing] = useState<string | undefined>()
-  const [applying, setApplying] = useState<TrainingBlock | null>(null)
   const { blocks, templates } = planning
 
   const visible = useMemo(() => {
@@ -122,11 +119,6 @@ export default function BlocksTab({ planning }: { planning: Planning }) {
             planning.saveBlock(x)
             close()
           }}
-          onApply={(x) => {
-            planning.saveBlock(x)
-            close()
-            setApplying(x)
-          }}
           onDuplicate={() => {
             if (current) planning.duplicateBlock(current.id, p.copySuffix)
             close()
@@ -143,19 +135,6 @@ export default function BlocksTab({ planning }: { planning: Planning }) {
             current ? phasesUsing(planning.phases, current.id).length : 0
           }
           onClose={close}
-        />
-      )}
-
-      {applying && (
-        <ApplyDialog
-          kind="block"
-          sourceId={applying.id}
-          name={applying.name}
-          weeks={blockWeeks(applying)}
-          templates={templates}
-          sessions={planning.sessions}
-          onApply={planning.apply}
-          onClose={() => setApplying(null)}
         />
       )}
     </>

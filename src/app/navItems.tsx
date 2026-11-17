@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import {
   CalendarIcon,
+  PlanIcon,
   DataIcon,
   OverviewIcon,
   PlannerIcon,
@@ -18,6 +19,7 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { to: '/', end: true, icon: <OverviewIcon />, label: (t) => t.nav.overview },
   { to: '/calendario', icon: <CalendarIcon />, label: (t) => t.nav.calendar },
-  { to: '/planner', icon: <PlannerIcon />, label: (t) => t.nav.planner },
+  { to: '/piano', icon: <PlanIcon />, label: (t) => t.nav.plan },
+  { to: '/forger', icon: <PlannerIcon />, label: (t) => t.nav.planner },
   { to: '/dati', icon: <DataIcon />, label: (t) => t.nav.data },
 ]

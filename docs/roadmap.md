@@ -5,7 +5,8 @@ Obiettivo: app completa entro **gennaio 2027**, uso reale da **febbraio 2027**, 
 - ✅ **Fondamenta** — Panoramica, Calendario (settimana/mese/anno), Planner (esercizi e allenamenti), sessioni del calendario create dai template, storage robusto (IndexedDB, migrazioni versionate, pagina Dati con export/import/backup).
 - ✅ **Registrazione live della forza** — schermata a schermo intero dal dettaglio della sessione: kg × reps per serie con i valori in grigio dell'ultima volta, timer di recupero (anche superserie), modifiche al volo, ripresa dopo la chiusura, riepilogo con record.
 - ✅ **Registrazione endurance e brick** — brick (più frazioni endurance di fila con transizioni) nel Planner e nel Calendario; inserimento manuale dell'eseguito dal dettaglio della seduta (anche per frazione sui brick), con scostamento dal piano.
-- ✅ **Blocchi e Fasi nel Planner** — blocchi di settimane tipo (1–12, editor a griglia), fasi come sequenze di blocchi, applicazione al calendario da un lunedì (in coda o sostituendo le programmate) con etichette nella settimana e rimozione.
+- ✅ **Blocchi e Fasi nel Forger** — blocchi di settimane tipo (1–12, editor a griglia), fasi come sequenze di blocchi, applicazione al calendario da un lunedì (in coda o sostituendo le programmate) con etichette nella settimana e rimozione.
+- ✅ **Forger e Il Piano** — il Planner diventa Forger (solo libreria: esercizi, allenamenti, blocchi, fasi); nuova sezione Il Piano con la cronologia di fasi e blocchi in calendario, completamento per fase, blocco e settimana, traguardo gara.
 - ⬜ **Analisi** — carico di allenamento, progressione della forza, mappa muscolare heatmap, volumi endurance.
 - ⬜ **Supabase** — login, sincronizzazione tra dispositivi, funzionamento offline-first.
 - ⬜ **Capacitor** — app Android, timer di recupero con notifica.

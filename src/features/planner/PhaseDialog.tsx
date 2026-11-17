@@ -31,8 +31,6 @@ interface Props {
   blocks: TrainingBlock[]
   templates: WorkoutTemplate[]
   onSave: (p: Phase) => void
-  /** Salva e apre "Applica al calendario". */
-  onApply: (p: Phase) => void
   onDuplicate: () => void
   onArchive: (archived: boolean) => void
   onDelete: () => void
@@ -45,7 +43,6 @@ export default function PhaseDialog({
   blocks,
   templates,
   onSave,
-  onApply,
   onDuplicate,
   onArchive,
   onDelete,
@@ -241,18 +238,6 @@ export default function PhaseDialog({
           onClick={() => setPicking(true)}
         >
           + {f.addBlock}
-        </button>
-
-        <button
-          type="button"
-          className="pl-btn bl-apply"
-          disabled={rows.length === 0}
-          onClick={() => {
-            const built = build()
-            if (built) onApply(built)
-          }}
-        >
-          {t.blocks.applyToCalendar}
         </button>
 
         <TemplateFooter
