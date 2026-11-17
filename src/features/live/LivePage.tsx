@@ -302,8 +302,8 @@ export default function LivePage() {
           sessions={sessions}
           exercises={exercises}
           endedAtMs={endedAt}
-          onSave={async (notes) => {
-            await live.finish(endedAt, notes)
+          onSave={async (notes, rpe) => {
+            await live.finish(endedAt, notes, rpe)
             navigate('/calendario')
           }}
           onBack={() => setEndedAt(null)}

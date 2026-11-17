@@ -164,6 +164,13 @@ export const MIGRATIONS: Migration[] = [
       applications: Array.isArray(d.applications) ? d.applications : [],
     }),
   },
+  {
+    to: 7,
+    description:
+      'Forza: l’eseguito può avere la fatica percepita (`actual.rpe`, 1–10); nessun dato da convertire',
+    // solo un campo facoltativo in più: le app più vecchie non devono importare file che lo contengono
+    migrate: (d) => d,
+  },
 ]
 
 /** Versione attuale dello schema dei dati. */

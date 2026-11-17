@@ -201,6 +201,17 @@ export const en: Dictionary = {
     byDay: 'by day',
     byWeek: 'by week',
     weekOf: 'Week of {d}',
+    loadTitle: 'Load (sRPE)',
+    loadTotal: 'Total',
+    loadPerBucket: 'average per interval',
+    loadHow: 'sRPE = minutes done × perceived exertion (RPE)',
+    noRpe: '{n} sessions without RPE counted as {rpe}',
+    formTitle: 'Fitness and fatigue',
+    fitness: 'Fitness',
+    fatigue: 'Fatigue',
+    freshness: 'Form',
+    formHow:
+      'Fitness = 42-day average load, Fatigue = 7-day average. Form = Fitness − Fatigue: below zero you are loaded, above zero you are fresh.',
   },
   plan: {
     title: 'The Plan',

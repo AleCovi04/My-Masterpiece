@@ -358,6 +358,11 @@ describe('fine e riepilogo', () => {
       { exerciseId: 'curl', skipped: true, sets: [] },
     ])
     expect(a.notes).toBe('ok')
+    expect(a).not.toHaveProperty('rpe')
+    expect(liveActual(w, new Date(end).toISOString(), '', 7).rpe).toBe(7)
+    expect(
+      liveActual(w, new Date(end).toISOString(), '', 12),
+    ).not.toHaveProperty('rpe')
     expect(r.exerciseId).toBe('rem')
     const [s] = finishSession([strength('cur', '2026-11-16', [])], a, 'cur', t)
     expect(s).toMatchObject({ status: 'done', actual: a })

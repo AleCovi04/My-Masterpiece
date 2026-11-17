@@ -199,6 +199,17 @@ export const it = {
     byDay: 'per giorno',
     byWeek: 'per settimana',
     weekOf: 'Settimana dal {d}',
+    loadTitle: 'Carico (sRPE)',
+    loadTotal: 'Totale',
+    loadPerBucket: 'media per intervallo',
+    loadHow: 'sRPE = minuti svolti × fatica percepita (RPE)',
+    noRpe: '{n} sedute senza RPE contate con {rpe}',
+    formTitle: 'Forma e fatica',
+    fitness: 'Forma',
+    fatigue: 'Fatica',
+    freshness: 'Freschezza',
+    formHow:
+      'Forma = media del carico su 42 giorni, Fatica = su 7 giorni. Freschezza = Forma − Fatica: sotto zero sei carico, sopra zero sei fresco.',
   },
   plan: {
     title: 'Il Piano',

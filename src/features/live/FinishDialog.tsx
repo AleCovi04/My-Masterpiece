@@ -4,13 +4,16 @@ import { useI18n } from '../../i18n/context'
 import { formatDuration } from '../../lib/format'
 import { liveSummary } from '../../lib/liveWorkout'
 import Modal from '../planner/Modal'
+import '../endurance/endurance.css'
+
+const RPE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 interface Props {
   workout: LiveWorkout
   sessions: Session[]
   exercises: Exercise[]
   endedAtMs: number
-  onSave: (notes: string) => Promise<void>
+  onSave: (notes: string, rpe: number | null) => Promise<void>
   onBack: () => void
 }
 
@@ -26,6 +29,7 @@ export default function FinishDialog({
   const { t, lang } = useI18n()
   const l = t.live
   const [notes, setNotes] = useState('')
+  const [rpe, setRpe] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
   const sum = useMemo(
     () => liveSummary(workout, sessions, endedAtMs),
@@ -91,6 +95,23 @@ export default function FinishDialog({
         )}
       </section>
 
+      <div className="pl-fld">
+        <span>{t.endurance.rpe}</span>
+        <div className="ea-rpe" role="group" aria-label={t.endurance.rpe}>
+          {RPE.map((n) => (
+            <button
+              key={n}
+              type="button"
+              aria-pressed={rpe === n}
+              onClick={() => setRpe(rpe === n ? null : n)}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+        <small>{t.endurance.rpeHint}</small>
+      </div>
+
       <label className="pl-fld">
         <span>{l.notes}</span>
         <textarea
@@ -110,7 +131,7 @@ export default function FinishDialog({
           onClick={async () => {
             setSaving(true)
             try {
-              await onSave(notes)
+              await onSave(notes, rpe)
             } finally {
               setSaving(false)
             }

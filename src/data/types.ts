@@ -199,6 +199,8 @@ export interface StrengthActual {
   exercises: ActualExercise[] // ordine effettivo
   /** Note scritte nel riepilogo finale. */
   notes?: string
+  /** Fatica percepita 1–10, dal riepilogo finale (schema v7). */
+  rpe?: number
 }
 
 /** Giro (dall'import Garmin, ultimo punto della roadmap). */

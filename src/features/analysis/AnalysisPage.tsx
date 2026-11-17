@@ -11,6 +11,7 @@ import { parseIsoDate, todayIso } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
 import { buildPlan } from '../../lib/plan'
 import { useAnalysisData } from './useAnalysisData'
+import LoadTab from './LoadTab'
 import VolumeTab from './VolumeTab'
 import '../overview/overview.css'
 import './analysis.css'
@@ -151,7 +152,18 @@ export default function AnalysisPage() {
           titles={view.titles}
         />
       )}
-      {view && tab !== 'volumes' && (
+      {view && data && tab === 'load' && (
+        <LoadTab
+          allSessions={data.sessions}
+          sessions={view.sessions}
+          range={view.range}
+          buckets={view.buckets}
+          ticks={view.ticks}
+          titles={view.titles}
+          today={today}
+        />
+      )}
+      {view && tab === 'strength' && (
         <section className="panel">
           <h3>{a[tab]}</h3>
           <p className="note">{a.soon}</p>

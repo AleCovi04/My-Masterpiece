@@ -56,11 +56,16 @@ export function useLiveWorkout() {
 
   /** Salva l'eseguito (solo serie completate), segna la seduta completata e cancella la bozza. */
   const finish = useCallback(
-    async (endedAtMs: number, notes: string) => {
+    async (endedAtMs: number, notes: string, rpe: number | null) => {
       const w = latest.current
       if (!w || !data) return
       const now = new Date().toISOString()
-      const actual = liveActual(w, new Date(endedAtMs).toISOString(), notes)
+      const actual = liveActual(
+        w,
+        new Date(endedAtMs).toISOString(),
+        notes,
+        rpe,
+      )
       const sessions = finishSession(data.sessions, actual, w.sessionId, now)
       await dataStore.saveSessions(sessions)
       await dataStore.saveLiveWorkout(null)

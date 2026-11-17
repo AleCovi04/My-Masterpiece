@@ -453,6 +453,7 @@ export function liveActual(
   w: LiveWorkout,
   endedAt: IsoDateTime,
   notes?: string,
+  rpe?: number | null,
 ): StrengthActual {
   const exercises = w.exercises.flatMap((ex): ActualExercise[] => {
     const sets = ex.sets.flatMap((s) => (s.done ? [s.done] : []))
@@ -469,6 +470,7 @@ export function liveActual(
     endedAt,
     exercises,
     ...(n && { notes: n }),
+    ...(rpe && rpe >= 1 && rpe <= 10 && { rpe: Math.round(rpe) }),
   }
 }
 

@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef, useState } from 'react'
 import { niceMax } from '../../lib/analysis'
+import { useChartWidth } from './useChartWidth'
 
 export interface BarStack {
   key: string
@@ -37,20 +37,7 @@ export default function BarChart({
   planned,
   format,
 }: Props) {
-  // si disegna alla larghezza reale del contenitore: testi sempre a grandezza naturale
-  const box = useRef<HTMLDivElement>(null)
-  const [W, setW] = useState(520)
-  useLayoutEffect(() => {
-    const el = box.current
-    if (!el) return
-    if (el.clientWidth) setW(Math.max(240, el.clientWidth))
-    if (typeof ResizeObserver === 'undefined') return
-    const ro = new ResizeObserver(([e]) =>
-      setW(Math.max(240, Math.round(e.contentRect.width))),
-    )
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [])
+  const { ref: box, width: W } = useChartWidth()
   const n = ticks.length
   const totals = ticks.map((_, i) =>
     stacks.reduce((a, s) => a + s.values[i], 0),

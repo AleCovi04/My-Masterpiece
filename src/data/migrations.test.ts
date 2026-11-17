@@ -275,6 +275,12 @@ describe('migrazioni', () => {
     const kept = MIGRATIONS[5].migrate({ ...d, blocks: [{ id: 'x' }] })
     expect(kept.blocks).toEqual([{ id: 'x' }])
   })
+
+  it('v6 → v7: nessun dato cambia; l’RPE della forza resta valido', () => {
+    const d = migrate(v0(), 0)
+    expect(MIGRATIONS[6].migrate(d)).toBe(d)
+    expect(SCHEMA_VERSION).toBe(7)
+  })
 })
 
 describe('import/export', () => {
