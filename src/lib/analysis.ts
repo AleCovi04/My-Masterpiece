@@ -2,6 +2,7 @@
 import type {
   EnduranceDiscipline,
   IsoDate,
+  PhaseColor,
   Session,
   Sport,
 } from '../data/types'
@@ -15,6 +16,7 @@ import {
 } from './dates'
 import { brickActualTotals } from './enduranceActual'
 import { templateTotals } from './enduranceTemplate'
+import type { PlanItem, Timing } from './plan'
 import { DISCIPLINES, loadByDiscipline } from './weekStats'
 
 export const ENDURANCE: EnduranceDiscipline[] = ['swim', 'bike', 'run']
@@ -193,4 +195,168 @@ export function niceMax(v: number): { max: number; step: number } {
   const p = 10 ** Math.floor(Math.log10(raw))
   const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((s) => s >= raw)!
   return { max: Math.ceil(v / step) * step, step }
+}
+
+// ---------- scelta del periodo (filtro dell'Analisi) ----------
+
+/** Voce del Piano selezionabile: una fase o un blocco applicati, oppure un blocco dentro una fase. */
+export interface PlanEntry {
+  /** `a:<applicazione>` oppure `r:<gruppo di settimane>`. */
+  value: string
+  level: 'app' | 'run'
+  kind: 'phase' | 'block'
+  name: string
+  color?: PhaseColor
+  start: IsoDate
+  end: IsoDate
+  timing: Timing
+  /** Per i blocchi dentro una fase: la voce della fase. */
+  parent?: string
+}
+
+/** Le voci del Piano in ordine di data: ogni fase seguita dai suoi blocchi. */
+export function planEntries(items: PlanItem[]): PlanEntry[] {
+  return items.flatMap((item) => {
+    const a = item.application
+    const head: PlanEntry = {
+      value: `a:${a.id}`,
+      level: 'app',
+      kind: a.kind,
+      name: a.name,
+      ...(a.color && { color: a.color }),
+      start: item.start,
+      end: item.end,
+      timing: item.timing,
+    }
+    if (a.kind !== 'phase') return [head]
+    return [
+      head,
+      ...item.runs.map((r): PlanEntry => ({
+        value: `r:${r.key}`,
+        level: 'run',
+        kind: 'block',
+        name: r.blockName,
+        ...(a.color && { color: a.color }),
+        start: r.start,
+        end: r.end,
+        timing: r.timing,
+        parent: head.value,
+      })),
+    ]
+  })
+}
+
+export const PRESET_WEEKS = [4, 12, 26] as const
+
+/** Quello che l'utente ha scelto nel filtro. */
+export type PeriodChoice =
+  | { kind: 'weeks'; weeks: number; offset: number }
+  | { kind: 'year'; year: number }
+  | { kind: 'all' }
+  | { kind: 'plan'; value: string }
+  | { kind: 'custom'; start: IsoDate; end: IsoDate }
+
+export const DEFAULT_CHOICE: PeriodChoice = {
+  kind: 'weeks',
+  weeks: 12,
+  offset: 0,
+}
+
+const shiftIso = (d: IsoDate, days: number) =>
+  iso(addDays(parseIsoDate(d), days))
+
+/** Il periodo da calcolare; una voce del Piano sparita torna al predefinito. */
+export function choiceToPeriod(
+  c: PeriodChoice,
+  entries: PlanEntry[],
+  today: IsoDate,
+): Period {
+  switch (c.kind) {
+    case 'weeks': {
+      const r = resolveRange({ kind: 'weeks', weeks: c.weeks }, [], today)
+      const days = 7 * c.weeks * c.offset
+      return {
+        kind: 'range',
+        start: shiftIso(r.start, days),
+        end: shiftIso(r.end, days),
+      }
+    }
+    case 'year':
+      return { kind: 'range', start: `${c.year}-01-01`, end: `${c.year}-12-31` }
+    case 'all':
+      return { kind: 'all' }
+    case 'custom':
+      return { kind: 'range', start: c.start, end: c.end }
+    case 'plan': {
+      const e = entries.find((x) => x.value === c.value)
+      return e
+        ? { kind: 'range', start: e.start, end: e.end }
+        : choiceToPeriod(DEFAULT_CHOICE, entries, today)
+    }
+  }
+}
+
+/**
+ * La scelta spostata di un passo (`dir` = −1 indietro, +1 avanti), oppure
+ * `null` se non ci si può spostare (Tutto, primo o ultimo elemento del Piano).
+ * Dal Piano ci si sposta tra voci dello stesso livello (fase ↔ fase, blocco ↔ blocco).
+ */
+export function shiftChoice(
+  c: PeriodChoice,
+  dir: -1 | 1,
+  entries: PlanEntry[],
+): PeriodChoice | null {
+  switch (c.kind) {
+    case 'weeks':
+      return { ...c, offset: c.offset + dir }
+    case 'year':
+      return { ...c, year: c.year + dir }
+    case 'all':
+      return null
+    case 'custom': {
+      const len = daysBetween(c.start, c.end) + 1
+      return {
+        kind: 'custom',
+        start: shiftIso(c.start, dir * len),
+        end: shiftIso(c.end, dir * len),
+      }
+    }
+    case 'plan': {
+      const cur = entries.find((x) => x.value === c.value)
+      if (!cur) return null
+      const same = entries.filter((x) => x.level === cur.level)
+      const next = same[same.indexOf(cur) + dir]
+      return next ? { kind: 'plan', value: next.value } : null
+    }
+  }
+}
+
+const isIso = (v: unknown): v is IsoDate =>
+  typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v)
+
+/** Scelta salvata sul dispositivo (JSON), se valida. */
+export function parseChoice(text: string | null): PeriodChoice | null {
+  if (!text) return null
+  let v: unknown
+  try {
+    v = JSON.parse(text)
+  } catch {
+    return null
+  }
+  if (!v || typeof v !== 'object') return null
+  const o = v as Record<string, unknown>
+  if (
+    o.kind === 'weeks' &&
+    typeof o.weeks === 'number' &&
+    (PRESET_WEEKS as readonly number[]).includes(o.weeks)
+  )
+    return { kind: 'weeks', weeks: o.weeks, offset: 0 }
+  if (o.kind === 'year' && Number.isInteger(o.year))
+    return { kind: 'year', year: o.year as number }
+  if (o.kind === 'all') return { kind: 'all' }
+  if (o.kind === 'plan' && typeof o.value === 'string')
+    return { kind: 'plan', value: o.value }
+  if (o.kind === 'custom' && isIso(o.start) && isIso(o.end) && o.start <= o.end)
+    return { kind: 'custom', start: o.start, end: o.end }
+  return null
 }
