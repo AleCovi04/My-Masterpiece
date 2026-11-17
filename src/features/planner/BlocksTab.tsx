@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { ArchiveIcon, RestoreIcon } from '../../components/ui/Icons'
 import type { TrainingBlock } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { blockWeeks, weekTotals } from '../../lib/blocks'
+import { blockWeeks, phasesUsing, weekTotals } from '../../lib/blocks'
 import { normalizeName } from '../../lib/exercises'
 import { formatDuration } from '../../lib/format'
 import ApplyDialog from './ApplyDialog'
@@ -135,6 +135,13 @@ export default function BlocksTab({ planning }: { planning: Planning }) {
             if (current) planning.setBlockArchived(current.id, archived)
             close()
           }}
+          onDelete={() => {
+            if (current) planning.deleteBlock(current.id)
+            close()
+          }}
+          usedInPhases={
+            current ? phasesUsing(planning.phases, current.id).length : 0
+          }
           onClose={close}
         />
       )}

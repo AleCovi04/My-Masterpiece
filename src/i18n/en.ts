@@ -178,6 +178,9 @@ export const en: Dictionary = {
     saving: 'Saving…',
   },
   blocks: {
+    confirmDelete:
+      'Delete this block forever? Sessions already on the calendar stay.',
+    usedInPhases: 'Phases using it: {n} (it will be removed from them too).',
     newBlock: 'New block',
     editBlock: 'Edit block',
     empty:
@@ -222,6 +225,8 @@ export const en: Dictionary = {
     cancel: 'Cancel',
   },
   phases: {
+    confirmDelete:
+      'Delete this phase forever? Sessions already on the calendar stay.',
     newPhase: 'New phase',
     editPhase: 'Edit phase',
     empty:

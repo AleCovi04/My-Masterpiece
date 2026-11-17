@@ -176,6 +176,9 @@ export const it = {
     saving: 'Salvataggio…',
   },
   blocks: {
+    confirmDelete:
+      'Eliminare per sempre questo blocco? Le sedute già nel calendario restano.',
+    usedInPhases: 'Fasi che lo usano: {n} (verrà tolto anche da lì).',
     newBlock: 'Nuovo blocco',
     editBlock: 'Modifica blocco',
     empty:
@@ -221,6 +224,8 @@ export const it = {
     cancel: 'Annulla',
   },
   phases: {
+    confirmDelete:
+      'Eliminare per sempre questa fase? Le sedute già nel calendario restano.',
     newPhase: 'Nuova fase',
     editPhase: 'Modifica fase',
     empty:

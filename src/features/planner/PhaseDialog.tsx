@@ -35,6 +35,7 @@ interface Props {
   onApply: (p: Phase) => void
   onDuplicate: () => void
   onArchive: (archived: boolean) => void
+  onDelete: () => void
   onClose: () => void
 }
 
@@ -47,6 +48,7 @@ export default function PhaseDialog({
   onApply,
   onDuplicate,
   onArchive,
+  onDelete,
   onClose,
 }: Props) {
   const { t } = useI18n()
@@ -257,9 +259,9 @@ export default function PhaseDialog({
           template={phase}
           onDuplicate={onDuplicate}
           onArchive={onArchive}
-          onDelete={() => {}}
+          onDelete={onDelete}
           onClose={onClose}
-          canDelete={false}
+          confirmDeleteText={f.confirmDelete}
         />
       </form>
 

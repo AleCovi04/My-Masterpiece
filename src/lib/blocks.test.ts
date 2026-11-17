@@ -12,12 +12,14 @@ import {
   applicationLabel,
   blockWeeks,
   copyWeekOnto,
+  deleteBlock,
   duplicateWeek,
   emptyDays,
   isMonday,
   moveItem,
   newWeek,
   phaseWeeks,
+  phasesUsing,
   planApplication,
   removeApplication,
   removeWeek,
@@ -265,5 +267,28 @@ describe('applicazione al calendario', () => {
     expect(out.removed).toBe(r.created - 1)
     expect(out.sessions).toHaveLength(1)
     expect(out.applications).toEqual([])
+  })
+})
+
+describe('eliminazione', () => {
+  it('il blocco eliminato sparisce anche dalle fasi che lo usano', () => {
+    const a = block('a', [newWeek()])
+    const c = block('c', [newWeek()])
+    const ph = (id: string, blockIds: string[]): Phase => ({
+      id,
+      createdAt: now,
+      updatedAt: now,
+      name: id,
+      color: 1,
+      blockIds,
+      archived: false,
+    })
+    const phases = [ph('base', ['a', 'c', 'a']), ph('peak', ['c'])]
+    expect(phasesUsing(phases, 'a').map((p) => p.id)).toEqual(['base'])
+    const later = '2026-11-18T08:00:00.000Z'
+    const r = deleteBlock([a, c], phases, 'a', later)
+    expect(r.blocks.map((b) => b.id)).toEqual(['c'])
+    expect(r.phases[0]).toMatchObject({ blockIds: ['c'], updatedAt: later })
+    expect(r.phases[1]).toBe(phases[1])
   })
 })

@@ -48,6 +48,9 @@ interface Props {
   onApply: (b: TrainingBlock) => void
   onDuplicate: () => void
   onArchive: (archived: boolean) => void
+  onDelete: () => void
+  /** Fasi che usano questo blocco (per la conferma di eliminazione). */
+  usedInPhases: number
   onClose: () => void
 }
 
@@ -60,6 +63,8 @@ export default function BlockDialog({
   onApply,
   onDuplicate,
   onArchive,
+  onDelete,
+  usedInPhases,
   onClose,
 }: Props) {
   const { t } = useI18n()
@@ -394,9 +399,13 @@ export default function BlockDialog({
           template={block}
           onDuplicate={onDuplicate}
           onArchive={onArchive}
-          onDelete={() => {}}
+          onDelete={onDelete}
           onClose={onClose}
-          canDelete={false}
+          confirmDeleteText={
+            usedInPhases > 0
+              ? `${b.confirmDelete} ${b.usedInPhases.replace('{n}', String(usedInPhases))}`
+              : b.confirmDelete
+          }
         />
       </form>
 

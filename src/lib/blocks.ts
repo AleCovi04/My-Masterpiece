@@ -325,3 +325,27 @@ export function applicationLabel(
   const k = application.weeks.indexOf(week) + 1
   return `${application.name} · ${weekShort} ${k}/${application.weeks.length} · ${week.blockName} ${inBlock}`
 }
+
+/** Fasi che usano il blocco. */
+export const phasesUsing = (phases: Phase[], blockId: Id): Phase[] =>
+  phases.filter((p) => p.blockIds.includes(blockId))
+
+/**
+ * Elimina per sempre un blocco e lo toglie dalle fasi che lo usano. Le sedute
+ * e le applicazioni già nel calendario restano (le etichette hanno il nome copiato).
+ */
+export function deleteBlock(
+  blocks: TrainingBlock[],
+  phases: Phase[],
+  id: Id,
+  now: IsoDateTime = new Date().toISOString(),
+): { blocks: TrainingBlock[]; phases: Phase[] } {
+  return {
+    blocks: blocks.filter((b) => b.id !== id),
+    phases: phases.map((p) =>
+      p.blockIds.includes(id)
+        ? { ...p, blockIds: p.blockIds.filter((x) => x !== id), updatedAt: now }
+        : p,
+    ),
+  }
+}

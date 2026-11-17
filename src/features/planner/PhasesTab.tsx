@@ -139,6 +139,10 @@ export default function PhasesTab({ planning }: { planning: Planning }) {
             if (current) planning.setPhaseArchived(current.id, archived)
             close()
           }}
+          onDelete={() => {
+            if (current) planning.deletePhase(current.id)
+            close()
+          }}
           onClose={close}
         />
       )}

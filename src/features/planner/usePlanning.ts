@@ -10,6 +10,7 @@ import type {
   WorkoutTemplate,
 } from '../../data/types'
 import {
+  deleteBlock as withoutBlock,
   planApplication,
   removeApplication,
   type ApplyInput,
@@ -129,6 +130,19 @@ export function usePlanning() {
     [saveBlocks],
   )
 
+  /** Elimina per sempre il blocco e lo toglie dalle fasi che lo usano. */
+  const deleteBlock = useCallback(
+    (id: Id) => {
+      const cur = latest.current
+      if (!cur) return
+      const r = withoutBlock(cur.blocks, cur.phases, id)
+      update({ blocks: r.blocks, phases: r.phases })
+      void dataStore.saveBlocks(r.blocks)
+      void dataStore.savePhases(r.phases)
+    },
+    [update],
+  )
+
   // ---------- fasi ----------
 
   const savePhases = useCallback(
@@ -153,6 +167,12 @@ export function usePlanning() {
       const src = list.find((p) => p.id === id)
       if (src) savePhases([...list, copyOf(src, suffix)])
     },
+    [savePhases],
+  )
+
+  const deletePhase = useCallback(
+    (id: Id) =>
+      savePhases((latest.current?.phases ?? []).filter((p) => p.id !== id)),
     [savePhases],
   )
 
@@ -199,9 +219,11 @@ export function usePlanning() {
     saveBlock,
     setBlockArchived,
     duplicateBlock,
+    deleteBlock,
     savePhase,
     setPhaseArchived,
     duplicatePhase,
+    deletePhase,
     apply,
     unapply,
   }

@@ -8,8 +8,10 @@ interface Props {
   onArchive: (archived: boolean) => void
   onDelete: () => void
   onClose: () => void
-  /** Falso per ciò che si archivia soltanto (blocchi, fasi). */
+  /** Falso per nascondere "Elimina". */
   canDelete?: boolean
+  /** Testo della conferma (di default quello degli allenamenti). */
+  confirmDeleteText?: string
 }
 
 /** Pulsanti comuni a tutti gli editor di template: Salva/Annulla e Duplica/Archivia/Elimina. */
@@ -20,6 +22,7 @@ export default function TemplateFooter({
   onDelete,
   onClose,
   canDelete = true,
+  confirmDeleteText,
 }: Props) {
   const { t } = useI18n()
   const p = t.planner
@@ -50,7 +53,7 @@ export default function TemplateFooter({
           </button>
           {!canDelete ? null : confirmingDelete ? (
             <span className="pl-confirm">
-              <small>{p.confirmDeleteWorkout}</small>
+              <small>{confirmDeleteText ?? p.confirmDeleteWorkout}</small>
               <button type="button" className="pl-btn warn" onClick={onDelete}>
                 {p.confirmYes}
               </button>
