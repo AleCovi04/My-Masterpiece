@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import {
+  AnalysisIcon,
   CalendarIcon,
   PlanIcon,
   DataIcon,
@@ -21,5 +22,6 @@ export const NAV_ITEMS: NavItem[] = [
   { to: '/calendario', icon: <CalendarIcon />, label: (t) => t.nav.calendar },
   { to: '/piano', icon: <PlanIcon />, label: (t) => t.nav.plan },
   { to: '/forger', icon: <PlannerIcon />, label: (t) => t.nav.planner },
+  { to: '/analisi', icon: <AnalysisIcon />, label: (t) => t.nav.analysis },
   { to: '/dati', icon: <DataIcon />, label: (t) => t.nav.data },
 ]

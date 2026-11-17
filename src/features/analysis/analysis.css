@@ -1,0 +1,70 @@
+/* Analisi */
+.ana {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+.ana-title {
+  font-family: var(--f-display);
+  font-weight: 800;
+  font-size: clamp(36px, 5vw, 52px);
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1;
+}
+.ana-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.ana-period {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--muted);
+  min-width: 0;
+  max-width: 100%;
+}
+.ana-period select {
+  min-width: 0;
+  max-width: 100%;
+  width: auto;
+}
+.ana-range {
+  margin: -6px 0 0;
+}
+.ana-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+}
+.ana-chart {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+.chips.sm {
+  gap: 6px;
+}
+.chips.sm .chip {
+  padding: 6px 12px 6px 10px;
+  font-size: 13px;
+  gap: 7px;
+}
+.ana-legend {
+  margin: 0;
+}
+.ana-dash {
+  display: inline-block;
+  width: 16px;
+  border-top: 2px dashed var(--text);
+  vertical-align: middle;
+}
+@media (min-width: 1024px) {
+  .ana-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

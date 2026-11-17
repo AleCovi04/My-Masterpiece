@@ -85,6 +85,13 @@ export const PlanIcon = () => (
   </Svg>
 )
 
+/** Analisi: barre in crescita. */
+export const AnalysisIcon = () => (
+  <Svg>
+    <path d="M4 20h16M7 16v-4M12 16V8M17 16V5" />
+  </Svg>
+)
+
 export const DataIcon = () => (
   <Svg>
     <ellipse cx="12" cy="6" rx="8" ry="3" />
