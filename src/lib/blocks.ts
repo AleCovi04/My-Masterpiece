@@ -308,3 +308,20 @@ export function weekLabels(
     return week ? [{ application, week }] : []
   })
 }
+
+/**
+ * Testo dell'etichetta: per una fase prima la settimana della fase, poi quella
+ * del blocco ("Base · sett. 3/8 · Carico 1/4"); per un blocco "Carico · sett. 1/4".
+ */
+export function applicationLabel(
+  application: BlockApplication,
+  week: BlockApplication['weeks'][number],
+  weekShort: string,
+): string {
+  const inBlock = `${week.week}/${week.weeks}`
+  if (application.kind === 'block') {
+    return `${week.blockName} · ${weekShort} ${inBlock}`
+  }
+  const k = application.weeks.indexOf(week) + 1
+  return `${application.name} · ${weekShort} ${k}/${application.weeks.length} · ${week.blockName} ${inBlock}`
+}

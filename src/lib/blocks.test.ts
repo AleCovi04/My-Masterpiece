@@ -9,6 +9,7 @@ import type {
 } from '../data/types'
 import {
   addItems,
+  applicationLabel,
   blockWeeks,
   copyWeekOnto,
   duplicateWeek,
@@ -249,6 +250,13 @@ describe('applicazione al calendario', () => {
     )
     expect(r.application.weeks).toHaveLength(5)
     expect(r.application.color).toBe(2)
+    const [w1, , w3] = r.application.weeks
+    expect(applicationLabel(r.application, w3, 'sett.')).toBe(
+      'Base · sett. 3/5 · Blocco a 1/2',
+    )
+    expect(
+      applicationLabel({ ...r.application, kind: 'block' }, w1, 'sett.'),
+    ).toBe('Blocco a · sett. 1/2')
     // una seduta svolta resta dopo la rimozione
     const done = r.sessions.map((s, i) =>
       i === 0 ? { ...s, status: 'done' as const } : s,

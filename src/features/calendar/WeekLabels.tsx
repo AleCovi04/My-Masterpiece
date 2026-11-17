@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { BlockApplication, IsoDate, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { weekLabels } from '../../lib/blocks'
+import { applicationLabel, weekLabels } from '../../lib/blocks'
 import { addDays, parseIsoDate, toIsoDate } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
 import Modal from '../planner/Modal'
@@ -31,13 +31,7 @@ export default function WeekLabels({
 
   const date = (iso: IsoDate) => formatLongDate(iso, t.monthsShort)
   const text = (a: BlockApplication, w: BlockApplication['weeks'][number]) =>
-    [
-      a.kind === 'phase' ? a.name : null,
-      w.blockName,
-      `${c.weekShort} ${w.week}/${w.weeks}`,
-    ]
-      .filter(Boolean)
-      .join(' · ')
+    applicationLabel(a, w, c.weekShort)
 
   return (
     <>
