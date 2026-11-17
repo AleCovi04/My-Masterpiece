@@ -3,6 +3,7 @@ import { useI18n } from '../../i18n/context'
 import { readPreference, writePreference } from '../../lib/preferences'
 import BlocksTab from './BlocksTab'
 import ExercisesTab from './ExercisesTab'
+import PhasesTab from './PhasesTab'
 import { usePlanning } from './usePlanning'
 import WorkoutsTab from './WorkoutsTab'
 import './planner.css'
@@ -63,11 +64,10 @@ export default function PlannerPage() {
 
 /** Blocchi e Fasi condividono gli stessi dati (blocchi, fasi, applicazioni). */
 function PlanningPanel({ tab }: { tab: 'blocks' | 'phases' }) {
-  const { t } = useI18n()
   const planning = usePlanning()
   return tab === 'blocks' ? (
     <BlocksTab planning={planning} />
   ) : (
-    <div className="ph">{t.planner.soon}</div>
+    <PhasesTab planning={planning} />
   )
 }

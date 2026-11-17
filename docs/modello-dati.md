@@ -91,6 +91,8 @@ Inserito **a mano** dal dettaglio della seduta (`src/lib/enduranceActual.ts`, mo
 - **Fase** (`Phase`): `name`, `goal`, `color` (1–6 = variabili del tema `--phase-1`…`--phase-6`), `blockIds` in ordine (anche ripetuti), `archived`.
 - **Applicazione al calendario** (`planApplication`, finestra `ApplyDialog`): da un **lunedì**; le sedute si aggiungono in coda al giorno (`append`) oppure prima si tolgono le sedute **programmate** di quelle settimane (`replace`); svolte, in corso e saltate non si toccano mai. Ogni seduta creata ha `applicationId`. Si salva un `BlockApplication`: `kind` (`block` | `phase`), `sourceId`, `name` e `color` copiati, `startDate`, `weeks` (per ogni settimana coperta: lunedì, blocco, settimana N di M) per le etichette del calendario. Sedute e applicazione si salvano insieme (`saveSessionsAndApplications`).
 - **Rimozione** (`removeApplication`): toglie l'applicazione e le sue sedute ancora programmate; le altre restano.
+- **Calendario** (vista settimana, `WeekLabels`): per ogni applicazione che copre la settimana un'etichetta col colore della fase, es. "Base · Carico · sett. 2/4" (per un blocco solo "Carico · sett. 2/4"). Toccandola: tipo, periodo, sedute ancora programmate e svolte/saltate, "Rimuovi applicazione" con conferma.
+- **Editor della fase**: nome, obiettivo, colore, blocchi in ordine (trascinamento o menu: su, giù, ripeti subito dopo, togli), settimane totali e ore medie a settimana; "Applica al calendario" salva e apre la stessa finestra dei blocchi.
 
 ## Salvataggio (`src/data/`)
 

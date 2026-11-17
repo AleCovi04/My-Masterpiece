@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { dataStore } from '../../data'
 import type {
+  BlockApplication,
   BrickActual,
   EnduranceActual,
   Exercise,
@@ -12,6 +13,7 @@ import type {
 } from '../../data/types'
 import { clearSessionActual, setSessionActual } from '../../lib/enduranceActual'
 import { createLiveWorkout, startSession } from '../../lib/liveWorkout'
+import { removeApplication } from '../../lib/blocks'
 import { moveSession } from '../../lib/reorder'
 import {
   applyEditedPlan,
@@ -22,6 +24,7 @@ import {
 } from '../../lib/sessions'
 
 interface Loaded {
+  applications: BlockApplication[]
   sessions: Session[]
   templates: WorkoutTemplate[]
   exercises: Exercise[]
@@ -41,10 +44,11 @@ export function useCalendarSessions() {
       dataStore.loadSessions(),
       dataStore.loadTemplates(),
       dataStore.loadExercises(),
-    ]).then(([sessions, templates, exercises]) => {
+      dataStore.loadApplications(),
+    ]).then(([sessions, templates, exercises, applications]) => {
       if (cancelled) return
       latest.current = sessions
-      setData({ sessions, templates, exercises })
+      setData({ sessions, templates, exercises, applications })
     })
     return () => {
       cancelled = true
@@ -139,6 +143,22 @@ export function useCalendarSessions() {
     [change],
   )
 
+  /** Toglie un blocco o una fase applicati: solo le sedute ancora programmate. */
+  const unapply = useCallback(
+    async (appId: Id) => {
+      const current = latest.current
+      const apps = data?.applications
+      if (!current || !apps) return
+      const r = removeApplication(current, apps, appId)
+      latest.current = r.sessions
+      setData((d) =>
+        d ? { ...d, sessions: r.sessions, applications: r.applications } : d,
+      )
+      await dataStore.saveSessionsAndApplications(r.sessions, r.applications)
+    },
+    [data?.applications],
+  )
+
   const remove = useCallback(
     (id: Id) => change((cur) => removeSession(cur, id)),
     [change],
@@ -147,6 +167,7 @@ export function useCalendarSessions() {
   return {
     sessions: data?.sessions ?? null,
     templates: data?.templates ?? [],
+    applications: data?.applications ?? [],
     exercises: data?.exercises ?? [],
     move,
     add,
@@ -157,6 +178,7 @@ export function useCalendarSessions() {
     start,
     saveActual,
     clearActual,
+    unapply,
     remove,
   }
 }

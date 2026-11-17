@@ -9,9 +9,15 @@ import { LIVE_PATH } from '../live/hooks'
 import MonthView from './MonthView'
 import SessionDetail from './SessionDetail'
 import TemplatePickerDialog from './TemplatePickerDialog'
+import WeekLabels from './WeekLabels'
 import WeekView from './WeekView'
 import YearView from './YearView'
-import { periodLabel, shiftAnchor, type CalendarView } from './period'
+import {
+  periodLabel,
+  shiftAnchor,
+  weekDates,
+  type CalendarView,
+} from './period'
 import { useCalendarSessions } from './useCalendarSessions'
 import './calendar.css'
 
@@ -81,6 +87,14 @@ export default function CalendarPage() {
         </button>
       </div>
 
+      {sessions && view === 'week' && (
+        <WeekLabels
+          monday={weekDates(anchor)[0]}
+          applications={cal.applications}
+          sessions={sessions}
+          onRemove={cal.unapply}
+        />
+      )}
       {sessions && view === 'week' && (
         <WeekView
           anchor={anchor}

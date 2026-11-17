@@ -246,3 +246,61 @@
     height: 24px;
   }
 }
+
+/* ---------- fasi ---------- */
+.ph-colors {
+  display: flex;
+  gap: 8px;
+}
+.ph-colors button {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 3px solid var(--bg);
+  background: var(--c);
+  box-shadow: 0 0 0 1.5px var(--line);
+  cursor: pointer;
+}
+.ph-colors button[aria-checked='true'] {
+  box-shadow: 0 0 0 2.5px var(--text);
+}
+.ph-rows {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ph-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.ph-row.lifting {
+  opacity: 0.45;
+}
+.ph-row.missing {
+  border-color: var(--accent);
+}
+.ph-row-tx {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.ph-row-tx small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.ph-addblock {
+  align-self: flex-start;
+}
+.pl-item.ph-item {
+  border-left: 4px solid var(--c);
+}
