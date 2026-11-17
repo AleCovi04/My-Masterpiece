@@ -144,6 +144,14 @@ export const en: Dictionary = {
     confirmText: 'Sets not completed will not be saved.',
     confirmYes: 'Yes, finish',
     back: 'Back to the workout',
+    cancelWorkout: 'Cancel workout',
+    cancelTitle: 'Cancel the workout?',
+    cancelText:
+      'The session goes back to planned and the logged sets are deleted.',
+    cancelYes: 'Yes, cancel workout',
+    emptyTitle: 'No sets completed',
+    emptyText:
+      'There is nothing to save. Cancel the workout? The session goes back to planned.',
     summaryTitle: 'Summary',
     duration: 'Duration',
     setsDone: 'Completed sets',

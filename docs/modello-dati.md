@@ -65,6 +65,7 @@ Un allenamento in una data: `id`, `date`, `order` nel giorno (da 0), `discipline
 - **Timer di recupero**: calcolato da `rest.endsAt` (giusto anche in background o dopo la riapertura); −15 s, +15 s (a recupero finito riparte da adesso), Salta, tempo a mano (m:ss o secondi). Nessun suono né vibrazione per ora.
 - **Durante la sessione**: aggiungi serie (stessi obiettivi dell'ultima) o togli l'ultima se non completata; aggiungi esercizi dal catalogo (recupero di default, tante serie quante l'ultima volta, altrimenti 3); salta/riprendi esercizio; riordina trascinando (tenendo premuto su telefono). Niente "sostituisci".
 - **Termina** → conferma → riepilogo (`liveSummary`): durata reale, serie completate, volume Σ kg × reps, record per esercizio (kg massimo e 1RM stimato con Epley, kg × (1 + reps/30), solo se superano lo storico delle altre sedute concluse; un esercizio mai fatto non dà record), note. **Salvando** (`liveActual` + `finishSession`): la seduta diventa `done` con `actual.endedAt`, gli esercizi con le sole serie completate (le altre si ignorano, non diventano "saltate"), quelli senza serie solo se saltati (`skipped: true`), le note in `actual.notes`; la bozza si cancella. Nel calendario la card diventa verde e la Panoramica conta la durata reale.
+- **Annulla allenamento** (pulsante in fondo alla schermata, con conferma; `cancelSession`): la seduta torna `planned`, `actual` si elimina e la bozza si cancella. Se si preme **Termina** senza serie completate (`hasDoneSets`), invece del riepilogo si propone di annullare.
 
 ## Endurance effettivo
 

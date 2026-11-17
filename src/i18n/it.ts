@@ -142,6 +142,14 @@ export const it = {
     confirmText: 'Le serie non completate non verranno salvate.',
     confirmYes: 'Sì, termina',
     back: 'Torna all’allenamento',
+    cancelWorkout: 'Annulla allenamento',
+    cancelTitle: 'Annullare l’allenamento?',
+    cancelText:
+      'La sessione torna programmata e le serie registrate vengono eliminate.',
+    cancelYes: 'Sì, annulla allenamento',
+    emptyTitle: 'Nessuna serie completata',
+    emptyText:
+      'Non c’è niente da salvare. Vuoi annullare l’allenamento? La sessione torna programmata.',
     summaryTitle: 'Riepilogo',
     duration: 'Durata',
     setsDone: 'Serie completate',

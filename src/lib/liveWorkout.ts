@@ -486,6 +486,24 @@ export function finishSession(
   )
 }
 
+/** C'è almeno una serie completata? */
+export const hasDoneSets = (w: LiveWorkout): boolean =>
+  w.exercises.some((ex) => ex.sets.some((s) => s.done))
+
+/** Allenamento annullato: la seduta torna programmata, senza eseguito. */
+export function cancelSession(
+  sessions: Session[],
+  sessionId: Id,
+  now: IsoDateTime,
+): Session[] {
+  return sessions.map((s) => {
+    if (s.id !== sessionId || s.discipline !== 'strength') return s
+    const { actual: _gone, ...rest } = s
+    void _gone
+    return { ...rest, status: 'planned', updatedAt: now }
+  })
+}
+
 export interface LiveRecord {
   exerciseId: Id
   /** Presente se il kg massimo supera lo storico. */

@@ -11,10 +11,12 @@ import {
   addExercises,
   addSet,
   adjustRest,
+  cancelSession,
   completeSet,
   createLiveWorkout,
   editSetText,
   finishSession,
+  hasDoneSets,
   liveActual,
   liveSummary,
   moveExercise,
@@ -383,5 +385,28 @@ describe('fine e riepilogo', () => {
     expect(liveSummary(w, [], end).records).toEqual([])
     const weak = completeSet(w0, p.id, 0, { kg: 60, reps: 5 }, T)
     expect(liveSummary(weak, history, end).records).toEqual([])
+  })
+})
+
+describe('annulla allenamento', () => {
+  it('la seduta torna programmata senza eseguito; le altre restano uguali', () => {
+    const started = startSession(
+      [strength('a', '2026-11-16', []), strength('b', '2026-11-16', [])],
+      'a',
+      t,
+    )
+    const later = '2026-11-16T11:00:00.000Z'
+    const [a, b] = cancelSession(started, 'a', later)
+    expect(a.status).toBe('planned')
+    expect('actual' in a).toBe(false)
+    expect(a.updatedAt).toBe(later)
+    expect(b).toBe(started[1])
+  })
+
+  it('riconosce se c’è almeno una serie completata', () => {
+    const w = live([entry('panca', 2)])
+    expect(hasDoneSets(w)).toBe(false)
+    const p = w.exercises[0].id
+    expect(hasDoneSets(completeSet(w, p, 0, { kg: 80, reps: 8 }, T))).toBe(true)
   })
 })

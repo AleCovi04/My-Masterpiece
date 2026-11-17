@@ -8,6 +8,7 @@ import {
   adjustRest,
   completeSet,
   editSetText,
+  hasDoneSets,
   liveGroups,
   moveExercise,
   removeSet,
@@ -48,7 +49,10 @@ export default function LivePage() {
   const now = useNow(1000)
   const [errors, setErrors] = useState<Record<string, SetErrors>>({})
   const [picking, setPicking] = useState(false)
-  const [confirming, setConfirming] = useState(false)
+  const [confirming, setConfirming] = useState<
+    null | 'finish' | 'empty' | 'cancel'
+  >(null)
+  const [cancelling, setCancelling] = useState(false)
   const [endedAt, setEndedAt] = useState<number | null>(null)
   const listRef = useRef<HTMLOListElement>(null)
   const scrollTo = useRef<string | null>(null)
@@ -140,7 +144,7 @@ export default function LivePage() {
         <button
           type="button"
           className="pl-btn acc lv-end"
-          onClick={() => setConfirming(true)}
+          onClick={() => setConfirming(hasDoneSets(w) ? 'finish' : 'empty')}
         >
           {l.finish}
         </button>
@@ -193,6 +197,14 @@ export default function LivePage() {
         {l.addExercise}
       </button>
 
+      <button
+        type="button"
+        className="pl-btn warn lv-cancel"
+        onClick={() => setConfirming('cancel')}
+      >
+        {l.cancelWorkout}
+      </button>
+
       {w.rest && (
         <RestBar
           rest={w.rest}
@@ -218,11 +230,11 @@ export default function LivePage() {
         />
       )}
 
-      {confirming && (
+      {confirming === 'finish' && (
         <Modal
           title={l.confirmTitle}
           closeLabel={l.back}
-          onClose={() => setConfirming(false)}
+          onClose={() => setConfirming(null)}
         >
           <p className="lv-muted">{l.confirmText}</p>
           <div className="pl-actions">
@@ -230,7 +242,7 @@ export default function LivePage() {
               type="button"
               className="pl-btn acc"
               onClick={() => {
-                setConfirming(false)
+                setConfirming(null)
                 setEndedAt(Date.now())
               }}
             >
@@ -239,7 +251,44 @@ export default function LivePage() {
             <button
               type="button"
               className="pl-btn"
-              onClick={() => setConfirming(false)}
+              onClick={() => setConfirming(null)}
+            >
+              {l.back}
+            </button>
+          </div>
+        </Modal>
+      )}
+
+      {(confirming === 'cancel' || confirming === 'empty') && (
+        <Modal
+          title={confirming === 'empty' ? l.emptyTitle : l.cancelTitle}
+          closeLabel={l.back}
+          onClose={() => setConfirming(null)}
+        >
+          <p className="lv-muted">
+            {confirming === 'empty' ? l.emptyText : l.cancelText}
+          </p>
+          <div className="pl-actions">
+            <button
+              type="button"
+              className="pl-btn warn"
+              disabled={cancelling}
+              onClick={async () => {
+                setCancelling(true)
+                try {
+                  await live.cancel()
+                  navigate('/calendario')
+                } finally {
+                  setCancelling(false)
+                }
+              }}
+            >
+              {l.cancelYes}
+            </button>
+            <button
+              type="button"
+              className="pl-btn"
+              onClick={() => setConfirming(null)}
             >
               {l.back}
             </button>

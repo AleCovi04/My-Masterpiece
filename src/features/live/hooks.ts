@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { dataStore } from '../../data'
 import type { Exercise, LiveWorkout, Session } from '../../data/types'
-import { finishSession, liveActual, resumeLive } from '../../lib/liveWorkout'
+import {
+  cancelSession,
+  finishSession,
+  liveActual,
+  resumeLive,
+} from '../../lib/liveWorkout'
 
 /** Percorso della schermata live (un solo allenamento in corso alla volta). */
 export const LIVE_PATH = '/allenamento'
@@ -65,6 +70,21 @@ export function useLiveWorkout() {
     [data],
   )
 
+  /** Annulla: la seduta torna programmata, le serie registrate e la bozza si eliminano. */
+  const cancel = useCallback(async () => {
+    const w = latest.current
+    if (!w || !data) return
+    const sessions = cancelSession(
+      data.sessions,
+      w.sessionId,
+      new Date().toISOString(),
+    )
+    await dataStore.saveSessions(sessions)
+    await dataStore.saveLiveWorkout(null)
+    latest.current = null
+    setData({ ...data, sessions, workout: null })
+  }, [data])
+
   return {
     loading: data === null,
     workout: data?.workout ?? null,
@@ -72,6 +92,7 @@ export function useLiveWorkout() {
     exercises: data?.exercises ?? [],
     change,
     finish,
+    cancel,
   }
 }
 
