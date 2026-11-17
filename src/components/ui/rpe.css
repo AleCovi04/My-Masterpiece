@@ -1,0 +1,24 @@
+.rpe-scale {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  max-width: 460px;
+}
+.rpe-scale button {
+  min-height: 40px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: 600 15px var(--f-body);
+  cursor: pointer;
+  padding: 0;
+}
+.rpe-scale[aria-invalid='true'] button {
+  border-color: var(--accent);
+}
+.rpe-scale button[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}

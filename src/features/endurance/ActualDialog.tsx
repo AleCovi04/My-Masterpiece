@@ -17,6 +17,7 @@ import {
   type MetricsDraft,
 } from '../../lib/enduranceActual'
 import { formatClock, parseClock } from '../../lib/enduranceTemplate'
+import RpeScale from '../../components/ui/RpeScale'
 import Modal from '../planner/Modal'
 import MetricsFields from './MetricsFields'
 import './endurance.css'
@@ -34,7 +35,6 @@ interface Props {
   onClose: () => void
 }
 
-const RPE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 const transitionOk = (raw: string) =>
   raw.trim() === '' || parseClock(raw) !== null
 
@@ -87,6 +87,7 @@ export default function ActualDialog({ session: s, onSave, onClose }: Props) {
       parsedLegs.every((p) => p.metrics) &&
       legs.every((l, i) => i === 0 || transitionOk(l.transition))
     : !!single?.metrics
+  const complete = valid && rpe !== null
 
   const patchLeg = (i: number, patch: Partial<LegForm>) =>
     setLegs((ls) => ls.map((l, k) => (k === i ? { ...l, ...patch } : l)))
@@ -94,7 +95,7 @@ export default function ActualDialog({ session: s, onSave, onClose }: Props) {
   const submit = (ev: FormEvent) => {
     ev.preventDefault()
     setSubmitted(true)
-    if (!valid) return
+    if (!complete) return
     if (s.discipline === 'brick') {
       const built: BrickLegActual[] = legs.map((l, i) => {
         const tr = i > 0 ? parseClock(l.transition) : null
@@ -183,22 +184,7 @@ export default function ActualDialog({ session: s, onSave, onClose }: Props) {
           </ol>
         )}
 
-        <div className="pl-fld">
-          <span>{e.rpe}</span>
-          <div className="ea-rpe" role="group" aria-label={e.rpe}>
-            {RPE.map((n) => (
-              <button
-                key={n}
-                type="button"
-                aria-pressed={rpe === n}
-                onClick={() => setRpe(rpe === n ? null : n)}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-          <small>{e.rpeHint}</small>
-        </div>
+        <RpeScale value={rpe} onChange={setRpe} showError={submitted} />
 
         <label className="pl-fld">
           <span>{e.notes}</span>

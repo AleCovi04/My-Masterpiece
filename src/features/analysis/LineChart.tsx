@@ -19,9 +19,11 @@ interface Props {
   titles?: string[]
   series: LineSeries[]
   format: (v: number) => string
+  /** Niente numeri (asse Y e riquadro): conta solo la forma della curva. */
+  hideValues?: boolean
 }
 
-const L = 46
+const AXIS_LEFT = 46
 const R = 12
 const T = 14
 const B = 30
@@ -33,10 +35,13 @@ export default function LineChart({
   titles = ticks,
   series,
   format,
+  hideValues = false,
 }: Props) {
   const { ref, width: W } = useChartWidth()
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '')
   const [sel, setSel] = useState<number | null>(null)
+  // senza numeri sull'asse non serve il margine a sinistra
+  const L = hideValues ? R : AXIS_LEFT
   const H = chartHeight(W)
   const PH = H - T - B
   const n = ticks.length
@@ -101,19 +106,22 @@ export default function LineChart({
               strokeOpacity={k === 0 ? 0.5 : 1}
               strokeDasharray={k === 0 ? undefined : '3 4'}
             />
-            <text
-              x={L - 8}
-              y={y(v) + 4}
-              fontSize="11"
-              fill="var(--muted)"
-              textAnchor="end"
-            >
-              {format(v)}
-            </text>
+            {!hideValues && (
+              <text
+                x={L - 8}
+                y={y(v) + 4}
+                fontSize="11"
+                fill="var(--muted)"
+                textAnchor="end"
+              >
+                {format(v)}
+              </text>
+            )}
           </g>
         ))}
         {ticks.map((tick, i) =>
-          i % every === 0 ? (
+          // la prima etichetta è allineata a sinistra: la successiva non le si sovrappone
+          i % every === 0 && (i === 0 || x(i) > L + 64) ? (
             <text
               key={i}
               x={x(i)}
@@ -201,7 +209,7 @@ export default function LineChart({
             key: s.key,
             label: s.label,
             color: s.color,
-            value: format(s.values[current] ?? 0),
+            value: hideValues ? '' : format(s.values[current] ?? 0),
           }))}
         />
       )}

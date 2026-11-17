@@ -8,6 +8,7 @@ import {
   parseChoice,
   planEntries,
   resolveRange,
+  type Bucket,
   type Granularity,
   type PeriodChoice,
 } from '../../lib/analysis'
@@ -39,7 +40,7 @@ const readGrain = (): Granularity | null => {
 export default function AnalysisPage() {
   const { t } = useI18n()
   const a = t.analysis
-  const data = useAnalysisData()
+  const { data, setRpe } = useAnalysisData()
   // l'ultimo periodo scelto resta su questo dispositivo
   const [choice, setChoice] = useState<PeriodChoice>(
     () => parseChoice(readPreference(PERIOD_KEY)) ?? DEFAULT_CHOICE,
@@ -75,20 +76,30 @@ export default function AnalysisPage() {
       const d = parseIsoDate(iso)
       return `${d.getDate()} ${t.monthsShort[d.getMonth()]}`
     }
-    const ticks = buckets.map((b) =>
-      granularity === 'day' && buckets.length <= 31
-        ? String(parseIsoDate(b.start).getDate())
-        : short(b.start),
-    )
-    const titles = buckets.map((b) =>
-      granularity === 'day'
-        ? formatLongDate(b.start, t.monthsShort)
-        : `${short(b.start)} – ${formatLongDate(b.end, t.monthsShort)}`,
-    )
+    const axis = (g: Granularity, list: Bucket[]) => ({
+      buckets: list,
+      ticks: list.map((b) =>
+        g === 'day' && list.length <= 31
+          ? String(parseIsoDate(b.start).getDate())
+          : short(b.start),
+      ),
+      titles: list.map((b) =>
+        g === 'day'
+          ? formatLongDate(b.start, t.monthsShort)
+          : `${short(b.start)} – ${formatLongDate(b.end, t.monthsShort)}`,
+      ),
+    })
     const sessions = data.sessions.filter(
       (s) => s.date >= range.start && s.date <= range.end,
     )
-    return { range, granularity, buckets, ticks, titles, sessions }
+    return {
+      range,
+      granularity,
+      ...axis(granularity, buckets),
+      // il Carico è sempre per settimana
+      weeks: axis('week', bucketsOf(range, 'week')),
+      sessions,
+    }
   }, [data, period, today, t, grain])
 
   return (
@@ -116,7 +127,7 @@ export default function AnalysisPage() {
             </button>
           ))}
         </div>
-        {tab !== 'strength' && view && (
+        {tab === 'volumes' && view && (
           <div className="seg" role="group" aria-label={a.granularity}>
             {GRAINS.map((g) => (
               <button
@@ -147,10 +158,9 @@ export default function AnalysisPage() {
           allSessions={data.sessions}
           sessions={view.sessions}
           range={view.range}
-          buckets={view.buckets}
-          ticks={view.ticks}
-          titles={view.titles}
+          weeks={view.weeks}
           today={today}
+          onSetRpe={setRpe}
         />
       )}
       {view && data && tab === 'strength' && (

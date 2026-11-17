@@ -14,6 +14,7 @@ import type {
 import { clearSessionActual, setSessionActual } from '../../lib/enduranceActual'
 import { createLiveWorkout, startSession } from '../../lib/liveWorkout'
 import { removeApplication } from '../../lib/blocks'
+import { setSessionRpe } from '../../lib/load'
 import { moveSession } from '../../lib/reorder'
 import {
   applyEditedPlan,
@@ -136,6 +137,13 @@ export function useCalendarSessions() {
     [change],
   )
 
+  /** RPE aggiunto dopo, a una seduta svolta che non l'aveva. */
+  const setRpe = useCallback(
+    (id: Id, rpe: number) =>
+      change((cur) => setSessionRpe(cur, id, rpe, new Date().toISOString())),
+    [change],
+  )
+
   /** Elimina l'eseguito endurance: la seduta torna programmata. */
   const clearActual = useCallback(
     (id: Id) =>
@@ -177,6 +185,7 @@ export function useCalendarSessions() {
     setStatus,
     start,
     saveActual,
+    setRpe,
     clearActual,
     unapply,
     remove,

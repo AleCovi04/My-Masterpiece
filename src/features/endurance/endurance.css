@@ -38,27 +38,6 @@
   margin: 0;
   font-size: 15px;
 }
-.ea-rpe {
-  display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
-  gap: 4px;
-  max-width: 460px;
-}
-.ea-rpe button {
-  min-height: 40px;
-  border: 1.5px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text);
-  font: 600 15px var(--f-body);
-  cursor: pointer;
-  padding: 0;
-}
-.ea-rpe button[aria-pressed='true'] {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-ink);
-}
 .ea-view {
   display: flex;
   flex-direction: column;

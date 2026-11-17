@@ -179,6 +179,7 @@ export default function CalendarPage() {
           onResume={() => navigate(LIVE_PATH)}
           onSaveActual={(actual) => cal.saveActual(opened.id, actual)}
           onClearActual={() => cal.clearActual(opened.id)}
+          onSetRpe={(rpe) => cal.setRpe(opened.id, rpe)}
         />
       )}
     </div>

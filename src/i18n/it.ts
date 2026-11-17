@@ -223,17 +223,52 @@ export const it = {
     total: 'Totale',
     byDay: 'per giorno',
     byWeek: 'per settimana',
-    loadTitle: 'Carico (sRPE)',
-    loadTotal: 'Totale',
-    loadPerBucket: 'media per intervallo',
-    loadHow: 'sRPE = minuti svolti × fatica percepita (RPE)',
-    noRpe: '{n} sedute senza RPE contate con {rpe}',
-    formTitle: 'Forma e fatica',
+    loadTitle: 'Carico settimanale per disciplina',
+    loadHow: 'Carico = minuti svolti × fatica percepita (RPE)',
+    hoursTitle: 'Ore per settimana',
+    missingRpe: '{n} sedute senza RPE → aggiungilo',
+    missingRpeOne: '1 seduta senza RPE → aggiungilo',
+    missingRpeHow:
+      'Sono escluse dal carico finché non indichi quanto sono state faticose.',
+    acwrTitle: 'Progressione del carico',
+    acwrZone: {
+      low: 'Scarico',
+      safe: 'Progressione sicura',
+      caution: 'Attenzione',
+      high: 'Aumento troppo brusco',
+    },
+    thisWeek: 'Questa settimana',
+    weekTo: 'Nei 7 giorni fino al {date}',
+    acwrSentence: '{when} {pct} rispetto alla tua media: {zone}',
+    acwrNoChronic: 'Nessun carico nelle 4 settimane precedenti.',
+    acwrHow:
+      'Rapporto acuto/cronico: carico degli ultimi 7 giorni diviso la media settimanale delle ultime 4 settimane.',
+    freshTitle: 'Freschezza',
+    freshZone: {
+      fresh: 'Fresco',
+      neutral: 'Neutro',
+      productive: 'Carico produttivo',
+      overload: 'Sovraccarico',
+    },
+    freshHint: {
+      fresh: 'Recuperato: buon momento per un test o una gara.',
+      neutral: 'Carico e recupero in equilibrio.',
+      productive: 'Stai accumulando lavoro utile: cura il recupero.',
+      overload:
+        'La fatica supera di molto la forma: valuta qualche giorno più leggero.',
+    },
+    freshHow:
+      'Confronto tra Forma (media del carico su 42 giorni) e Fatica (su 7 giorni).',
+    insufficient: 'Dati insufficienti',
+    insufficientHow:
+      'Servono almeno 4 settimane di sedute con RPE (finora {n} giorni).',
+    formTitle: 'Andamento della forma',
+    trend: { up: 'In crescita', flat: 'Stabile', down: 'In calo' },
+    trendHow:
+      'Forma = media del carico degli ultimi 42 giorni. Conta la pendenza, confrontata con 14 giorni prima.',
     fitness: 'Forma',
-    fatigue: 'Fatica',
-    freshness: 'Freschezza',
-    formHow:
-      'Forma = media del carico su 42 giorni, Fatica = su 7 giorni. Freschezza = Forma − Fatica: sotto zero sei carico, sopra zero sei fresco.',
+    loadDisclaimer:
+      'Stime indicative basate su durata × RPE: servono a vedere le tendenze, non sostituiscono il parere medico.',
     muscleMap: 'Mappa muscolare',
     muscleHow:
       'Serie completate pesate per il coinvolgimento (una serie al 50 % vale 0,5). Tocca un muscolo per vedere gli esercizi.',
@@ -350,6 +385,13 @@ export const it = {
     removeBlock: 'Togli dalla fase',
     dragHandle: 'Trascina per riordinare (su telefono tieni premuto)',
   },
+  rpe: {
+    label: 'Fatica percepita (RPE)',
+    legend: '1 = riposo · 10 = massimo',
+    required: 'Scegli un valore da 1 a 10 per salvare.',
+    add: 'Aggiungi RPE',
+    addHow: "Senza RPE questa seduta non entra nel carico dell'Analisi.",
+  },
   endurance: {
     record: 'Registra eseguito',
     edit: 'Modifica eseguito',
@@ -372,10 +414,7 @@ export const it = {
     hr: 'FC media / max',
     bpm: 'bpm',
     elevation: 'Dislivello +',
-    rpe: 'Fatica percepita (RPE, facoltativa)',
     rpeShort: 'RPE',
-    rpeHint:
-      '1 = molto facile · 10 = sforzo massimo. Tocca di nuovo per togliere.',
     notes: 'Note',
     notesPlaceholder: 'Come è andata?',
     leg: 'Frazione',

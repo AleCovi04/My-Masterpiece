@@ -810,3 +810,7 @@
   border-radius: 999px;
   background: var(--c);
 }
+.sd-hint {
+  color: var(--muted);
+  font-size: 13px;
+}

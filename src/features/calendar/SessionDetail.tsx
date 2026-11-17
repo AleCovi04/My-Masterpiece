@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { DisciplineIcon, LegIcons } from '../../components/ui/Icons'
+import RpeScale from '../../components/ui/RpeScale'
 import { brickSports } from '../../lib/brick'
 import type {
   BrickActual,
@@ -13,6 +14,7 @@ import type {
 import { useI18n } from '../../i18n/context'
 import { isIsoDate } from '../../lib/dates'
 import { formatDuration } from '../../lib/format'
+import { sessionRpe } from '../../lib/load'
 import { sessionAsTemplate, sessionDurationSec } from '../../lib/sessions'
 import ActualDialog from '../endurance/ActualDialog'
 import ActualView from '../endurance/ActualView'
@@ -44,6 +46,8 @@ interface Props {
   onSaveActual: (actual: EnduranceActual | BrickActual) => void
   /** Elimina l'eseguito endurance (la seduta torna programmata). */
   onClearActual: () => void
+  /** Aggiunge l'RPE mancante di una seduta svolta. */
+  onSetRpe: (rpe: number) => void
 }
 
 const noop = () => {}
@@ -64,6 +68,7 @@ export default function SessionDetail({
   liveElsewhere,
   onSaveActual,
   onClearActual,
+  onSetRpe,
 }: Props) {
   const { t } = useI18n()
   const c = t.calendar
@@ -134,6 +139,14 @@ export default function SessionDetail({
               </div>
             )}
           </dl>
+
+          {s.status === 'done' && s.actual && sessionRpe(s) === undefined && (
+            <section className="sd-sec">
+              <h4>{t.rpe.add}</h4>
+              <small className="sd-hint">{t.rpe.addHow}</small>
+              <RpeScale value={null} onChange={onSetRpe} bare />
+            </section>
+          )}
 
           {s.discipline !== 'strength' ? (
             s.actual ? (

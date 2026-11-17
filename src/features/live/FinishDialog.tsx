@@ -3,17 +3,16 @@ import type { Exercise, LiveWorkout, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { formatDuration } from '../../lib/format'
 import { liveSummary } from '../../lib/liveWorkout'
+import RpeScale from '../../components/ui/RpeScale'
 import Modal from '../planner/Modal'
 import '../endurance/endurance.css'
-
-const RPE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
 interface Props {
   workout: LiveWorkout
   sessions: Session[]
   exercises: Exercise[]
   endedAtMs: number
-  onSave: (notes: string, rpe: number | null) => Promise<void>
+  onSave: (notes: string, rpe: number) => Promise<void>
   onBack: () => void
 }
 
@@ -31,6 +30,7 @@ export default function FinishDialog({
   const [notes, setNotes] = useState('')
   const [rpe, setRpe] = useState<number | null>(null)
   const [saving, setSaving] = useState(false)
+  const [tried, setTried] = useState(false)
   const sum = useMemo(
     () => liveSummary(workout, sessions, endedAtMs),
     [workout, sessions, endedAtMs],
@@ -95,22 +95,7 @@ export default function FinishDialog({
         )}
       </section>
 
-      <div className="pl-fld">
-        <span>{t.endurance.rpe}</span>
-        <div className="ea-rpe" role="group" aria-label={t.endurance.rpe}>
-          {RPE.map((n) => (
-            <button
-              key={n}
-              type="button"
-              aria-pressed={rpe === n}
-              onClick={() => setRpe(rpe === n ? null : n)}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
-        <small>{t.endurance.rpeHint}</small>
-      </div>
+      <RpeScale value={rpe} onChange={setRpe} showError={tried} />
 
       <label className="pl-fld">
         <span>{l.notes}</span>
@@ -129,6 +114,8 @@ export default function FinishDialog({
           className="pl-btn acc"
           disabled={saving}
           onClick={async () => {
+            setTried(true)
+            if (rpe === null) return
             setSaving(true)
             try {
               await onSave(notes, rpe)
