@@ -53,11 +53,7 @@ export default function AddToPlanDialog({
           <ul className="pl-list">
             {kind === 'phase'
               ? byName(phases).map((p) => (
-                  <li
-                    key={p.id}
-                    className="pl-item ph-item"
-                    data-phase={p.color}
-                  >
+                  <li key={p.id} className="pl-item ph-item" data-phase="">
                     <button
                       type="button"
                       className="pl-item-main"

@@ -223,7 +223,6 @@ describe('applicazione al calendario', () => {
       createdAt: now,
       updatedAt: now,
       name: 'Base',
-      color: 2,
       blockIds: ['a', 'a', 's', 'sparito'],
       archived: false,
     }
@@ -240,7 +239,6 @@ describe('applicazione al calendario', () => {
         kind: 'phase',
         sourceId: 'ph',
         name: 'Base',
-        color: 2,
         weeks,
         start,
         mode: 'append',
@@ -251,7 +249,6 @@ describe('applicazione al calendario', () => {
       'app3',
     )
     expect(r.application.weeks).toHaveLength(5)
-    expect(r.application.color).toBe(2)
     const [w1, , w3] = r.application.weeks
     expect(applicationLabel(r.application, w3, 'sett.')).toBe(
       'Base · sett. 3/5 · Blocco a 1/2',
@@ -279,7 +276,6 @@ describe('eliminazione', () => {
       createdAt: now,
       updatedAt: now,
       name: id,
-      color: 1,
       blockIds,
       archived: false,
     })

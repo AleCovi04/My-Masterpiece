@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import type { PhaseColor, Session, WorkoutTemplate } from '../../data/types'
+import type { Session, WorkoutTemplate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import {
   isMonday,
@@ -25,7 +25,6 @@ interface Props {
   kind: 'block' | 'phase'
   sourceId: string
   name: string
-  color?: PhaseColor
   weeks: SourceWeek[]
   templates: WorkoutTemplate[]
   /** Sedute attuali, per l'anteprima. */
@@ -48,7 +47,6 @@ export default function ApplyDialog({
   kind,
   sourceId,
   name,
-  color,
   weeks,
   templates,
   sessions,
@@ -68,7 +66,6 @@ export default function ApplyDialog({
     kind,
     sourceId,
     name,
-    color,
     weeks,
     start,
     mode,

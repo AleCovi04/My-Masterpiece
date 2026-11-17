@@ -2,7 +2,6 @@ import { useRef, useState, type FormEvent } from 'react'
 import type {
   Id,
   Phase,
-  PhaseColor,
   TrainingBlock,
   WorkoutTemplate,
 } from '../../data/types'
@@ -16,8 +15,6 @@ import Modal from './Modal'
 import TemplateFooter from './TemplateFooter'
 import { useSortable } from './useSortable'
 import './blocks.css'
-
-const PHASE_COLORS: PhaseColor[] = [1, 2, 3, 4, 5, 6]
 
 /** Una riga della fase: il blocco, con una chiave propria (lo stesso blocco può ripetersi). */
 interface Row {
@@ -37,7 +34,7 @@ interface Props {
   onClose: () => void
 }
 
-/** Editor della fase: blocchi in ordine (anche ripetuti), con nome, obiettivo e colore. */
+/** Editor della fase: blocchi in ordine (anche ripetuti), con nome e obiettivo. */
 export default function PhaseDialog({
   phase,
   blocks,
@@ -53,7 +50,6 @@ export default function PhaseDialog({
   const f = t.phases
   const [name, setName] = useState(phase?.name ?? '')
   const [goal, setGoal] = useState(phase?.goal ?? '')
-  const [color, setColor] = useState<PhaseColor>(phase?.color ?? 1)
   const [rows, setRows] = useState<Row[]>(() =>
     (phase?.blockIds ?? []).map((blockId) => ({ key: newId(), blockId })),
   )
@@ -87,7 +83,6 @@ export default function PhaseDialog({
       id: phase?.id ?? newId(),
       name: name.trim().replace(/\s+/g, ' '),
       ...(g && { goal: g }),
-      color,
       blockIds,
       archived: phase?.archived ?? false,
       createdAt: phase?.createdAt ?? now,
@@ -134,23 +129,6 @@ export default function PhaseDialog({
             onChange={(e) => setGoal(e.target.value)}
           />
         </label>
-
-        <div className="pl-fld">
-          <span>{f.color}</span>
-          <div className="ph-colors" role="radiogroup" aria-label={f.color}>
-            {PHASE_COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                role="radio"
-                aria-checked={color === c}
-                aria-label={`${f.color} ${c}`}
-                data-phase={c}
-                onClick={() => setColor(c)}
-              />
-            ))}
-          </div>
-        </div>
 
         <div className="bl-weekbar">
           <b>{f.blocksTitle}</b>

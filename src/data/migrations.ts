@@ -28,6 +28,14 @@ export interface Migration {
 type Obj = Record<string, unknown>
 const isObj = (v: unknown): v is Obj => !!v && typeof v === 'object'
 
+/** Toglie il campo `color` (fasi e applicazioni, v8). */
+function dropColor(v: unknown): unknown {
+  if (!isObj(v) || !('color' in v)) return v
+  const rest = { ...v }
+  delete rest.color
+  return rest
+}
+
 /** Applica `fn` alle serie di ogni voce (`entries[].sets[]`) di un piano di forza. */
 function mapEntrySets(entries: unknown, fn: (set: Obj) => Obj): unknown {
   if (!Array.isArray(entries)) return entries
@@ -170,6 +178,18 @@ export const MIGRATIONS: Migration[] = [
       'Forza: l’eseguito può avere la fatica percepita (`actual.rpe`, 1–10); nessun dato da convertire',
     // solo un campo facoltativo in più: le app più vecchie non devono importare file che lo contengono
     migrate: (d) => d,
+  },
+  {
+    to: 8,
+    description:
+      'Fasi senza colore: via `color` da fasi e applicazioni (tutte con lo stesso colore neutro)',
+    migrate: (d) => ({
+      ...d,
+      ...(Array.isArray(d.phases) && { phases: d.phases.map(dropColor) }),
+      ...(Array.isArray(d.applications) && {
+        applications: d.applications.map(dropColor),
+      }),
+    }),
   },
 ]
 

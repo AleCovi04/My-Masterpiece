@@ -116,7 +116,7 @@ export default function PeriodPicker({
         </button>
         <div
           className="pp-cur"
-          data-phase={entry?.color}
+          data-phase={entry?.kind === 'phase' ? '' : undefined}
           data-plan={entry ? '' : undefined}
         >
           <b>{title}</b>
@@ -216,7 +216,7 @@ function PlanPickerDialog({ entries, selected, onPick, onClose }: DialogProps) {
     <button
       type="button"
       className={`pp-row${e.value === selected ? ' sel' : ''}`}
-      data-phase={e.color}
+      data-phase={e.kind === 'phase' ? '' : undefined}
       aria-pressed={e.value === selected}
       onClick={() => onPick(e.value)}
     >

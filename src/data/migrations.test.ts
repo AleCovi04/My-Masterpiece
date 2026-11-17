@@ -279,7 +279,21 @@ describe('migrazioni', () => {
   it('v6 → v7: nessun dato cambia; l’RPE della forza resta valido', () => {
     const d = migrate(v0(), 0)
     expect(MIGRATIONS[6].migrate(d)).toBe(d)
-    expect(SCHEMA_VERSION).toBe(7)
+  })
+
+  it('v7 → v8: via il colore da fasi e applicazioni', () => {
+    const d = migrate(v0(), 0)
+    const out = MIGRATIONS[7].migrate({
+      ...d,
+      phases: [{ id: 'p', name: 'Base', color: 3, blockIds: [] }, 'rotto'],
+      applications: [{ id: 'a', kind: 'phase', color: 2 }, { id: 'b' }],
+    })
+    expect(out.phases).toEqual([
+      { id: 'p', name: 'Base', blockIds: [] },
+      'rotto',
+    ])
+    expect(out.applications).toEqual([{ id: 'a', kind: 'phase' }, { id: 'b' }])
+    expect(SCHEMA_VERSION).toBe(8)
   })
 })
 

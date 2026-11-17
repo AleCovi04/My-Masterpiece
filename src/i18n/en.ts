@@ -325,7 +325,6 @@ export const en: Dictionary = {
       'No phases yet. A phase is a sequence of blocks (e.g. Base, Build, Peak, Taper).',
     goal: 'Goal (optional)',
     goalPlaceholder: 'E.g. build the aerobic base',
-    color: 'Colour',
     blocksTitle: 'Blocks',
     blocksCount: 'blocks',
     noBlocks: 'No blocks: add one.',

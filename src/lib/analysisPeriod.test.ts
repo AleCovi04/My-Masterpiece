@@ -34,7 +34,6 @@ const app = (
     kind,
     sourceId: id,
     name: id,
-    ...(kind === 'phase' && { color: 1 as const }),
     startDate: start,
     weeks,
   }

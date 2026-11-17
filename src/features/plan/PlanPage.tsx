@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { PlanIcon } from '../../components/ui/Icons'
+import { PlanIcon, TrashIcon } from '../../components/ui/Icons'
 import { dataStore } from '../../data'
 import type { IsoDate, Phase, TrainingBlock } from '../../data/types'
 import { useI18n } from '../../i18n/context'
@@ -14,6 +14,7 @@ import {
   type Progress,
   type Timing,
 } from '../../lib/plan'
+import Modal from '../planner/Modal'
 import { usePlanning } from '../planner/usePlanning'
 import AddToPlanDialog from './AddToPlanDialog'
 import ApplyDialog from './ApplyDialog'
@@ -121,7 +122,6 @@ export default function PlanPage() {
           kind={pick.kind}
           sourceId={pick.kind === 'phase' ? pick.phase.id : pick.block.id}
           name={pick.kind === 'phase' ? pick.phase.name : pick.block.name}
-          color={pick.kind === 'phase' ? pick.phase.color : undefined}
           weeks={
             pick.kind === 'phase'
               ? phaseWeeks(pick.phase, planning.blocks)
@@ -159,6 +159,7 @@ function PlanCard({
   const a = item.application
   const [open, setOpen] = useState(item.timing === 'current')
   const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
   const date = (iso: IsoDate) => formatLongDate(iso, t.monthsShort)
   const shortDate = (iso: IsoDate) => {
     const [, m, d] = iso.split('-').map(Number)
@@ -179,12 +180,11 @@ function PlanCard({
     ]
       .filter(Boolean)
       .join(' · ')
+  const pending =
+    item.progress.total - item.progress.done - item.progress.skipped
 
   return (
-    <li
-      className={`pn-card ${item.timing}`}
-      data-phase={a.kind === 'phase' ? a.color : undefined}
-    >
+    <li className={`pn-card ${item.timing}`}>
       <button
         type="button"
         className="pn-card-h"
@@ -200,15 +200,22 @@ function PlanCard({
           </span>
         </span>
         <b className="pn-name">{a.name}</b>
-        <small>
+        <small className="pn-dates">
           {date(item.start)} – {date(item.end)} · {a.weeks.length}{' '}
           {t.blocks.weeksCount}
         </small>
-        <span className="pn-prog">
-          <ProgressBar p={item.progress} />
-          <b>{item.progress.pct}%</b>
-        </span>
-        <small>{stats(item.progress)}</small>
+        <b className="pn-pct">{item.progress.pct}%</b>
+        <ProgressBar p={item.progress} />
+        <small className="pn-stats">{stats(item.progress)}</small>
+      </button>
+      <button
+        type="button"
+        className="pn-trash"
+        aria-label={pl.remove}
+        title={pl.remove}
+        onClick={() => setConfirming(true)}
+      >
+        <TrashIcon />
       </button>
 
       {open && (
@@ -251,49 +258,46 @@ function PlanCard({
               </ul>
             </section>
           ))}
-
-          <div className="pl-danger">
-            {confirming ? (
-              <span className="pl-confirm">
-                <small>
-                  {pl.removeConfirm.replace(
-                    '{n}',
-                    String(
-                      item.progress.total -
-                        item.progress.done -
-                        item.progress.skipped,
-                    ),
-                  )}
-                </small>
-                <button
-                  type="button"
-                  className="pl-btn warn"
-                  onClick={async () => {
-                    await onRemove()
-                    setConfirming(false)
-                  }}
-                >
-                  {pl.confirmYes}
-                </button>
-                <button
-                  type="button"
-                  className="pl-btn"
-                  onClick={() => setConfirming(false)}
-                >
-                  {pl.cancel}
-                </button>
-              </span>
-            ) : (
-              <button
-                type="button"
-                className="pl-btn warn"
-                onClick={() => setConfirming(true)}
-              >
-                {pl.remove}
-              </button>
-            )}
-          </div>
         </div>
+      )}
+
+      {confirming && (
+        <Modal
+          title={pl.remove}
+          closeLabel={pl.close}
+          onClose={() => setConfirming(false)}
+        >
+          <p className="pn-confirm">
+            <b>{a.name}</b>
+            <br />
+            {pl.removeConfirm.replace('{n}', String(pending))}
+          </p>
+          <div className="pl-actions">
+            <button
+              type="button"
+              className="pl-btn warn"
+              disabled={busy}
+              onClick={async () => {
+                setBusy(true)
+                try {
+                  await onRemove()
+                } finally {
+                  setBusy(false)
+                  setConfirming(false)
+                }
+              }}
+            >
+              {pl.confirmYes}
+            </button>
+            <button
+              type="button"
+              className="pl-btn"
+              onClick={() => setConfirming(false)}
+            >
+              {pl.cancel}
+            </button>
+          </div>
+        </Modal>
       )}
     </li>
   )

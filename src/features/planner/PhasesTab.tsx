@@ -78,7 +78,7 @@ export default function PhasesTab({ planning }: { planning: Planning }) {
               <li
                 key={x.id}
                 className={`pl-item ph-item${x.archived ? ' arch' : ''}`}
-                data-phase={x.color}
+                data-phase=""
               >
                 <button
                   type="button"

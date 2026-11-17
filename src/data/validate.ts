@@ -121,7 +121,6 @@ export function isPhase(v: unknown): v is Phase {
     isObj(v) &&
     typeof v.id === 'string' &&
     typeof v.name === 'string' &&
-    typeof v.color === 'number' &&
     Array.isArray(v.blockIds) &&
     v.blockIds.every((id) => typeof id === 'string')
   )

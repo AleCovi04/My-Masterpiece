@@ -2,7 +2,6 @@
 import type {
   EnduranceDiscipline,
   IsoDate,
-  PhaseColor,
   Session,
   Sport,
 } from '../data/types'
@@ -206,7 +205,6 @@ export interface PlanEntry {
   level: 'app' | 'run'
   kind: 'phase' | 'block'
   name: string
-  color?: PhaseColor
   start: IsoDate
   end: IsoDate
   timing: Timing
@@ -223,7 +221,6 @@ export function planEntries(items: PlanItem[]): PlanEntry[] {
       level: 'app',
       kind: a.kind,
       name: a.name,
-      ...(a.color && { color: a.color }),
       start: item.start,
       end: item.end,
       timing: item.timing,
@@ -236,7 +233,6 @@ export function planEntries(items: PlanItem[]): PlanEntry[] {
         level: 'run',
         kind: 'block',
         name: r.blockName,
-        ...(a.color && { color: a.color }),
         start: r.start,
         end: r.end,
         timing: r.timing,

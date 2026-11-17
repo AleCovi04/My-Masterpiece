@@ -10,7 +10,6 @@ import {
   type IsoDate,
   type IsoDateTime,
   type Phase,
-  type PhaseColor,
   type Session,
   type Sport,
   type TrainingBlock,
@@ -184,7 +183,6 @@ export interface ApplyInput {
   kind: 'block' | 'phase'
   sourceId: Id
   name: string
-  color?: PhaseColor
   weeks: SourceWeek[]
   /** Lunedì di partenza. */
   start: IsoDate
@@ -263,7 +261,6 @@ export function planApplication(
     kind: input.kind,
     sourceId: input.sourceId,
     name: input.name,
-    ...(input.color && { color: input.color }),
     startDate: input.start,
     weeks: input.weeks.map(({ block, index }, k) => ({
       start: shift(input.start, k * 7),

@@ -41,7 +41,7 @@ export default function WeekLabels({
             key={a.id}
             type="button"
             className="cal-label"
-            data-phase={a.color}
+            data-phase={a.kind === 'phase' ? '' : undefined}
             onClick={() => {
               setConfirming(false)
               setOpen(a)

@@ -16,7 +16,6 @@ const app = (
   kind: 'phase',
   sourceId: 'ph',
   name: id,
-  color: 1,
   startDate: start,
   weeks: weeks.map(([blockId, week, total], i) => {
     const d = new Date(`${start}T12:00:00`)

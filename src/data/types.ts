@@ -387,14 +387,10 @@ export interface TrainingBlock extends Entity {
   archived: boolean
 }
 
-/** Colori delle fasi: variabili del tema `--phase-1` … `--phase-6`. */
-export type PhaseColor = 1 | 2 | 3 | 4 | 5 | 6
-
 /** Sequenza ordinata di blocchi (anche ripetuti), es. "Base" = carico ×3 + scarico. */
 export interface Phase extends Entity {
   name: string
   goal?: string
-  color: PhaseColor
   blockIds: Id[]
   archived: boolean
 }
@@ -418,8 +414,6 @@ export interface BlockApplication extends Entity {
   sourceId: Id
   /** Nome del blocco o della fase al momento dell'applicazione. */
   name: string
-  /** Colore della fase (solo `kind: 'phase'`). */
-  color?: PhaseColor
   startDate: IsoDate
   weeks: AppliedWeek[]
 }

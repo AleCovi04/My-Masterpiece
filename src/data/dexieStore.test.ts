@@ -309,7 +309,6 @@ describe('store IndexedDB', () => {
       createdAt: stamp,
       updatedAt: stamp,
       name: 'Base',
-      color: 1,
       blockIds: ['b1', 'b1'],
       archived: false,
     }

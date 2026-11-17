@@ -46,13 +46,8 @@
   --run: #e2ad00;
   --strength: #e23f6b;
   --brick: #8b5cf6;
-  /* colori delle fasi (Planner, Fasi) */
-  --phase-1: #14b8a6;
-  --phase-2: #6366f1;
-  --phase-3: #f97316;
-  --phase-4: #ec4899;
-  --phase-5: #84cc16;
-  --phase-6: #64748b;
+  /* fasi: un colore neutro per tutte */
+  --phase: var(--text);
   --f-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;
   --f-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
@@ -72,23 +67,8 @@
 [data-discipline='brick'] {
   --c: var(--brick);
 }
-[data-phase='1'] {
-  --c: var(--phase-1);
-}
-[data-phase='2'] {
-  --c: var(--phase-2);
-}
-[data-phase='3'] {
-  --c: var(--phase-3);
-}
-[data-phase='4'] {
-  --c: var(--phase-4);
-}
-[data-phase='5'] {
-  --c: var(--phase-5);
-}
-[data-phase='6'] {
-  --c: var(--phase-6);
+[data-phase] {
+  --c: var(--phase);
 }
 
 /* icone delle frazioni di un brick, in fila */

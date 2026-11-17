@@ -326,7 +326,6 @@ export const it = {
       'Nessuna fase. Una fase è una sequenza di blocchi (es. Base, Build, Peak, Taper).',
     goal: 'Obiettivo (facoltativo)',
     goalPlaceholder: 'Es. costruire la base aerobica',
-    color: 'Colore',
     blocksTitle: 'Blocchi',
     blocksCount: 'blocchi',
     noBlocks: 'Nessun blocco: aggiungine uno.',

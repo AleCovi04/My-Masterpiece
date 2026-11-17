@@ -35,6 +35,12 @@ export const RestoreIcon = () => (
   </Svg>
 )
 
+export const TrashIcon = () => (
+  <Svg>
+    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />
+  </Svg>
+)
+
 export const ChevronIcon = () => (
   <Svg>
     <path d="M15 6l-6 6 6 6" />
