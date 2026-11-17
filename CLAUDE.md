@@ -33,6 +33,15 @@ React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 `npm run lint`, `npm test` e `npm run build` passano; verifica a 390 px e 1440 px; documentazione aggiornata (modello dati, decisioni, roadmap); commit con messaggio chiaro e push.
 
+## Modo di lavorare
+
+- Rispondi in italiano, in modo conciso.
+- Per ogni nuovo punto della roadmap: prima 5–7 domande su flusso e scelte, ognuna con la tua proposta; poi un piano breve. Implementa solo dopo l'approvazione.
+- Con più opzioni: pro e contro di ciascuna e quale consigli.
+- Un compito alla volta; alla fine commit e push e riepilogo di 3–4 righe, con dubbi e domande aperte separati.
+- Dopo ogni compito: cosa deve controllare l'utente (al massimo 5 punti, anche dal telefono).
+- Aggiorna sempre roadmap, decisioni e modello dati.
+
 ## Risposte
 
 Brevi, al massimo 4 righe, più eventuali domande aperte o dubbi.
