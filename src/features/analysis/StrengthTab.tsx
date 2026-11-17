@@ -194,6 +194,7 @@ export default function StrengthTab({ sessions, exercises }: Props) {
               stacks={[
                 {
                   key: 'vol',
+                  label: a.volume,
                   color: 'var(--strength)',
                   values: progress.map((p) => p.volume),
                 },

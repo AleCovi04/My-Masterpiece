@@ -3,6 +3,7 @@ import type { IsoDate, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import type { Bucket, Range } from '../../lib/analysis'
 import { parseIsoDate } from '../../lib/dates'
+import { formatLongDate } from '../../lib/format'
 import {
   DEFAULT_RPE,
   fitnessFatigue,
@@ -94,9 +95,11 @@ export default function LoadTab({
           titles={titles}
           stacks={DISCIPLINES.map((d) => ({
             key: d,
+            label: t.discipline[d],
             color: `var(--${d})`,
             values: perBucket.map((l) => l[d]),
           }))}
+          totalLabel={a.total}
           format={int}
         />
         <p className="note ana-legend">
@@ -131,6 +134,7 @@ export default function LoadTab({
         <LineChart
           label={a.formTitle}
           ticks={dayTicks}
+          titles={points.map((p) => formatLongDate(p.date, t.monthsShort))}
           series={[
             {
               key: 'fitness',

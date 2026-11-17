@@ -4,7 +4,7 @@ import {
   bucketsOf,
   distanceBySport,
   granularityOf,
-  niceMax,
+  axisScale,
   resolveRange,
   sumTime,
   timeSeries,
@@ -159,11 +159,19 @@ describe('volumi', () => {
   })
 })
 
-describe('niceMax', () => {
-  it('arrotonda a 1, 2, 2.5 o 5 × 10ⁿ', () => {
-    expect(niceMax(0)).toEqual({ max: 1, step: 0.25 })
-    expect(niceMax(7.3)).toEqual({ max: 8, step: 2 })
-    expect(niceMax(42)).toEqual({ max: 60, step: 20 })
-    expect(niceMax(9)).toEqual({ max: 10, step: 2.5 })
+describe('axisScale', () => {
+  it('lascia poco spazio sopra il massimo, griglia su passi tondi', () => {
+    expect(axisScale(0)).toMatchObject({ max: 1, step: 0.25 })
+    const h = axisScale(10)
+    expect(h.max).toBeCloseTo(10.8)
+    expect(h.step).toBe(5)
+    expect(h.lines).toEqual([0, 5, 10])
+    const k = axisScale(42)
+    expect(k.max).toBeCloseTo(45.36)
+    expect(k.step).toBe(20)
+    expect(k.lines).toEqual([0, 20, 40])
+    const s = axisScale(1.7)
+    expect(s.step).toBe(0.5)
+    expect(s.lines).toEqual([0, 0.5, 1, 1.5])
   })
 })

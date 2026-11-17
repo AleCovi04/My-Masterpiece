@@ -20,3 +20,7 @@ export function useChartWidth(fallback = 520) {
   }, [])
   return { ref, width }
 }
+
+/** Altezza del grafico: più alto quando c'è spazio (desktop). */
+export const chartHeight = (width: number) =>
+  width >= 900 ? 340 : width >= 600 ? 300 : 250

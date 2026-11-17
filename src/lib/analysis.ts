@@ -187,13 +187,23 @@ export function sumDistance(series: SportDistance[]): SportDistance {
   return out
 }
 
-/** Massimo "tondo" per l'asse: 1, 2 o 5 × 10ⁿ, con al più 5 linee. */
-export function niceMax(v: number): { max: number; step: number } {
-  if (v <= 0) return { max: 1, step: 0.25 }
-  const raw = v / 4
+/**
+ * Scala dell'asse Y: il massimo è appena sopra il valore più alto (+8 %),
+ * le linee della griglia cadono su passi "tondi" (1, 2, 2,5 o 5 × 10ⁿ), al più 4.
+ */
+export function axisScale(
+  v: number,
+  headroom = 0.08,
+): { max: number; step: number; lines: number[] } {
+  if (v <= 0) return { max: 1, step: 0.25, lines: [0, 0.25, 0.5, 0.75, 1] }
+  const max = v * (1 + headroom)
+  const raw = max / 4
   const p = 10 ** Math.floor(Math.log10(raw))
-  const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((s) => s >= raw)!
-  return { max: Math.ceil(v / step) * step, step }
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * p).find((x) => x >= raw)!
+  const lines: number[] = []
+  for (let k = 0; k * step <= max + 1e-9; k++)
+    lines.push(+(k * step).toFixed(10))
+  return { max, step, lines }
 }
 
 // ---------- scelta del periodo (filtro dell'Analisi) ----------

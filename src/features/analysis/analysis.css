@@ -33,9 +33,67 @@
   gap: 14px;
 }
 .ana-chart {
+  position: relative;
   width: 100%;
   min-width: 0;
   overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+.ana-chart svg {
+  display: block;
+  cursor: crosshair;
+}
+.ana-tip {
+  position: absolute;
+  z-index: 1;
+  min-width: 130px;
+  max-width: 190px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--text) 14%, transparent);
+  font-size: 12px;
+  pointer-events: none;
+}
+.ana-tip b {
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.ana-tip span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.ana-tip span.strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.ana-tip i {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+}
+.ana-tip i.dot {
+  border-radius: 50%;
+  background: var(--text);
+}
+.ana-tip i.none {
+  background: transparent;
+}
+.ana-tip em {
+  margin-left: auto;
+  padding-left: 10px;
+  font-style: normal;
+  font-weight: 600;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .chips.sm {
   gap: 6px;
@@ -48,10 +106,10 @@
 .ana-legend {
   margin: 0;
 }
-.ana-dash {
+.ana-pkey {
   display: inline-block;
-  width: 16px;
-  border-top: 2px dashed var(--text);
+  width: 26px;
+  height: 10px;
   vertical-align: middle;
 }
 .ana-figs {
@@ -328,10 +386,5 @@
     margin: 0;
     padding: 2px 0;
     flex-wrap: wrap;
-  }
-}
-@media (min-width: 1024px) {
-  .ana-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

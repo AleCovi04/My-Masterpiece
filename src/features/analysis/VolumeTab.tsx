@@ -11,7 +11,7 @@ import {
 } from '../../lib/analysis'
 import { formatDistance, formatDuration } from '../../lib/format'
 import { DISCIPLINES } from '../../lib/weekStats'
-import BarChart from './BarChart'
+import BarChart, { PlannedKey } from './BarChart'
 
 interface Props {
   sessions: Session[]
@@ -82,16 +82,20 @@ export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
           titles={titles}
           stacks={shown.map((d) => ({
             key: d,
+            label: t.discipline[d],
             color: `var(--${d})`,
             values: time.map((x) => x[d].actualS / 3600),
           }))}
           planned={time.map(
             (x) => shown.reduce((s, d) => s + x[d].plannedS, 0) / 3600,
           )}
+          plannedLabel={a.plannedOne}
+          totalLabel={a.total}
           format={hoursLabel}
+          formatTip={(h) => formatDuration(Math.round(h * 3600))}
         />
         <p className="note ana-legend">
-          {a.legendBars} · <span className="ana-dash" /> {a.legendDash}
+          {a.legendBars} · <PlannedKey /> {a.legendDash}
         </p>
       </section>
 
@@ -123,15 +127,18 @@ export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
           stacks={[
             {
               key: sport,
+              label: t.discipline[sport],
               color: `var(--${sport})`,
               values: dist.map((x) => x[sport].actualM / unit),
             },
           ]}
           planned={dist.map((x) => x[sport].plannedM / unit)}
+          plannedLabel={a.plannedOne}
           format={distLabel}
+          formatTip={(v) => formatDistance(v * unit, sport)}
         />
         <p className="note ana-legend">
-          {a.legendBars} · <span className="ana-dash" /> {a.legendDash} ·{' '}
+          {a.legendBars} · <PlannedKey /> {a.legendDash} ·{' '}
           {sport === 'swim' ? 'm' : 'km'}
         </p>
       </section>
