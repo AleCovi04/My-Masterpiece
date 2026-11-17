@@ -189,7 +189,6 @@ export const en: Dictionary = {
     volumes: 'Volume',
     load: 'Load',
     strength: 'Strength',
-    soon: 'Coming in the next step.',
     hours: 'Hours by discipline',
     distance: 'Distance',
     actual: 'Actual',
@@ -212,6 +211,20 @@ export const en: Dictionary = {
     freshness: 'Form',
     formHow:
       'Fitness = 42-day average load, Fatigue = 7-day average. Form = Fitness − Fatigue: below zero you are loaded, above zero you are fresh.',
+    muscleMap: 'Muscle map',
+    muscleHow:
+      'Completed sets weighted by involvement (a set at 50% counts 0.5). Tap a muscle to see its exercises.',
+    noMuscleExercises: 'No exercises done for this muscle in the period.',
+    noStrength: 'No strength sessions done in the period.',
+    exercise: 'Exercise',
+    setsDone: 'Sets',
+    maxKg: 'Max kg',
+    e1rm: 'Estimated 1RM',
+    volume: 'Volume (kg)',
+    progress: 'Progression',
+    volumePerSession: 'Volume per session (kg × reps)',
+    progressHow:
+      'Estimated 1RM with Epley: kg × (1 + reps / 30), the best of each session. Dashed = max kg.',
   },
   plan: {
     title: 'The Plan',

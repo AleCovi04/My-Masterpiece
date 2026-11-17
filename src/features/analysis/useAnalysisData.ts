@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
 import { dataStore } from '../../data'
-import type { BlockApplication, Session } from '../../data/types'
+import type { BlockApplication, Exercise, Session } from '../../data/types'
 
 export interface AnalysisData {
   sessions: Session[]
   applications: BlockApplication[]
+  exercises: Exercise[]
 }
 
 /** Dati in sola lettura per l'Analisi. */
@@ -13,11 +14,13 @@ export function useAnalysisData(): AnalysisData | null {
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([dataStore.loadSessions(), dataStore.loadApplications()]).then(
-      ([sessions, applications]) => {
-        if (!cancelled) setData({ sessions, applications })
-      },
-    )
+    Promise.all([
+      dataStore.loadSessions(),
+      dataStore.loadApplications(),
+      dataStore.loadExercises(),
+    ]).then(([sessions, applications, exercises]) => {
+      if (!cancelled) setData({ sessions, applications, exercises })
+    })
     return () => {
       cancelled = true
     }

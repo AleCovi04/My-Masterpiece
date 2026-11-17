@@ -187,7 +187,6 @@ export const it = {
     volumes: 'Volumi',
     load: 'Carico',
     strength: 'Forza',
-    soon: 'In arrivo nel prossimo passo.',
     hours: 'Ore per disciplina',
     distance: 'Distanza',
     actual: 'Effettive',
@@ -210,6 +209,21 @@ export const it = {
     freshness: 'Freschezza',
     formHow:
       'Forma = media del carico su 42 giorni, Fatica = su 7 giorni. Freschezza = Forma − Fatica: sotto zero sei carico, sopra zero sei fresco.',
+    muscleMap: 'Mappa muscolare',
+    muscleHow:
+      'Serie completate pesate per il coinvolgimento (una serie al 50 % vale 0,5). Tocca un muscolo per vedere gli esercizi.',
+    noMuscleExercises:
+      'Nessun esercizio svolto per questo muscolo nel periodo.',
+    noStrength: 'Nessuna seduta di forza svolta nel periodo.',
+    exercise: 'Esercizio',
+    setsDone: 'Serie',
+    maxKg: 'Kg max',
+    e1rm: '1RM stimato',
+    volume: 'Volume (kg)',
+    progress: 'Progressione',
+    volumePerSession: 'Volume per seduta (kg × reps)',
+    progressHow:
+      '1RM stimato con Epley: kg × (1 + reps / 30), il migliore di ogni seduta. Tratteggio = kg massimi.',
   },
   plan: {
     title: 'Il Piano',

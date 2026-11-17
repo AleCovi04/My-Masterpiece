@@ -26,6 +26,9 @@ interface HeatProps {
   /** Valore che corrisponde a `--heat-hi`; di default il massimo dei valori. */
   max?: number
   formatValue?: (value: number) => string
+  /** Gruppo scelto (facoltativo): con `onSelect` i gruppi diventano toccabili. */
+  selected?: BodyGroup | null
+  onSelect?: (id: BodyGroup | null) => void
 }
 
 export type BodyMapProps = (SelectProps | HeatProps) & { className?: string }
@@ -73,7 +76,10 @@ export default function BodyMap(props: BodyMapProps) {
       : String(Math.round(v * 100) / 100)
 
   const toggle = (id: BodyGroup) => {
-    if (props.mode !== 'select') return
+    if (props.mode === 'heat') {
+      props.onSelect?.(props.selected === id ? null : id)
+      return
+    }
     const has = props.selected.includes(id)
     props.onChange(
       props.multiple
@@ -127,7 +133,11 @@ export default function BodyMap(props: BodyMapProps) {
 
   const renderGroup = (fig: Figure, view: View, id: BodyGroup) => {
     const name = groupName(id, lang)
-    const selected = props.mode === 'select' && props.selected.includes(id)
+    const selected =
+      props.mode === 'select'
+        ? props.selected.includes(id)
+        : props.selected === id
+    const interactive = props.mode === 'select' || !!props.onSelect
     const value = heatValues?.[id] ?? 0
     const style: CSSProperties & Record<string, string> = {}
     if (heatValues && value > 0 && heatMax > 0) {
@@ -150,13 +160,13 @@ export default function BodyMap(props: BodyMapProps) {
         />
       ) : null,
     )
-    return props.mode === 'select' ? (
+    return interactive ? (
       <g
         key={id}
         {...common}
         role="button"
         aria-pressed={selected}
-        aria-label={name}
+        aria-label={heatValues ? tipText(id) : name}
         onClick={() => toggle(id)}
         onKeyDown={(e: KeyboardEvent) => {
           if (e.key === 'Enter' || e.key === ' ') {

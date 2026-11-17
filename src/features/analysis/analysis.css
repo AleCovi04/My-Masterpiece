@@ -96,6 +96,51 @@
   border-radius: 3px;
   flex: none;
 }
+.ana-muscle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+.ana-muscle h4,
+.ana-sub {
+  margin: 0;
+  font-size: 15px;
+}
+.ana-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+.ana-table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 4px 6px 6px 0;
+}
+.ana-table td {
+  padding: 7px 6px 7px 0;
+  border-top: 1px solid var(--line);
+}
+.ana-table small {
+  color: var(--muted);
+}
+.ana-link {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
 @media (min-width: 1024px) {
   .ana-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

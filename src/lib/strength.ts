@@ -132,3 +132,122 @@ export function setsPerMuscle(
   }
   return result
 }
+
+// ---------- Analisi della forza ----------
+
+/** Serie per muscolo (pesate per il coinvolgimento) in tutte le sedute di forza svolte. */
+export function muscleSetsIn(
+  sessions: Session[],
+  exercises: Pick<Exercise, 'id' | 'muscles'>[],
+): Record<MuscleId, number> {
+  const total = Object.fromEntries(MUSCLES.map((m) => [m.id, 0])) as Record<
+    MuscleId,
+    number
+  >
+  for (const { actual } of doneStrength(sessions)) {
+    const per = setsPerMuscle(actual.exercises, exercises)
+    for (const m of MUSCLES) total[m.id] += per[m.id]
+  }
+  return total
+}
+
+export interface MuscleExercise {
+  exerciseId: Id
+  /** Serie completate dell'esercizio. */
+  sets: number
+  /** Serie che contano per il muscolo (serie × % / 100). */
+  weighted: number
+  maxKg: number
+  best1Rm: number
+}
+
+/** Esercizi svolti che coinvolgono un muscolo, dal contributo più alto. */
+export function muscleExercises(
+  sessions: Session[],
+  exercises: Pick<Exercise, 'id' | 'muscles'>[],
+  muscle: MuscleId,
+): MuscleExercise[] {
+  const percent = new Map<Id, number>()
+  for (const e of exercises) {
+    const m = e.muscles.find((x) => x.muscle === muscle)
+    if (m && m.percent > 0) percent.set(e.id, m.percent)
+  }
+  const out = new Map<Id, MuscleExercise>()
+  for (const { actual } of doneStrength(sessions)) {
+    for (const ex of actual.exercises) {
+      const pct = percent.get(ex.exerciseId)
+      if (ex.skipped || !pct || ex.sets.length === 0) continue
+      const cur = out.get(ex.exerciseId) ?? {
+        exerciseId: ex.exerciseId,
+        sets: 0,
+        weighted: 0,
+        maxKg: 0,
+        best1Rm: 0,
+      }
+      cur.sets += ex.sets.length
+      cur.weighted += (ex.sets.length * pct) / 100
+      for (const s of ex.sets) {
+        cur.maxKg = Math.max(cur.maxKg, s.kg)
+        cur.best1Rm = Math.max(cur.best1Rm, epley1Rm(s.kg, s.reps))
+      }
+      out.set(ex.exerciseId, cur)
+    }
+  }
+  return [...out.values()].sort(
+    (a, b) => b.weighted - a.weighted || b.best1Rm - a.best1Rm,
+  )
+}
+
+export interface ProgressPoint {
+  date: IsoDate
+  /** kg più alto sollevato nella seduta. */
+  maxKg: number
+  /** Miglior 1RM stimato (Epley) della seduta. */
+  best1Rm: number
+  /** Σ kg × reps della seduta. */
+  volume: number
+  sets: number
+}
+
+/** Andamento di un esercizio seduta per seduta (sedute svolte, in ordine di data). */
+export function exerciseProgress(
+  sessions: Session[],
+  exerciseId: Id,
+): ProgressPoint[] {
+  const out: ProgressPoint[] = []
+  const done = doneStrength(sessions).sort(
+    (a, b) => a.date.localeCompare(b.date) || a.order - b.order,
+  )
+  for (const { date, actual } of done) {
+    const sets = actual.exercises
+      .filter((e) => e.exerciseId === exerciseId && !e.skipped)
+      .flatMap((e) => e.sets)
+    if (sets.length === 0) continue
+    out.push({
+      date,
+      maxKg: Math.max(...sets.map((s) => s.kg)),
+      best1Rm: Math.max(...sets.map((s) => epley1Rm(s.kg, s.reps))),
+      volume: totalVolume(sets),
+      sets: sets.length,
+    })
+  }
+  return out
+}
+
+/** Esercizi svolti, dal più frequente (a pari merito il più recente). */
+export function performedExercises(sessions: Session[]): Id[] {
+  const stats = new Map<Id, { n: number; last: IsoDate }>()
+  for (const { date, actual } of doneStrength(sessions)) {
+    for (const e of actual.exercises) {
+      if (e.skipped || e.sets.length === 0) continue
+      const cur = stats.get(e.exerciseId)
+      stats.set(e.exerciseId, {
+        n: (cur?.n ?? 0) + 1,
+        last: cur && cur.last > date ? cur.last : date,
+      })
+    }
+  }
+  return [...stats.entries()]
+    .sort((a, b) => b[1].n - a[1].n || b[1].last.localeCompare(a[1].last))
+    .map(([id]) => id)
+}

@@ -12,6 +12,7 @@ import { formatLongDate } from '../../lib/format'
 import { buildPlan } from '../../lib/plan'
 import { useAnalysisData } from './useAnalysisData'
 import LoadTab from './LoadTab'
+import StrengthTab from './StrengthTab'
 import VolumeTab from './VolumeTab'
 import '../overview/overview.css'
 import './analysis.css'
@@ -163,11 +164,8 @@ export default function AnalysisPage() {
           today={today}
         />
       )}
-      {view && tab === 'strength' && (
-        <section className="panel">
-          <h3>{a[tab]}</h3>
-          <p className="note">{a.soon}</p>
-        </section>
+      {view && data && tab === 'strength' && (
+        <StrengthTab sessions={view.sessions} exercises={data.exercises} />
       )}
     </div>
   )

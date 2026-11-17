@@ -77,7 +77,10 @@ export default function LineChart({ label, ticks, series, format }: Props) {
               y={H - 9}
               fontSize="11"
               fill="var(--muted)"
-              textAnchor="middle"
+              // le etichette ai bordi non escono dal grafico
+              textAnchor={
+                x(i) > W - R - 24 ? 'end' : x(i) < L + 24 ? 'start' : 'middle'
+              }
             >
               {tick}
             </text>

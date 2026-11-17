@@ -98,6 +98,16 @@
 .bm-g.sel path {
   fill: var(--accent);
 }
+/* mappa di calore toccabile: il gruppo scelto tiene il suo colore e prende il contorno */
+.bm.heat .bm-g[role='button'] {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.bm.heat .bm-g.sel path {
+  fill: var(--bm-fill, var(--bm-muscle));
+  stroke: var(--text);
+  stroke-width: 3px;
+}
 @media (hover: hover) {
   .bm.select .bm-g:not(.sel):hover path {
     fill: color-mix(in srgb, var(--accent) 38%, var(--bm-muscle));
