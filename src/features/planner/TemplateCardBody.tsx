@@ -1,4 +1,4 @@
-import { DisciplineIcon } from '../../components/ui/Icons'
+import { DisciplineIcon, LegIcons } from '../../components/ui/Icons'
 import {
   MUSCLES,
   type Exercise,
@@ -13,6 +13,7 @@ import {
   templateDurationSec,
   templateTotals,
 } from '../../lib/enduranceTemplate'
+import { brickSports, brickSummary, brickTotals } from '../../lib/brick'
 import { formatDuration } from '../../lib/format'
 import { topMuscles } from '../../lib/templates'
 
@@ -34,6 +35,16 @@ export default function TemplateCardBody({ template: w, exercises }: Props) {
   if (w.discipline === 'strength') {
     meta = `${w.entries.length} ${p.exercisesCount}`
     if (seconds) meta += ` · ${formatDuration(seconds)}`
+  } else if (w.discipline === 'brick') {
+    const totals = brickTotals(w.legs)
+    meta = [
+      `${w.legs.length} ${p.legsTitle.toLowerCase()}`,
+      seconds &&
+        `${!w.estimatedDurationSec && !totals.durationComplete ? '≥ ' : ''}${formatDuration(seconds)}`,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+    summary = brickSummary(w.legs, t.discipline)
   } else {
     const totals = templateTotals(w)
     meta = [
@@ -66,7 +77,14 @@ export default function TemplateCardBody({ template: w, exercises }: Props) {
           {w.archived && <span className="pl-tag">{p.archivedTag}</span>}
         </b>
       </span>
-      {meta && <span className="wk-meta">{meta}</span>}
+      {meta && (
+        <span className="wk-meta">
+          {w.discipline === 'brick' && (
+            <LegIcons sports={brickSports(w.legs)} />
+          )}{' '}
+          {meta}
+        </span>
+      )}
       {summary && <span className="wk-sum">{summary}</span>}
       {muscles.length > 0 && (
         <span className="wk-chips">

@@ -1,5 +1,8 @@
+import { DisciplineIcon } from '../../components/ui/Icons'
 import type {
-  EnduranceSession,
+  BrickSession,
+  EnduranceDiscipline,
+  EndurancePlan,
   EnduranceStep,
   Exercise,
   Session,
@@ -13,6 +16,7 @@ import {
   formatIntensity,
   templateTotals,
 } from '../../lib/enduranceTemplate'
+import { brickTotals } from '../../lib/brick'
 import { formatMmSs } from '../../lib/exercises'
 import { formatDuration } from '../../lib/format'
 import { blocks, supersetLabels } from '../../lib/templates'
@@ -25,11 +29,10 @@ export default function SessionPlanView({
   session: Session
   exercises: Exercise[]
 }) {
-  return session.discipline === 'strength' ? (
-    <StrengthView session={session} exercises={exercises} />
-  ) : (
-    <EnduranceView session={session} />
-  )
+  if (session.discipline === 'strength')
+    return <StrengthView session={session} exercises={exercises} />
+  if (session.discipline === 'brick') return <BrickView session={session} />
+  return <EnduranceView d={session.discipline} plan={session.plan} />
 }
 
 // ---------- forza: esercizi, serie e superserie ----------
@@ -110,12 +113,16 @@ function StrengthView({
 
 // ---------- endurance: passi, blocchi e totali ----------
 
-function EnduranceView({ session }: { session: EnduranceSession }) {
+function EnduranceView({
+  d,
+  plan,
+}: {
+  d: EnduranceDiscipline
+  plan: EndurancePlan
+}) {
   const { t } = useI18n()
   const c = t.calendar
   const p = t.planner
-  const d = session.discipline
-  const plan = session.plan
   const totals = templateTotals({ discipline: d, ...plan })
 
   const empty =
@@ -205,6 +212,55 @@ function EnduranceView({ session }: { session: EnduranceSession }) {
           ),
         )
       )}
+    </div>
+  )
+}
+
+// ---------- brick: totale e frazioni con le transizioni ----------
+
+function BrickView({ session }: { session: BrickSession }) {
+  const { t } = useI18n()
+  const p = t.planner
+  const legs = session.plan.legs
+  const totals = brickTotals(legs)
+  return (
+    <div className="sd-plan">
+      <div className="sd-totals">
+        <div>
+          <small>{p.totalTime}</small>
+          <b>
+            {totals.durationS > 0
+              ? `${totals.durationComplete ? '' : '≥ '}${formatDuration(totals.durationS)}`
+              : '—'}
+          </b>
+        </div>
+        <div>
+          <small>{p.transitionsTotal}</small>
+          <b>
+            {totals.transitionsS > 0 ? formatClock(totals.transitionsS) : '—'}
+          </b>
+        </div>
+      </div>
+      {legs.map((leg, i) => (
+        <section
+          className="sd-leg"
+          key={leg.id}
+          data-discipline={leg.discipline}
+        >
+          {i > 0 && leg.transitionBeforeS ? (
+            <p className="sd-trans">
+              {p.transition}: {formatClock(leg.transitionBeforeS)}
+            </p>
+          ) : null}
+          <h4 className="sd-leg-h">
+            <span className="wk-ic">
+              <DisciplineIcon discipline={leg.discipline} />
+            </span>
+            {p.legWord} {i + 1} · {t.discipline[leg.discipline]}
+          </h4>
+          <EnduranceView d={leg.discipline} plan={leg} />
+        </section>
+      ))}
     </div>
   )
 }

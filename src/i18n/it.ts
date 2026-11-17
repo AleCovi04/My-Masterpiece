@@ -19,6 +19,7 @@ export const it = {
     bike: 'Bici',
     run: 'Corsa',
     strength: 'Forza',
+    brick: 'Brick',
   },
   status: {
     planned: 'Programmato',
@@ -317,6 +318,19 @@ export const it = {
     checkEnduranceFields:
       'Controlla i campi evidenziati: distanza o tempo (mm:ss), intensità, ripetizioni (2–99).',
     notesStep: 'Note del passo',
+    legsTitle: 'Frazioni',
+    legsHint: 'Da 2 a 6 frazioni di nuoto, bici o corsa, in qualunque ordine.',
+    legWord: 'Frazione',
+    legMenu: 'Azioni della frazione',
+    legDragHandle:
+      'Trascina per riordinare la frazione (su telefono tieni premuto)',
+    duplicateLeg: 'Duplica frazione',
+    removeLeg: 'Elimina frazione',
+    transitionBefore: 'Transizione prima (facoltativa)',
+    transitionsTotal: 'Transizioni',
+    transition: 'Transizione',
+    checkLegs: 'Controlla le frazioni evidenziate.',
+    partialShort: 'parziale',
   },
   data: {
     title: 'Dati',

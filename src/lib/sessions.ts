@@ -1,4 +1,6 @@
 import type {
+  BrickSession,
+  BrickTemplate,
   Discipline,
   EnduranceSession,
   EnduranceTemplate,
@@ -11,6 +13,7 @@ import type {
   StrengthTemplate,
   WorkoutTemplate,
 } from '../data/types'
+import { brickDurationSec, defaultLegs } from './brick'
 import { templateTotals } from './enduranceTemplate'
 import { newId } from './ids'
 import { sessionsOn } from './reorder'
@@ -48,6 +51,13 @@ export function sessionFromTemplate(
       plan: { entries: structuredClone(template.entries) },
     }
   }
+  if (template.discipline === 'brick') {
+    return {
+      ...base,
+      discipline: 'brick',
+      plan: { legs: structuredClone(template.legs) },
+    }
+  }
   return {
     ...base,
     discipline: template.discipline,
@@ -73,6 +83,9 @@ export function emptySession(
     date,
     order: 0,
     status: 'planned' as const,
+  }
+  if (discipline === 'brick') {
+    return { ...base, discipline, plan: { legs: defaultLegs() } }
   }
   return discipline === 'strength'
     ? { ...base, discipline, plan: { entries: [] } }
@@ -164,6 +177,7 @@ export function setSessionStatus(
 export function sessionDurationSec(s: Session): number | null {
   if (s.estimatedDurationSec) return s.estimatedDurationSec
   if (s.discipline === 'strength') return null
+  if (s.discipline === 'brick') return brickDurationSec(s.plan.legs)
   return templateTotals({ discipline: s.discipline, ...s.plan }).durationS
 }
 
@@ -180,6 +194,7 @@ export function sessionSetsCount(s: StrengthSession): number {
  */
 export function sessionAsTemplate(s: StrengthSession): StrengthTemplate
 export function sessionAsTemplate(s: EnduranceSession): EnduranceTemplate
+export function sessionAsTemplate(s: BrickSession): BrickTemplate
 export function sessionAsTemplate(s: Session): WorkoutTemplate {
   const base = {
     id: s.id,
@@ -192,9 +207,11 @@ export function sessionAsTemplate(s: Session): WorkoutTemplate {
     }),
     archived: false,
   }
-  return s.discipline === 'strength'
-    ? { ...base, discipline: 'strength', entries: s.plan.entries }
-    : { ...base, discipline: s.discipline, ...s.plan }
+  if (s.discipline === 'strength')
+    return { ...base, discipline: 'strength', entries: s.plan.entries }
+  if (s.discipline === 'brick')
+    return { ...base, discipline: 'brick', legs: s.plan.legs }
+  return { ...base, discipline: s.discipline, ...s.plan }
 }
 
 /** Applica alla sola seduta ciò che è uscito dall'editor (il template d'origine non cambia). */
@@ -224,6 +241,12 @@ export function applyEditedPlan(
     return {
       ...meta,
       plan: { entries: structuredClone(edited.entries) },
+    } as Session
+  }
+  if (edited.discipline === 'brick') {
+    return {
+      ...meta,
+      plan: { legs: structuredClone(edited.legs) },
     } as Session
   }
   return {

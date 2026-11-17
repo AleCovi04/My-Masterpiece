@@ -21,6 +21,7 @@ export const en: Dictionary = {
     bike: 'Bike',
     run: 'Run',
     strength: 'Strength',
+    brick: 'Brick',
   },
   status: {
     planned: 'Scheduled',
@@ -319,6 +320,18 @@ export const en: Dictionary = {
     checkEnduranceFields:
       'Check the highlighted fields: distance or time (mm:ss), intensity, repeats (2–99).',
     notesStep: 'Step notes',
+    legsTitle: 'Legs',
+    legsHint: '2 to 6 swim, bike or run legs, in any order.',
+    legWord: 'Leg',
+    legMenu: 'Leg actions',
+    legDragHandle: 'Drag to reorder the leg (on phone press and hold)',
+    duplicateLeg: 'Duplicate leg',
+    removeLeg: 'Delete leg',
+    transitionBefore: 'Transition before (optional)',
+    transitionsTotal: 'Transitions',
+    transition: 'Transition',
+    checkLegs: 'Check the highlighted legs.',
+    partialShort: 'partial',
   },
   data: {
     title: 'Data',

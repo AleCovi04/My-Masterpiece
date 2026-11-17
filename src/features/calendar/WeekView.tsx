@@ -1,3 +1,5 @@
+import { LegIcons } from '../../components/ui/Icons'
+import { brickSports } from '../../lib/brick'
 import { useRef, type MouseEvent } from 'react'
 import type { Id, IsoDate, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
@@ -122,6 +124,9 @@ export default function WeekView({
                           {...reorder.cardProps(s.id)}
                         >
                           <b>{name}</b>
+                          {s.discipline === 'brick' && (
+                            <LegIcons sports={brickSports(s.plan.legs)} />
+                          )}
                           <span>
                             {secs ? `${formatHm(secs)} · ` : ''}
                             {t.status[s.status]}

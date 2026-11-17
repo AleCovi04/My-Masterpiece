@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { Discipline } from '../../data/types'
+import type { Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import {
   addDays,
@@ -10,7 +10,12 @@ import {
 } from '../../lib/dates'
 import { formatDuration } from '../../lib/format'
 import { sessionDurationSec } from '../../lib/sessions'
-import { DISCIPLINES, sessionsInWeek, summarize } from '../../lib/weekStats'
+import {
+  DISCIPLINES,
+  sessionSports,
+  sessionsInWeek,
+  summarize,
+} from '../../lib/weekStats'
 import LoadChart from './LoadChart'
 import RaceDatePicker from './RaceDatePicker'
 import TodayPanel from './TodayPanel'
@@ -20,9 +25,7 @@ import './overview.css'
 export default function OverviewPage() {
   const { t } = useI18n()
   const { data, setRaceDate } = useOverviewData()
-  const [active, setActive] = useState<Set<Discipline>>(
-    () => new Set(DISCIPLINES),
-  )
+  const [active, setActive] = useState<Set<Sport>>(() => new Set(DISCIPLINES))
 
   if (!data) return null
 
@@ -31,7 +34,9 @@ export default function OverviewPage() {
   const monday = mondayOf(new Date())
   const sunday = addDays(monday, 6)
   const week = sessionsInWeek(data.sessions, toIsoDate(monday))
-  const filtered = week.filter((s) => active.has(s.discipline))
+  const filtered = week.filter((s) =>
+    sessionSports(s).some((d) => active.has(d)),
+  )
   const sum = summarize(filtered, today)
 
   const days = data.raceDate
@@ -39,7 +44,7 @@ export default function OverviewPage() {
     : null
   const rangeText = `${monday.getDate()} ${t.monthsShort[monday.getMonth()]} – ${sunday.getDate()} ${t.monthsShort[sunday.getMonth()]} ${sunday.getFullYear()}`
 
-  const toggle = (d: Discipline) => {
+  const toggle = (d: Sport) => {
     if (active.has(d) && active.size === 1) return // almeno una attiva
     const next = new Set(active)
     if (!next.delete(d)) next.add(d)

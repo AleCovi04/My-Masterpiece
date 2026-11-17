@@ -6,6 +6,7 @@ import type {
   RepeatBlock,
   WorkoutTemplate,
 } from '../data/types'
+import { brickDurationSec } from './brick'
 import { formatDuration } from './format'
 
 // ---------- lettura e scrittura dei valori ----------
@@ -203,7 +204,9 @@ export function templateTotals(
 /** Durata mostrata: quella scritta a mano, altrimenti quella calcolata. */
 export function templateDurationSec(t: WorkoutTemplate): number | null {
   if (t.estimatedDurationSec) return t.estimatedDurationSec
-  return t.discipline === 'strength' ? null : templateTotals(t).durationS
+  if (t.discipline === 'strength') return null
+  if (t.discipline === 'brick') return brickDurationSec(t.legs)
+  return templateTotals(t).durationS
 }
 
 // ---------- testo ----------

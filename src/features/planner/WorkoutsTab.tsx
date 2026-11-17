@@ -7,13 +7,14 @@ import {
 import type { Discipline, WorkoutTemplate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { normalizeName } from '../../lib/exercises'
+import BrickDialog from './BrickDialog'
 import EnduranceDialog from './EnduranceDialog'
 import Modal from './Modal'
 import TemplateCardBody from './TemplateCardBody'
 import TemplateDialog from './TemplateDialog'
 import { useTemplates } from './useTemplates'
 
-const DISCIPLINES: Discipline[] = ['strength', 'run', 'bike', 'swim']
+const DISCIPLINES: Discipline[] = ['strength', 'run', 'bike', 'swim', 'brick']
 
 export default function WorkoutsTab() {
   const { t, lang } = useI18n()
@@ -96,12 +97,27 @@ export default function WorkoutsTab() {
         {...footer}
       />
     )
+  } else if (editorDiscipline === 'brick') {
+    editor = (
+      <BrickDialog
+        key={current?.id ?? 'new'}
+        template={current?.discipline === 'brick' ? current : null}
+        onSave={onSave}
+        {...footer}
+      />
+    )
   } else if (editorDiscipline) {
     editor = (
       <EnduranceDialog
         key={current?.id ?? 'new'}
         discipline={editorDiscipline}
-        template={current && current.discipline !== 'strength' ? current : null}
+        template={
+          current &&
+          current.discipline !== 'strength' &&
+          current.discipline !== 'brick'
+            ? current
+            : null
+        }
         onSave={onSave}
         {...footer}
       />

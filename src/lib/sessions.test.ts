@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type {
+  BrickTemplate,
   RunTemplate,
   Session,
   StrengthSession,
@@ -18,7 +19,7 @@ import {
   sessionFromTemplate,
   setSessionStatus,
 } from './sessions'
-import { plannedSeconds, summarize } from './weekStats'
+import { loadByDiscipline, plannedSeconds, summarize } from './weekStats'
 
 const now = '2026-11-16T08:00:00.000Z'
 const day = '2026-11-16'
@@ -213,7 +214,7 @@ describe('modifica del piano di una seduta', () => {
 
   it('senza nome torna a mostrarsi la disciplina', () => {
     const s = sessionFromTemplate(run, day, now, 's2')
-    if (s.discipline === 'strength') throw new Error('attesa una corsa')
+    if (s.discipline !== 'run') throw new Error('attesa una corsa')
     const r = applyEditedPlan(s, { ...sessionAsTemplate(s), name: '' }, now)
     expect(r.name).toBeUndefined()
     expect(r.plan).toEqual(s.plan)
@@ -231,5 +232,65 @@ describe('uso degli esercizi nelle sedute', () => {
       templates: 0,
       sessions: 0,
     })
+  })
+})
+
+describe('brick', () => {
+  const brick: BrickTemplate = {
+    id: 'tpl-brick',
+    createdAt: now,
+    updatedAt: now,
+    name: 'Bici + corsa',
+    discipline: 'brick',
+    archived: false,
+    legs: [
+      {
+        id: 'l1',
+        discipline: 'bike',
+        mode: 'simple',
+        simple: { goal: 'time', durationS: 3600 },
+      },
+      {
+        id: 'l2',
+        discipline: 'run',
+        mode: 'simple',
+        simple: { goal: 'time', durationS: 1200 },
+        transitionBeforeS: 120,
+      },
+    ],
+  }
+  const fromTemplate = () => {
+    const s = sessionFromTemplate(brick, day, now, 'sb')
+    if (s.discipline !== 'brick') throw new Error('atteso un brick')
+    return s
+  }
+
+  it('dal template: copia indipendente delle frazioni, durata calcolata', () => {
+    const s = fromTemplate()
+    expect(s.plan.legs).toEqual(brick.legs)
+    expect(s.plan.legs).not.toBe(brick.legs)
+    expect(sessionDurationSec(s)).toBe(3600 + 120 + 1200)
+  })
+
+  it('sessione vuota: bici → corsa', () => {
+    const s = emptySession('brick', day, now, 'e')
+    if (s.discipline !== 'brick') throw new Error('atteso un brick')
+    expect(s.plan.legs.map((l) => l.discipline)).toEqual(['bike', 'run'])
+  })
+
+  it('modifica del piano solo sulla seduta', () => {
+    const s = fromTemplate()
+    const edited = { ...sessionAsTemplate(s), legs: [...brick.legs].reverse() }
+    const r = applyEditedPlan(s, edited, now)
+    if (r.discipline !== 'brick') throw new Error('atteso un brick')
+    expect(r.plan.legs.map((l) => l.id)).toEqual(['l2', 'l1'])
+    expect(brick.legs[0].id).toBe('l1')
+  })
+
+  it('Panoramica: il brick si divide tra gli sport delle frazioni', () => {
+    const load = loadByDiscipline([fromTemplate()])
+    expect(load.bike.plannedS).toBe(3600)
+    expect(load.run.plannedS).toBe(1320)
+    expect(load.swim.plannedS).toBe(0)
   })
 })

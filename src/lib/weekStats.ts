@@ -1,8 +1,15 @@
-import type { Discipline, IsoDate, Session } from '../data/types'
+import type { IsoDate, Session, Sport } from '../data/types'
+import { brickSecondsBySport } from './brick'
 import { addDays, parseIsoDate, toIsoDate } from './dates'
 import { sessionDurationSec } from './sessions'
 
-export const DISCIPLINES: Discipline[] = ['swim', 'bike', 'run', 'strength']
+export const DISCIPLINES: Sport[] = ['swim', 'bike', 'run', 'strength']
+
+/** Sport di una seduta: per un brick quelli delle frazioni. */
+export const sessionSports = (s: Session): Sport[] =>
+  s.discipline === 'brick'
+    ? [...new Set(s.plan.legs.map((l) => l.discipline))]
+    : [s.discipline]
 
 /** Durata prevista; 0 se non è nota (forza senza durata, endurance senza intensità). */
 export function plannedSeconds(s: Session): number {
@@ -63,11 +70,19 @@ export function summarize(sessions: Session[], today: IsoDate): WeekSummary {
 
 export function loadByDiscipline(
   sessions: Session[],
-): Record<Discipline, { plannedS: number; actualS: number }> {
+): Record<Sport, { plannedS: number; actualS: number }> {
   const out = Object.fromEntries(
     DISCIPLINES.map((d) => [d, { plannedS: 0, actualS: 0 }]),
-  ) as Record<Discipline, { plannedS: number; actualS: number }>
+  ) as Record<Sport, { plannedS: number; actualS: number }>
   for (const s of sessions) {
+    if (s.discipline === 'brick') {
+      // il brick si divide tra gli sport delle frazioni (l'eseguito arriverà con la registrazione endurance)
+      if (s.status === 'skipped') continue
+      const parts = brickSecondsBySport(s.plan.legs, s.estimatedDurationSec)
+      for (const [d, sec] of Object.entries(parts))
+        out[d as Sport].plannedS += sec
+      continue
+    }
     const d = s.discipline
     if (s.status !== 'skipped') out[d].plannedS += plannedSeconds(s)
     if (s.status === 'done') out[d].actualS += actualSeconds(s)

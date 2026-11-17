@@ -137,6 +137,46 @@ describe('migrazioni', () => {
     expect(MIGRATIONS[2].migrate(d)).toEqual(d)
   })
 
+  it('v3 → v4: nessun dato cambia; i brick sono validi solo con 2–6 frazioni', () => {
+    const d = migrate(v0(), 0)
+    expect(MIGRATIONS[3].migrate(d)).toEqual(d)
+    const leg = (id: string, discipline: string) => ({
+      id,
+      discipline,
+      mode: 'simple',
+      simple: { goal: 'distance' },
+    })
+    const brick = (id: string, legs: unknown[]) => ({
+      id,
+      name: 'Brick',
+      discipline: 'brick',
+      legs,
+    })
+    const { data, dropped } = sanitize({
+      exercises: [],
+      templates: [
+        brick('ok', [
+          leg('a', 'bike'),
+          { ...leg('b', 'run'), transitionBeforeS: 120 },
+        ]),
+        brick('una', [leg('a', 'bike')]),
+        brick('forza', [leg('a', 'bike'), leg('b', 'strength')]),
+      ],
+      sessions: [
+        {
+          id: 's',
+          date: '2026-11-20',
+          discipline: 'brick',
+          plan: { legs: [leg('a', 'swim'), leg('b', 'bike')] },
+        },
+      ],
+      raceDate: null,
+    })
+    expect(data.templates.map((t) => t.id)).toEqual(['ok'])
+    expect(data.sessions).toHaveLength(1)
+    expect(dropped).toBe(2)
+  })
+
   it('migrate applica solo le migrazioni mancanti ed è valida alla fine', () => {
     const d = migrate(v0(), 0)
     expect(sanitize(d).dropped).toBe(0)

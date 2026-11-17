@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { DisciplineIcon } from '../../components/ui/Icons'
+import { DisciplineIcon, LegIcons } from '../../components/ui/Icons'
+import { brickSports } from '../../lib/brick'
 import type {
   Exercise,
   IsoDate,
@@ -11,6 +12,7 @@ import { useI18n } from '../../i18n/context'
 import { isIsoDate } from '../../lib/dates'
 import { formatDuration } from '../../lib/format'
 import { sessionAsTemplate, sessionDurationSec } from '../../lib/sessions'
+import BrickDialog from '../planner/BrickDialog'
 import EnduranceDialog from '../planner/EnduranceDialog'
 import Modal from '../planner/Modal'
 import TemplateDialog from '../planner/TemplateDialog'
@@ -93,6 +95,9 @@ export default function SessionDetail({
               <DisciplineIcon discipline={s.discipline} />
             </span>
             <b>{t.discipline[s.discipline]}</b>
+            {s.discipline === 'brick' && (
+              <LegIcons sports={brickSports(s.plan.legs)} />
+            )}
             <span className={`tag ${s.status}`}>{t.status[s.status]}</span>
           </div>
 
@@ -256,6 +261,8 @@ export default function SessionDetail({
             exercises={exercises}
             {...editorProps}
           />
+        ) : s.discipline === 'brick' ? (
+          <BrickDialog template={sessionAsTemplate(s)} {...editorProps} />
         ) : (
           <EnduranceDialog
             discipline={s.discipline}

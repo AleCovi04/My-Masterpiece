@@ -113,6 +113,13 @@ export const MIGRATIONS: Migration[] = [
     // vecchie non devono importare file che lo contengono (lo perderebbero)
     migrate: (d) => d,
   },
+  {
+    to: 4,
+    description:
+      'Nuovo tipo di allenamento brick (`discipline: brick`, frazioni in `legs`); nessun dato da convertire',
+    // le app più vecchie non devono importare file con brick (li scarterebbero)
+    migrate: (d) => d,
+  },
 ]
 
 /** Versione attuale dello schema dei dati. */

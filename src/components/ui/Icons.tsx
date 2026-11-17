@@ -117,5 +117,27 @@ export function DisciplineIcon({ discipline }: { discipline: Discipline }) {
           <path d="M6 7v10M18 7v10M3 9.5v5M21 9.5v5M6 12h12" />
         </Svg>
       )
+    case 'brick':
+      return (
+        <Svg>
+          <rect x="3" y="5" width="8" height="5" rx="1" />
+          <rect x="13" y="5" width="8" height="5" rx="1" />
+          <rect x="8" y="14" width="8" height="5" rx="1" />
+          <path d="M7 10v2h5v2M17 10v2h-5" />
+        </Svg>
+      )
   }
+}
+
+/** Icone delle frazioni di un brick in fila, ognuna col colore del suo sport. */
+export function LegIcons({ sports }: { sports: Discipline[] }) {
+  return (
+    <span className="leg-icons" aria-hidden="true">
+      {sports.map((d, i) => (
+        <span key={i} className="leg-ic" data-discipline={d}>
+          <DisciplineIcon discipline={d} />
+        </span>
+      ))}
+    </span>
+  )
 }

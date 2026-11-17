@@ -13,7 +13,7 @@ import TemplateCardBody from '../planner/TemplateCardBody'
 import { fullDateLabel } from './period'
 import '../planner/planner.css'
 
-const DISCIPLINES: Discipline[] = ['strength', 'run', 'bike', 'swim']
+const DISCIPLINES: Discipline[] = ['strength', 'run', 'bike', 'swim', 'brick']
 
 interface Props {
   date: IsoDate

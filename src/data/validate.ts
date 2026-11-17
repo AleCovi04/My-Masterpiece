@@ -1,6 +1,7 @@
 // Controlli di forma sui dati letti dal salvataggio, da un file o da un backup.
 import { isIsoDate } from '../lib/dates'
 import type { RawData } from './migrations'
+import { BRICK_MAX_LEGS, BRICK_MIN_LEGS } from './types'
 import type {
   AppData,
   DataCounts,
@@ -36,6 +37,20 @@ const isEntryList = (v: unknown) =>
 
 const isMode = (v: unknown) => v === 'simple' || v === 'structured'
 
+const isLegList = (v: unknown) =>
+  Array.isArray(v) &&
+  v.length >= BRICK_MIN_LEGS &&
+  v.length <= BRICK_MAX_LEGS &&
+  v.every(
+    (l) =>
+      isObj(l) &&
+      typeof l.id === 'string' &&
+      ENDURANCE.has(l.discipline as string) &&
+      isMode(l.mode) &&
+      (l.transitionBeforeS === undefined ||
+        typeof l.transitionBeforeS === 'number'),
+  )
+
 export function isExercise(v: unknown): v is Exercise {
   return (
     isObj(v) &&
@@ -50,6 +65,7 @@ export function isTemplate(v: unknown): v is WorkoutTemplate {
   if (!isObj(v) || typeof v.id !== 'string' || typeof v.name !== 'string') {
     return false
   }
+  if (v.discipline === 'brick') return isLegList(v.legs)
   return v.discipline === 'strength'
     ? isEntryList(v.entries)
     : ENDURANCE.has(v.discipline as string) && isMode(v.mode)
@@ -58,6 +74,7 @@ export function isTemplate(v: unknown): v is WorkoutTemplate {
 export function isSession(v: unknown): v is Session {
   if (!isObj(v) || typeof v.id !== 'string' || !isIsoDate(v.date)) return false
   if (!isObj(v.plan)) return false
+  if (v.discipline === 'brick') return isLegList(v.plan.legs)
   return v.discipline === 'strength'
     ? isEntryList(v.plan.entries)
     : ENDURANCE.has(v.discipline as string) && isMode(v.plan.mode)

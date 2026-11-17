@@ -39,11 +39,18 @@ Comuni a tutte le discipline: `id`, `name`, `discipline`, `notes` facoltative, `
   - **Durata mostrata**: `estimatedDurationSec` se presente, altrimenti il tempo totale calcolato (può mancare se nessun passo ha l'intensità). "Ripristina automatico" toglie la sovrascrittura.
   - **Riassunto in lista**: es. `Risc. 15′ · 6×400 m · Def. 10′` (nel blocco compaiono i passi di lavoro).
 
+- **Brick** (`BrickTemplate`, `discipline: 'brick'`): più frazioni endurance di fila. `legs` = da 2 a 6 frazioni (`BRICK_MIN_LEGS`/`BRICK_MAX_LEGS`), ognuna `BrickLeg`: `id`, `discipline` (`swim` | `bike` | `run`, niente forza), `mode` + `simple` oppure `items` (stessa struttura e stesse regole dei template di corsa/bici/nuoto) e `transitionBeforeS` facoltativo = transizione prima della frazione (T1, T2…; sulla prima frazione non si salva).
+  - **Durata** (`src/lib/brick.ts`, `brickTotals`): somma delle frazioni calcolabili + transizioni, parziale ("≥") se qualche frazione non ha la durata; se nessuna frazione ha una durata calcolabile è ignota (le sole transizioni non bastano). `estimatedDurationSec` la sovrascrive come per l'endurance.
+  - **Riassunto**: `Bici 1h · T1 3′ · Corsa 25′` (`brickSummary`); nelle card le icone delle frazioni in fila (`LegIcons`) e il colore `--brick`.
+  - **Editor** (`BrickDialog`): frazioni apribili, riordinabili trascinando o dal menu, duplica/elimina (nei limiti 2–6), "+ Nuoto/Bici/Corsa"; ogni frazione usa `EndurancePlanEditor`, lo stesso editor di corsa/bici/nuoto (bozza in `endurancePlanDraft.ts`).
+
+Tipi: `Sport` = `strength` | `run` | `bike` | `swim`; `Discipline` = `Sport` | `brick`.
+
 Salvataggio dei template in `DataStore` (`loadTemplates`/`saveTemplates`), vedi "Salvataggio".
 
 ## Seduta (sessione del Calendario)
 
-Un allenamento in una data: `id`, `date`, `order` nel giorno (da 0), `discipline`, `status` (`planned`, `in_progress`, `done`, `skipped`), `templateId` facoltativo, `plan` e `estimatedDurationSec` facoltativa. `Session` è un'unione discriminata su `discipline` (`StrengthSession` | `EnduranceSession`), come i template.
+Un allenamento in una data: `id`, `date`, `order` nel giorno (da 0), `discipline`, `status` (`planned`, `in_progress`, `done`, `skipped`), `templateId` facoltativo, `plan` e `estimatedDurationSec` facoltativa. `Session` è un'unione discriminata su `discipline` (`StrengthSession` | `EnduranceSession` | `BrickSession`), come i template. Il piano di un brick è `{ legs }`; una sessione vuota brick parte con bici → corsa. L'eseguito del brick non esiste ancora (arriverà per frazione con la registrazione endurance).
 
 - **`plan` è una copia** con la stessa struttura del template: forza = `entries` (voci, serie con reps e RIR obiettivo, superserie); corsa/bici/nuoto = `mode` + `simple` oppure `items` (passi e blocchi). La copia rende la seduta indipendente: modificarla non tocca il template e modificare (o eliminare) il template non cambia le sedute già pianificate.
 - **`name`** (facoltativo) è il nome copiato dal template al momento dell'inserimento; se manca (sessione vuota) si mostra la disciplina. Anche `notes` viene copiato.
@@ -90,6 +97,7 @@ I dati hanno un **numero di versione dello schema** (`SCHEMA_VERSION`, salvato i
 | 1        | Muscoli nei 20 gruppi della mappa del corpo                                                                   |
 | 2        | Serie previste solo con `reps` e `rir` obiettivo (via i `kg` da template e piani); serie eseguite senza `rir` |
 | 3        | Eseguito di forza con note facoltative (`actual.notes`); nessun dato da convertire                            |
+| 4        | Nuovo tipo brick (`discipline: brick`, frazioni in `legs`); nessun dato da convertire                         |
 
 **Come aggiungere una migrazione**
 
@@ -109,7 +117,8 @@ Regole: **mai modificare o togliere una migrazione già pubblicata** (i disposit
 
 ## Calcoli (`src/lib/`)
 
-- Totali, durata e riassunto dei piani endurance, di template e sedute (`enduranceTemplate.ts`); durata e operazioni sulle sedute (`sessions.ts`).
+- Totali, durata e riassunto dei piani endurance, di template e sedute (`enduranceTemplate.ts`); brick (`brick.ts`); durata e operazioni sulle sedute (`sessions.ts`).
+- Panoramica (`weekStats.ts`): il brick si divide tra gli sport delle frazioni (ogni frazione con la transizione che la precede, in proporzione se la durata è scritta a mano); il filtro per sport mostra un brick se uno dei suoi sport è attivo.
 - Volume = kg × ripetizioni (`strength.ts`).
 - PR per esercizio: kg massimo e miglior serie per volume, solo sedute `done`.
 - Ultima volta per esercizio e serie (`previousSet`), per i valori in grigio della forza dal vivo.

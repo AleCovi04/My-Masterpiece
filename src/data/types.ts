@@ -37,7 +37,11 @@ export interface Exercise extends Entity {
 
 // ---------- Discipline ----------
 
-export type Discipline = 'strength' | 'run' | 'bike' | 'swim'
+/** Uno sport singolo (forza, corsa, bici, nuoto). */
+export type Sport = 'strength' | 'run' | 'bike' | 'swim'
+
+/** Tipo di allenamento: uno sport oppure un brick (più frazioni endurance di fila). */
+export type Discipline = Sport | 'brick'
 
 // ---------- Template ----------
 
@@ -140,8 +144,35 @@ export interface SwimTemplate extends EnduranceTemplateBase {
 }
 export type EnduranceTemplate = RunTemplate | BikeTemplate | SwimTemplate
 
+// ---------- Brick (più frazioni endurance di fila) ----------
+
+export const BRICK_MIN_LEGS = 2
+export const BRICK_MAX_LEGS = 6
+
+/**
+ * Una frazione del brick: uno sport endurance con il suo piano (stessa
+ * struttura dei template di corsa/bici/nuoto) e la transizione facoltativa
+ * che la precede (mai sulla prima frazione).
+ */
+export interface BrickLeg {
+  id: string
+  discipline: EnduranceDiscipline
+  mode: 'simple' | 'structured'
+  simple?: EnduranceSimple
+  items?: EnduranceItem[]
+  /** Transizione prima di questa frazione, in secondi (T1, T2…). */
+  transitionBeforeS?: number
+}
+
+export interface BrickTemplate extends TemplateBase {
+  discipline: 'brick'
+  /** Da 2 a 6 frazioni, in ordine. */
+  legs: BrickLeg[]
+}
+
 /** Unione discriminata per disciplina. */
-export type WorkoutTemplate = StrengthTemplate | EnduranceTemplate
+export type WorkoutTemplate =
+  StrengthTemplate | EnduranceTemplate | BrickTemplate
 
 // ---------- Esecuzione effettiva ----------
 
@@ -210,7 +241,12 @@ export interface EndurancePlan {
   items?: EnduranceItem[]
 }
 
-export type Plan = StrengthPlan | EndurancePlan
+/** Piano brick: le frazioni in ordine, come nel template. */
+export interface BrickPlan {
+  legs: BrickLeg[]
+}
+
+export type Plan = StrengthPlan | EndurancePlan | BrickPlan
 
 interface SessionBase extends Entity {
   date: IsoDate
@@ -242,8 +278,15 @@ export interface EnduranceSession extends SessionBase {
   actual?: EnduranceActual
 }
 
+/** Brick: l'eseguito per frazione arriverà con la registrazione endurance. */
+export interface BrickSession extends SessionBase {
+  discipline: 'brick'
+  plan: BrickPlan
+  actual?: undefined
+}
+
 /** Unione discriminata per disciplina. */
-export type Session = StrengthSession | EnduranceSession
+export type Session = StrengthSession | EnduranceSession | BrickSession
 
 // ---------- Allenamento di forza in corso (bozza della registrazione dal vivo) ----------
 
