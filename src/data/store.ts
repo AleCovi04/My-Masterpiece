@@ -3,6 +3,9 @@
 import type { ExportFile } from './exportFile'
 import type {
   AppData,
+  BlockApplication,
+  Phase,
+  TrainingBlock,
   DataCounts,
   Exercise,
   IsoDate,
@@ -39,6 +42,19 @@ export interface DataStore {
   saveExercises(exercises: Exercise[]): Promise<void>
   loadTemplates(): Promise<WorkoutTemplate[]>
   saveTemplates(templates: WorkoutTemplate[]): Promise<void>
+  /** Blocchi di settimane tipo (Planner, Blocchi). */
+  loadBlocks(): Promise<TrainingBlock[]>
+  saveBlocks(blocks: TrainingBlock[]): Promise<void>
+  /** Fasi = sequenze di blocchi (Planner, Fasi). */
+  loadPhases(): Promise<Phase[]>
+  savePhases(phases: Phase[]): Promise<void>
+  /** Blocchi e fasi applicati al calendario. */
+  loadApplications(): Promise<BlockApplication[]>
+  /** Sedute e applicazioni insieme, in una sola transazione (applica / rimuovi). */
+  saveSessionsAndApplications(
+    sessions: Session[],
+    applications: BlockApplication[],
+  ): Promise<void>
   /** `null` = "Nel futuro" (data non ancora scelta). */
   loadRaceDate(): Promise<IsoDate | null>
   saveRaceDate(date: IsoDate | null): Promise<void>

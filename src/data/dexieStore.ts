@@ -46,12 +46,16 @@ interface BackupRow {
   data: RawData
 }
 
-type ListKey = 'exercises' | 'templates' | 'sessions'
+type ListKey =
+  'exercises' | 'templates' | 'sessions' | 'blocks' | 'phases' | 'applications'
 
 class MmDb extends Dexie {
   exercises!: Table<Row, string>
   templates!: Table<Row, string>
   sessions!: Table<Row, string>
+  blocks!: Table<Row, string>
+  phases!: Table<Row, string>
+  applications!: Table<Row, string>
   meta!: Table<MetaRow, string>
   backups!: Table<BackupRow, number>
 
@@ -65,6 +69,12 @@ class MmDb extends Dexie {
       sessions: 'id, pos',
       meta: 'key',
       backups: '++id',
+    })
+    // v2: blocchi, fasi e applicazioni al calendario
+    this.version(2).stores({
+      blocks: 'id, pos',
+      phases: 'id, pos',
+      applications: 'id, pos',
     })
   }
 }
@@ -88,7 +98,16 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
   const now = options.now ?? (() => new Date())
   const legacy = options.legacy ?? null
   const db = new MmDb(options.dbName ?? DB_NAME, options.idb)
-  const all = [db.exercises, db.templates, db.sessions, db.meta, db.backups]
+  const all = [
+    db.exercises,
+    db.templates,
+    db.sessions,
+    db.blocks,
+    db.phases,
+    db.applications,
+    db.meta,
+    db.backups,
+  ]
 
   /** Se IndexedDB non è disponibile i dati vivono solo in memoria, per questa sessione. */
   let mem: AppData | null = null
@@ -99,6 +118,9 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     exercises: generateSampleExercises(now()),
     templates: [],
     sessions: [],
+    blocks: [],
+    phases: [],
+    applications: [],
     raceDate: DEFAULT_RACE_DATE,
   })
 
@@ -116,13 +138,25 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     (await db[key].orderBy('pos').toArray()).map((r) => r.item)
 
   const readRaw = async (): Promise<RawData> => {
-    const [exercises, templates, sessions, race] = await Promise.all([
-      readList('exercises'),
-      readList('templates'),
-      readList('sessions'),
-      db.meta.get('raceDate'),
-    ])
-    return { exercises, templates, sessions, raceDate: race?.value ?? null }
+    const [exercises, templates, sessions, blocks, phases, applications, race] =
+      await Promise.all([
+        readList('exercises'),
+        readList('templates'),
+        readList('sessions'),
+        readList('blocks'),
+        readList('phases'),
+        readList('applications'),
+        db.meta.get('raceDate'),
+      ])
+    return {
+      exercises,
+      templates,
+      sessions,
+      blocks,
+      phases,
+      applications,
+      raceDate: race?.value ?? null,
+    }
   }
 
   const writeList = async (key: ListKey, items: { id: string }[]) => {
@@ -136,6 +170,9 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     await writeList('exercises', data.exercises)
     await writeList('templates', data.templates)
     await writeList('sessions', data.sessions)
+    await writeList('blocks', data.blocks)
+    await writeList('phases', data.phases)
+    await writeList('applications', data.applications)
     await db.meta.put({ key: 'raceDate', value: data.raceDate })
   }
 
@@ -252,6 +289,27 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     saveExercises: (exercises) => save('exercises', exercises),
     loadTemplates: () => load('templates') as Promise<AppData['templates']>,
     saveTemplates: (templates) => save('templates', templates),
+    loadBlocks: () => load('blocks') as Promise<AppData['blocks']>,
+    saveBlocks: (blocks) => save('blocks', blocks),
+    loadPhases: () => load('phases') as Promise<AppData['phases']>,
+    savePhases: (phases) => save('phases', phases),
+    loadApplications: () =>
+      load('applications') as Promise<AppData['applications']>,
+    async saveSessionsAndApplications(sessions, applications) {
+      await init()
+      if (mem) {
+        mem = { ...mem, sessions, applications }
+        return
+      }
+      try {
+        await db.transaction('rw', db.sessions, db.applications, async () => {
+          await writeList('sessions', sessions)
+          await writeList('applications', applications)
+        })
+      } catch (error) {
+        console.error('Salvataggio non riuscito (applicazione)', error)
+      }
+    },
 
     async loadRaceDate() {
       return (await current()).raceDate

@@ -84,10 +84,18 @@ Inserito **a mano** dal dettaglio della seduta (`src/lib/enduranceActual.ts`, mo
 - **Salvare** (`setSessionActual`) rende la seduta `done`; **Elimina eseguito** (con conferma, `clearSessionActual`) la riporta `planned`. Nel dettaglio il riquadro "Eseguito" sta sopra il piano, con lo **scostamento** in % da durata e distanza previste (`deviationPct`), anche per frazione.
 - **Panoramica**: conta la durata eseguita; quella di un brick si divide tra gli sport delle frazioni (ogni frazione con la transizione che la precede).
 
+## Blocchi e fasi (`src/lib/blocks.ts`, Planner → Blocchi / Fasi)
+
+- **Blocco** (`TrainingBlock`): `name`, `notes`, `weeks` = da 1 a 12 settimane tipo (`BlockWeek`: `id` + `days`, 7 liste da lunedì a domenica). Ogni allenamento del giorno (`BlockItem`) è **collegato** a un template (`kind: 'template'`, `templateId`) oppure è una sessione vuota di una disciplina (`kind: 'empty'`). Il piano si copia nelle sedute solo all'applicazione: modificare un template cambia le applicazioni future, non le sedute già create. Un template eliminato resta nel blocco come "Allenamento eliminato" e all'applicazione si salta (l'anteprima lo dice). `archived`: si archivia, non si cancella.
+- **Editor**: una settimana alla volta (schede S1, S2… con le ore), su telefono i giorni in colonna, su PC in 7 colonne; "+" con lo stesso selettore del Calendario, trascinamento tra i giorni, duplica/copia su/elimina settimana, totali per sport (`weekTotals`; il brick si divide tra le frazioni, le sessioni vuote contano "senza durata").
+- **Fase** (`Phase`): `name`, `goal`, `color` (1–6 = variabili del tema `--phase-1`…`--phase-6`), `blockIds` in ordine (anche ripetuti), `archived`.
+- **Applicazione al calendario** (`planApplication`, finestra `ApplyDialog`): da un **lunedì**; le sedute si aggiungono in coda al giorno (`append`) oppure prima si tolgono le sedute **programmate** di quelle settimane (`replace`); svolte, in corso e saltate non si toccano mai. Ogni seduta creata ha `applicationId`. Si salva un `BlockApplication`: `kind` (`block` | `phase`), `sourceId`, `name` e `color` copiati, `startDate`, `weeks` (per ogni settimana coperta: lunedì, blocco, settimana N di M) per le etichette del calendario. Sedute e applicazione si salvano insieme (`saveSessionsAndApplications`).
+- **Rimozione** (`removeApplication`): toglie l'applicazione e le sue sedute ancora programmate; le altre restano.
+
 ## Salvataggio (`src/data/`)
 
 - **IndexedDB tramite Dexie** (`dexieStore.ts`), database `my-masterpiece`. L'app usa solo l'interfaccia `DataStore` (`store.ts`), esportata come `dataStore` da `src/data/index.ts`: è l'**unico punto di accesso** ai dati, ed è lì che si aggancerà la sincronizzazione con Supabase. Nessun altro modulo tocca IndexedDB.
-- Tabelle: `exercises`, `templates`, `sessions` (una riga per entità: `id`, `pos` = posizione nell'elenco, `item` = l'entità), `meta` (`schemaVersion`, `raceDate`, `lastExportAt`, `legacyImportedAt`, `liveWorkout` = bozza dell'allenamento in corso), `backups`.
+- Tabelle: `exercises`, `templates`, `sessions`, `blocks`, `phases`, `applications` (una riga per entità: `id`, `pos` = posizione nell'elenco, `item` = l'entità), `meta` (`schemaVersion`, `raceDate`, `lastExportAt`, `legacyImportedAt`, `liveWorkout` = bozza dell'allenamento in corso), `backups`. Versione Dexie 2 (le tre tabelle dei blocchi).
 - **localStorage** resta solo per le preferenze leggere del dispositivo (`src/lib/preferences.ts`: tema, lingua, scheda del Planner, sidebar).
 - **Primo avvio**: se IndexedDB è vuoto e ci sono dati nel vecchio localStorage (`mm.sessions`, `mm.exercises`, `mm.templates`, `mm.raceDate`), vengono migrati in automatico (`legacyLocalStorage.ts`). Le chiavi vecchie non si perdono: diventano copie di backup `<chiave>.backup-idb` (es. `mm.templates.backup-idb`). Se un giorno IndexedDB venisse svuotato, si riparte da quelle copie.
 - **Persistenza**: all'avvio si chiama `navigator.storage.persist()`, così il browser non cancella i dati quando lo spazio scarseggia. Lo stato si vede nella pagina Dati.
@@ -105,6 +113,7 @@ I dati hanno un **numero di versione dello schema** (`SCHEMA_VERSION`, salvato i
 | 3        | Eseguito di forza con note facoltative (`actual.notes`); nessun dato da convertire                                                          |
 | 4        | Nuovo tipo brick (`discipline: brick`, frazioni in `legs`); nessun dato da convertire                                                       |
 | 5        | Eseguito endurance manuale: via passo e velocità medi, distanza facoltativa, RPE e note, giri sempre lista; eseguito per frazione dei brick |
+| 6        | Blocchi, fasi e applicazioni al calendario (nuovi elenchi vuoti); sedute con `applicationId` facoltativo                                    |
 
 **Come aggiungere una migrazione**
 

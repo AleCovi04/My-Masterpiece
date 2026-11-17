@@ -11,6 +11,10 @@ export interface RawData {
   exercises: unknown[]
   templates: unknown[]
   sessions: unknown[]
+  /** Dalla versione 6 (assenti nei dati più vecchi). */
+  blocks?: unknown[]
+  phases?: unknown[]
+  applications?: unknown[]
   raceDate: unknown
 }
 
@@ -147,6 +151,17 @@ export const MIGRATIONS: Migration[] = [
           ? { ...s, actual: dropAveragePace(s.actual) }
           : s,
       ),
+    }),
+  },
+  {
+    to: 6,
+    description:
+      'Blocchi, fasi e applicazioni al calendario (nuovi elenchi, vuoti); sedute con `applicationId` facoltativo',
+    migrate: (d) => ({
+      ...d,
+      blocks: Array.isArray(d.blocks) ? d.blocks : [],
+      phases: Array.isArray(d.phases) ? d.phases : [],
+      applications: Array.isArray(d.applications) ? d.applications : [],
     }),
   },
 ]

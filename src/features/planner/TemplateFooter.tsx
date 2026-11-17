@@ -8,6 +8,8 @@ interface Props {
   onArchive: (archived: boolean) => void
   onDelete: () => void
   onClose: () => void
+  /** Falso per ciò che si archivia soltanto (blocchi, fasi). */
+  canDelete?: boolean
 }
 
 /** Pulsanti comuni a tutti gli editor di template: Salva/Annulla e Duplica/Archivia/Elimina. */
@@ -17,6 +19,7 @@ export default function TemplateFooter({
   onArchive,
   onDelete,
   onClose,
+  canDelete = true,
 }: Props) {
   const { t } = useI18n()
   const p = t.planner
@@ -45,7 +48,7 @@ export default function TemplateFooter({
           >
             {template.archived ? p.restore : p.archive}
           </button>
-          {confirmingDelete ? (
+          {!canDelete ? null : confirmingDelete ? (
             <span className="pl-confirm">
               <small>{p.confirmDeleteWorkout}</small>
               <button type="button" className="pl-btn warn" onClick={onDelete}>

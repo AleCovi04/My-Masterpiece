@@ -287,6 +287,8 @@ interface SessionBase extends Entity {
   notes?: string
   /** Stesso significato del template: forza a mano, endurance solo se sovrascritta. */
   estimatedDurationSec?: number
+  /** Creata applicando un blocco o una fase (`BlockApplication.id`). */
+  applicationId?: Id
 }
 
 /**
@@ -359,12 +361,76 @@ export interface LiveWorkout {
   rest: LiveRest | null
 }
 
+// ---------- Blocchi e fasi (periodizzazione) ----------
+
+export const BLOCK_MAX_WEEKS = 12
+export const DAYS_PER_WEEK = 7
+
+/** Un allenamento in un giorno del blocco: collegato a un template, oppure sessione vuota. */
+export type BlockItem =
+  | { id: string; kind: 'template'; templateId: Id }
+  | { id: string; kind: 'empty'; discipline: Discipline }
+
+/** Settimana tipo: 7 giorni (lunedì … domenica), ognuno con 0 o più allenamenti in ordine. */
+export interface BlockWeek {
+  id: string
+  days: BlockItem[][]
+}
+
+export interface TrainingBlock extends Entity {
+  name: string
+  notes?: string
+  /** Da 1 a 12 settimane. */
+  weeks: BlockWeek[]
+  archived: boolean
+}
+
+/** Colori delle fasi: variabili del tema `--phase-1` … `--phase-6`. */
+export type PhaseColor = 1 | 2 | 3 | 4 | 5 | 6
+
+/** Sequenza ordinata di blocchi (anche ripetuti), es. "Base" = carico ×3 + scarico. */
+export interface Phase extends Entity {
+  name: string
+  goal?: string
+  color: PhaseColor
+  blockIds: Id[]
+  archived: boolean
+}
+
+/** Una settimana del calendario coperta da un'applicazione (per l'etichetta). */
+export interface AppliedWeek {
+  /** Lunedì della settimana. */
+  start: IsoDate
+  blockId: Id
+  /** Nome del blocco al momento dell'applicazione. */
+  blockName: string
+  /** Settimana del blocco, da 1. */
+  week: number
+  /** Settimane del blocco. */
+  weeks: number
+}
+
+/** Un blocco o una fase applicati al calendario da un lunedì. */
+export interface BlockApplication extends Entity {
+  kind: 'block' | 'phase'
+  sourceId: Id
+  /** Nome del blocco o della fase al momento dell'applicazione. */
+  name: string
+  /** Colore della fase (solo `kind: 'phase'`). */
+  color?: PhaseColor
+  startDate: IsoDate
+  weeks: AppliedWeek[]
+}
+
 // ---------- Insieme dei dati (salvataggio, export, backup) ----------
 
 export interface AppData {
   exercises: Exercise[]
   templates: WorkoutTemplate[]
   sessions: Session[]
+  blocks: TrainingBlock[]
+  phases: Phase[]
+  applications: BlockApplication[]
   /** `null` = "Nel futuro" (data non ancora scelta). */
   raceDate: IsoDate | null
 }
@@ -373,4 +439,6 @@ export interface DataCounts {
   exercises: number
   templates: number
   sessions: number
+  blocks: number
+  phases: number
 }

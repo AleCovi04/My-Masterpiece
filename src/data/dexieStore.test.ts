@@ -10,7 +10,14 @@ import {
 } from './dexieStore'
 import type { LegacyStorage } from './legacyLocalStorage'
 import { SCHEMA_VERSION } from './migrations'
-import type { Exercise, LiveWorkout, StrengthTemplate } from './types'
+import type {
+  BlockApplication,
+  Exercise,
+  LiveWorkout,
+  Phase,
+  StrengthTemplate,
+  TrainingBlock,
+} from './types'
 
 const t0 = new Date('2026-11-16T08:00:00.000Z')
 const DAY = 864e5
@@ -270,6 +277,73 @@ describe('store IndexedDB', () => {
     expect(await b.open().loadLiveWorkout()).toEqual(live)
     await store.saveLiveWorkout(null)
     expect(await b.open().loadLiveWorkout()).toBeNull()
+  })
+
+  it('blocchi, fasi e applicazioni: salvati, riletti, esportati', async () => {
+    const b = browser()
+    const store = b.open()
+    const stamp = t0.toISOString()
+    const block: TrainingBlock = {
+      id: 'b1',
+      createdAt: stamp,
+      updatedAt: stamp,
+      name: 'Carico',
+      weeks: [
+        {
+          id: 'w1',
+          days: [
+            [{ id: 'i1', kind: 'empty', discipline: 'run' }],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+          ],
+        },
+      ],
+      archived: false,
+    }
+    const phase: Phase = {
+      id: 'p1',
+      createdAt: stamp,
+      updatedAt: stamp,
+      name: 'Base',
+      color: 1,
+      blockIds: ['b1', 'b1'],
+      archived: false,
+    }
+    const app: BlockApplication = {
+      id: 'a1',
+      createdAt: stamp,
+      updatedAt: stamp,
+      kind: 'block',
+      sourceId: 'b1',
+      name: 'Carico',
+      startDate: '2026-11-23',
+      weeks: [
+        {
+          start: '2026-11-23',
+          blockId: 'b1',
+          blockName: 'Carico',
+          week: 1,
+          weeks: 1,
+        },
+      ],
+    }
+    await store.saveBlocks([block])
+    await store.savePhases([phase])
+    await store.saveSessionsAndApplications([], [app])
+    const again = b.open()
+    expect(await again.loadBlocks()).toEqual([block])
+    expect(await again.loadPhases()).toEqual([phase])
+    expect(await again.loadApplications()).toEqual([app])
+    const file = await again.exportAll()
+    expect(file.data).toMatchObject({
+      blocks: [block],
+      phases: [phase],
+      applications: [app],
+    })
   })
 
   it('senza IndexedDB l’app parte lo stesso, con i dati in memoria', async () => {

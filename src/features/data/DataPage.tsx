@@ -80,7 +80,10 @@ export default function DataPage() {
     })
 
   const counts = (c: DataCounts) =>
-    `${c.exercises} ${d.exercises} · ${c.templates} ${d.templates} · ${c.sessions} ${d.sessions}`
+    `${c.exercises} ${d.exercises} · ${c.templates} ${d.templates} · ${c.sessions} ${d.sessions}` +
+    (c.blocks || c.phases
+      ? ` · ${c.blocks} ${d.blocks} · ${c.phases} ${d.phases}`
+      : '')
 
   /** Esegue un'operazione sui dati mostrando l'esito. */
   const run = async (action: () => Promise<void>, done?: string) => {
@@ -299,6 +302,12 @@ export default function DataPage() {
               </li>
               <li>
                 <b>{preview.counts.sessions}</b> {d.sessions}
+              </li>
+              <li>
+                <b>{preview.counts.blocks}</b> {d.blocks}
+              </li>
+              <li>
+                <b>{preview.counts.phases}</b> {d.phases}
               </li>
             </ul>
             {preview.dropped > 0 && (

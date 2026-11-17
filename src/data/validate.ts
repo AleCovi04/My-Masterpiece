@@ -1,13 +1,21 @@
 // Controlli di forma sui dati letti dal salvataggio, da un file o da un backup.
 import { isIsoDate } from '../lib/dates'
 import type { RawData } from './migrations'
-import { BRICK_MAX_LEGS, BRICK_MIN_LEGS } from './types'
+import {
+  BLOCK_MAX_WEEKS,
+  BRICK_MAX_LEGS,
+  BRICK_MIN_LEGS,
+  DAYS_PER_WEEK,
+} from './types'
 import type {
   AppData,
+  BlockApplication,
   DataCounts,
   Exercise,
   LiveWorkout,
+  Phase,
   Session,
+  TrainingBlock,
   WorkoutTemplate,
 } from './types'
 
@@ -81,6 +89,63 @@ export function isSession(v: unknown): v is Session {
     : ENDURANCE.has(v.discipline as string) && isMode(v.plan.mode)
 }
 
+const DISCIPLINES = new Set(['strength', 'run', 'bike', 'swim', 'brick'])
+
+const isBlockItem = (v: unknown) =>
+  isObj(v) &&
+  typeof v.id === 'string' &&
+  ((v.kind === 'template' && typeof v.templateId === 'string') ||
+    (v.kind === 'empty' && DISCIPLINES.has(v.discipline as string)))
+
+export function isBlock(v: unknown): v is TrainingBlock {
+  return (
+    isObj(v) &&
+    typeof v.id === 'string' &&
+    typeof v.name === 'string' &&
+    Array.isArray(v.weeks) &&
+    v.weeks.length >= 1 &&
+    v.weeks.length <= BLOCK_MAX_WEEKS &&
+    v.weeks.every(
+      (w) =>
+        isObj(w) &&
+        typeof w.id === 'string' &&
+        Array.isArray(w.days) &&
+        w.days.length === DAYS_PER_WEEK &&
+        w.days.every((d) => Array.isArray(d) && d.every(isBlockItem)),
+    )
+  )
+}
+
+export function isPhase(v: unknown): v is Phase {
+  return (
+    isObj(v) &&
+    typeof v.id === 'string' &&
+    typeof v.name === 'string' &&
+    typeof v.color === 'number' &&
+    Array.isArray(v.blockIds) &&
+    v.blockIds.every((id) => typeof id === 'string')
+  )
+}
+
+export function isApplication(v: unknown): v is BlockApplication {
+  return (
+    isObj(v) &&
+    typeof v.id === 'string' &&
+    (v.kind === 'block' || v.kind === 'phase') &&
+    typeof v.sourceId === 'string' &&
+    typeof v.name === 'string' &&
+    isIsoDate(v.startDate) &&
+    Array.isArray(v.weeks) &&
+    v.weeks.every(
+      (w) =>
+        isObj(w) &&
+        isIsoDate(w.start) &&
+        typeof w.week === 'number' &&
+        typeof w.weeks === 'number',
+    )
+  )
+}
+
 /** Bozza dell'allenamento in corso con la forma attesa (altrimenti si ignora). */
 export function isLiveWorkout(v: unknown): v is LiveWorkout {
   return (
@@ -138,6 +203,9 @@ export function sanitize(raw: RawData): { data: AppData; dropped: number } {
       exercises: keep(raw.exercises, isExercise),
       templates: keep(raw.templates, isTemplate),
       sessions: keep(raw.sessions, isSession),
+      blocks: keep(raw.blocks ?? [], isBlock),
+      phases: keep(raw.phases ?? [], isPhase),
+      applications: keep(raw.applications ?? [], isApplication),
       raceDate: isIsoDate(raw.raceDate) ? raw.raceDate : null,
     },
     dropped,
@@ -148,8 +216,12 @@ export const countData = (d: {
   exercises: unknown[]
   templates: unknown[]
   sessions: unknown[]
+  blocks?: unknown[]
+  phases?: unknown[]
 }): DataCounts => ({
   exercises: d.exercises.length,
   templates: d.templates.length,
   sessions: d.sessions.length,
+  blocks: d.blocks?.length ?? 0,
+  phases: d.phases?.length ?? 0,
 })

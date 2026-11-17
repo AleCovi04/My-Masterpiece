@@ -16,9 +16,12 @@ import '../planner/planner.css'
 const DISCIPLINES: Discipline[] = ['strength', 'run', 'bike', 'swim', 'brick']
 
 interface Props {
-  date: IsoDate
+  /** Giorno e posizione di inserimento (Calendario); altrimenti `subtitle`. */
+  date?: IsoDate
   /** Posizione di inserimento nel giorno, da 0. */
-  index: number
+  index?: number
+  /** Sottotitolo al posto di data e posizione (es. editor dei blocchi). */
+  subtitle?: string
   templates: WorkoutTemplate[]
   exercises: Exercise[]
   onPickTemplate: (template: WorkoutTemplate) => void
@@ -32,7 +35,8 @@ interface Props {
  */
 export default function TemplatePickerDialog({
   date,
-  index,
+  index = 0,
+  subtitle,
   templates,
   exercises,
   onPickTemplate,
@@ -68,7 +72,10 @@ export default function TemplatePickerDialog({
   return (
     <Modal title={c.chooseWorkout} closeLabel={c.close} onClose={onClose} wide>
       <p className="sp-sub">
-        {fullDateLabel(date, t)} · {c.position} {index + 1}
+        {subtitle ??
+          (date
+            ? `${fullDateLabel(date, t)} · ${c.position} ${index + 1}`
+            : '')}
       </p>
 
       <div className="pl-toolbar sp-toolbar">

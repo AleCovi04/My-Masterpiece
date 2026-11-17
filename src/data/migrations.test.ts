@@ -260,8 +260,20 @@ describe('migrazioni', () => {
       exercises: [],
       templates: [],
       sessions: [],
+      blocks: [],
+      phases: [],
+      applications: [],
       raceDate: null,
     })
+  })
+
+  it('v5 → v6: elenchi di blocchi, fasi e applicazioni vuoti se mancano', () => {
+    const d = migrate(v0(), 0)
+    expect(d.blocks).toEqual([])
+    expect(d.phases).toEqual([])
+    expect(d.applications).toEqual([])
+    const kept = MIGRATIONS[5].migrate({ ...d, blocks: [{ id: 'x' }] })
+    expect(kept.blocks).toEqual([{ id: 'x' }])
   })
 })
 
