@@ -201,6 +201,7 @@ export interface StrengthActual {
   notes?: string
 }
 
+/** Giro (dall'import Garmin, ultimo punto della roadmap). */
 export interface Lap {
   distanceM: number
   durationS: number
@@ -209,21 +210,48 @@ export interface Lap {
 
 export type EnduranceSource = 'manual' | 'garmin_fit'
 
-export interface EnduranceActual {
-  discipline: 'run' | 'bike' | 'swim'
-  source: EnduranceSource
-  distanceM: number
+/**
+ * Dati eseguiti di una disciplina endurance (seduta singola o frazione di un
+ * brick). Passo e velocità medi non si salvano: si calcolano da distanza e tempo.
+ */
+export interface EnduranceMetrics {
+  /** Tempo di attività in secondi (obbligatorio). */
   durationS: number
-  avgPaceSecPerKm?: number // corsa
-  avgSpeedKmh?: number // bici
-  avgPaceSecPer100m?: number // nuoto
+  distanceM?: number
   avgHr?: number
   maxHr?: number
+  /** Dislivello positivo in metri (solo corsa e bici). */
   elevationGainM?: number
+}
+
+export interface EnduranceActual extends EnduranceMetrics {
+  discipline: EnduranceDiscipline
+  source: EnduranceSource
+  /** Fatica percepita 1–10. */
+  rpe?: number
+  notes?: string
+  /** Vuoto per l'inserimento manuale. */
   laps: Lap[]
 }
 
-export type Actual = StrengthActual | EnduranceActual
+/** Una frazione eseguita: lo sport è copiato, così l'eseguito resta leggibile anche se il piano cambia. */
+export interface BrickLegActual extends EnduranceMetrics {
+  /** Frazione del piano (`BrickLeg.id`). */
+  legId: string
+  discipline: EnduranceDiscipline
+  /** Transizione reale prima della frazione, in secondi (mai sulla prima). */
+  transitionBeforeS?: number
+}
+
+export interface BrickActual {
+  discipline: 'brick'
+  source: EnduranceSource
+  legs: BrickLegActual[]
+  rpe?: number
+  notes?: string
+}
+
+export type Actual = StrengthActual | EnduranceActual | BrickActual
 
 // ---------- Seduta ----------
 
@@ -278,11 +306,10 @@ export interface EnduranceSession extends SessionBase {
   actual?: EnduranceActual
 }
 
-/** Brick: l'eseguito per frazione arriverà con la registrazione endurance. */
 export interface BrickSession extends SessionBase {
   discipline: 'brick'
   plan: BrickPlan
-  actual?: undefined
+  actual?: BrickActual
 }
 
 /** Unione discriminata per disciplina. */

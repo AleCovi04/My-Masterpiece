@@ -45,6 +45,22 @@ function dropPlannedKg(set: Obj): Obj {
   }
 }
 
+/** v5: passo e velocità medi non si salvano più; i giri sono sempre una lista. */
+function dropAveragePace(actual: Obj): Obj {
+  const {
+    avgPaceSecPerKm: _a,
+    avgSpeedKmh: _b,
+    avgPaceSecPer100m: _c,
+    ...rest
+  } = actual
+  void [_a, _b, _c]
+  return {
+    ...rest,
+    ...(rest.discipline !== 'brick' &&
+      !Array.isArray(rest.laps) && { laps: [] }),
+  }
+}
+
 /** v2: la serie eseguita non ha il RIR. */
 function dropActualRir(actual: unknown): unknown {
   if (!isObj(actual) || !Array.isArray(actual.exercises)) return actual
@@ -119,6 +135,19 @@ export const MIGRATIONS: Migration[] = [
       'Nuovo tipo di allenamento brick (`discipline: brick`, frazioni in `legs`); nessun dato da convertire',
     // le app più vecchie non devono importare file con brick (li scarterebbero)
     migrate: (d) => d,
+  },
+  {
+    to: 5,
+    description:
+      'Eseguito endurance manuale: via passo e velocità medi (si calcolano), distanza facoltativa, RPE e note; eseguito per frazione dei brick',
+    migrate: (d) => ({
+      ...d,
+      sessions: d.sessions.map((s: unknown) =>
+        isObj(s) && isObj(s.actual) && s.discipline !== 'strength'
+          ? { ...s, actual: dropAveragePace(s.actual) }
+          : s,
+      ),
+    }),
   },
 ]
 

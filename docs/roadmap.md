@@ -4,7 +4,7 @@ Obiettivo: app completa entro **gennaio 2027**, uso reale da **febbraio 2027**, 
 
 - ✅ **Fondamenta** — Panoramica, Calendario (settimana/mese/anno), Planner (esercizi e allenamenti), sessioni del calendario create dai template, storage robusto (IndexedDB, migrazioni versionate, pagina Dati con export/import/backup).
 - ✅ **Registrazione live della forza** — schermata a schermo intero dal dettaglio della sessione: kg × reps per serie con i valori in grigio dell'ultima volta, timer di recupero (anche superserie), modifiche al volo, ripresa dopo la chiusura, riepilogo con record.
-- ⬜ **Registrazione endurance e brick** — ✅ brick (più frazioni endurance di fila con transizioni) nel Planner e nel Calendario; ⬜ inserimento manuale dell'eseguito (anche per frazione sui brick) dal dettaglio della seduta.
+- ✅ **Registrazione endurance e brick** — brick (più frazioni endurance di fila con transizioni) nel Planner e nel Calendario; inserimento manuale dell'eseguito dal dettaglio della seduta (anche per frazione sui brick), con scostamento dal piano.
 - ⬜ **Blocchi e Fasi nel Planner** — periodizzazione (settimane/mesi di allenamenti) applicabile al calendario in un colpo.
 - ⬜ **Analisi** — carico di allenamento, progressione della forza, mappa muscolare heatmap, volumi endurance.
 - ⬜ **Supabase** — login, sincronizzazione tra dispositivi, funzionamento offline-first.

@@ -76,7 +76,13 @@ Un allenamento in una data: `id`, `date`, `order` nel giorno (da 0), `discipline
 
 ## Endurance effettivo
 
-Manuale o importato da `.FIT` Garmin (solo Garmin → app), campo `source` (`manual` | `garmin_fit`): distanza, durata, passo o velocità medi, FC media e massima, dislivello, giri. L'import abbina il file alla seduta prevista dello stesso giorno e disciplina, altrimenti ne crea una nuova.
+Inserito **a mano** dal dettaglio della seduta (`src/lib/enduranceActual.ts`, modulo in `src/features/endurance/`); l'import `.FIT` Garmin arriverà con l'ultimo punto della roadmap. L'endurance non si registra mai dal telefono: "Inizia allenamento" esiste solo per la forza.
+
+- **`EnduranceMetrics`** (seduta o frazione): `durationS` **obbligatorio** (m:ss o h:mm:ss), `distanceM`, `avgHr` e `maxHr` (interi 30–250, la massima non sotto la media), `elevationGainM` (0–10000 m, solo corsa e bici). Passo e velocità medi **non si salvano**: si calcolano (`averageIntensity`, stesse unità dell'intensità dei piani).
+- **`EnduranceActual`** (corsa, bici, nuoto): `discipline`, `source` (`manual` | `garmin_fit`), le metriche, `rpe` (1–10, facoltativa), `notes`, `laps` (vuoti per l'inserimento manuale).
+- **`BrickActual`**: `source`, `legs` (`BrickLegActual`: `legId` della frazione del piano, `discipline` copiata, metriche e `transitionBeforeS` reale facoltativo, mai sulla prima), `rpe` e `notes` dell'intero brick. Il modulo propone una sezione per ogni frazione del piano, già compilata con i dati salvati della stessa frazione; un brick senza frazioni non si registra. Totale = frazioni + transizioni (`brickActualTotals`).
+- **Salvare** (`setSessionActual`) rende la seduta `done`; **Elimina eseguito** (con conferma, `clearSessionActual`) la riporta `planned`. Nel dettaglio il riquadro "Eseguito" sta sopra il piano, con lo **scostamento** in % da durata e distanza previste (`deviationPct`), anche per frazione.
+- **Panoramica**: conta la durata eseguita; quella di un brick si divide tra gli sport delle frazioni (ogni frazione con la transizione che la precede).
 
 ## Salvataggio (`src/data/`)
 
@@ -91,13 +97,14 @@ Manuale o importato da `.FIT` Garmin (solo Garmin → app), campo `source` (`man
 
 I dati hanno un **numero di versione dello schema** (`SCHEMA_VERSION`, salvato in `meta.schemaVersion`, scritto in ogni export e in ogni backup). `MIGRATIONS` è l'elenco ordinato dei passaggi: la migrazione con `to: N` porta i dati dalla versione N−1 alla N. All'avvio, se la versione salvata è più bassa, si salva un backup (`pre-migration`) e si eseguono in ordine le migrazioni mancanti; le stesse migrazioni si applicano ai file importati e ai backup ripristinati.
 
-| Versione | Cosa cambia                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------- |
-| 0        | Formato iniziale (15 gruppi muscolari, serie con i kg)                                                        |
-| 1        | Muscoli nei 20 gruppi della mappa del corpo                                                                   |
-| 2        | Serie previste solo con `reps` e `rir` obiettivo (via i `kg` da template e piani); serie eseguite senza `rir` |
-| 3        | Eseguito di forza con note facoltative (`actual.notes`); nessun dato da convertire                            |
-| 4        | Nuovo tipo brick (`discipline: brick`, frazioni in `legs`); nessun dato da convertire                         |
+| Versione | Cosa cambia                                                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0        | Formato iniziale (15 gruppi muscolari, serie con i kg)                                                                                      |
+| 1        | Muscoli nei 20 gruppi della mappa del corpo                                                                                                 |
+| 2        | Serie previste solo con `reps` e `rir` obiettivo (via i `kg` da template e piani); serie eseguite senza `rir`                               |
+| 3        | Eseguito di forza con note facoltative (`actual.notes`); nessun dato da convertire                                                          |
+| 4        | Nuovo tipo brick (`discipline: brick`, frazioni in `legs`); nessun dato da convertire                                                       |
+| 5        | Eseguito endurance manuale: via passo e velocità medi, distanza facoltativa, RPE e note, giri sempre lista; eseguito per frazione dei brick |
 
 **Come aggiungere una migrazione**
 

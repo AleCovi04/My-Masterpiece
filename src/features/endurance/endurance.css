@@ -1,0 +1,72 @@
+/* Eseguito endurance: modulo e riquadro nel dettaglio della seduta. */
+.ea-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.ea-grid .en-dist {
+  min-width: 0;
+}
+.ea-legs {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ea-legs > li {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ea-leg {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--c);
+  border-radius: 14px;
+  background: var(--surface);
+  min-width: 0;
+}
+.ea-leg h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+}
+.ea-rpe {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  max-width: 460px;
+}
+.ea-rpe button {
+  min-height: 40px;
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: 600 15px var(--f-body);
+  cursor: pointer;
+  padding: 0;
+}
+.ea-rpe button[aria-pressed='true'] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+.ea-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ea-dev {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}

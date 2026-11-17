@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { DisciplineIcon, LegIcons } from '../../components/ui/Icons'
 import { brickSports } from '../../lib/brick'
 import type {
+  BrickActual,
+  EnduranceActual,
   Exercise,
   IsoDate,
   Session,
@@ -12,6 +14,8 @@ import { useI18n } from '../../i18n/context'
 import { isIsoDate } from '../../lib/dates'
 import { formatDuration } from '../../lib/format'
 import { sessionAsTemplate, sessionDurationSec } from '../../lib/sessions'
+import ActualDialog from '../endurance/ActualDialog'
+import ActualView from '../endurance/ActualView'
 import BrickDialog from '../planner/BrickDialog'
 import EnduranceDialog from '../planner/EnduranceDialog'
 import Modal from '../planner/Modal'
@@ -36,6 +40,10 @@ interface Props {
   onResume: () => void
   /** Un'altra seduta di forza è già in corso. */
   liveElsewhere: boolean
+  /** Salva l'eseguito endurance inserito a mano (la seduta diventa completata). */
+  onSaveActual: (actual: EnduranceActual | BrickActual) => void
+  /** Elimina l'eseguito endurance (la seduta torna programmata). */
+  onClearActual: () => void
 }
 
 const noop = () => {}
@@ -54,10 +62,15 @@ export default function SessionDetail({
   onStart,
   onResume,
   liveElsewhere,
+  onSaveActual,
+  onClearActual,
 }: Props) {
   const { t } = useI18n()
   const c = t.calendar
+  const e = t.endurance
   const [editing, setEditing] = useState(false)
+  const [recording, setRecording] = useState(false)
+  const [confirmingClear, setConfirmingClear] = useState(false)
   // `null` = riga "Sposta data" chiusa
   const [newDate, setNewDate] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
@@ -123,10 +136,60 @@ export default function SessionDetail({
           </dl>
 
           {s.discipline !== 'strength' ? (
-            <button type="button" className="pl-btn acc sd-start" disabled>
-              {c.start}
-              <small>{c.comingSoon}</small>
-            </button>
+            s.actual ? (
+              <section className="sd-sec">
+                <h4>{e.section}</h4>
+                <ActualView session={s} />
+                <div className="pl-actions">
+                  <button
+                    type="button"
+                    className="pl-btn"
+                    onClick={() => setRecording(true)}
+                  >
+                    {e.edit}
+                  </button>
+                  {confirmingClear ? (
+                    <span className="pl-confirm">
+                      <small>{e.confirmRemove}</small>
+                      <button
+                        type="button"
+                        className="pl-btn warn"
+                        onClick={() => {
+                          onClearActual()
+                          setConfirmingClear(false)
+                        }}
+                      >
+                        {e.confirmYes}
+                      </button>
+                      <button
+                        type="button"
+                        className="pl-btn"
+                        onClick={() => setConfirmingClear(false)}
+                      >
+                        {e.cancel}
+                      </button>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="pl-btn warn"
+                      onClick={() => setConfirmingClear(true)}
+                    >
+                      {e.remove}
+                    </button>
+                  )}
+                </div>
+              </section>
+            ) : (
+              <button
+                type="button"
+                className="pl-btn acc sd-start"
+                disabled={s.status === 'skipped'}
+                onClick={() => setRecording(true)}
+              >
+                {e.record}
+              </button>
+            )
           ) : s.status === 'in_progress' ? (
             <button
               type="button"
@@ -253,6 +316,17 @@ export default function SessionDetail({
           </div>
         </div>
       </Modal>
+
+      {recording && s.discipline !== 'strength' && (
+        <ActualDialog
+          session={s}
+          onSave={(actual) => {
+            onSaveActual(actual)
+            setRecording(false)
+          }}
+          onClose={() => setRecording(false)}
+        />
+      )}
 
       {editing &&
         (s.discipline === 'strength' ? (

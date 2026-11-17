@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { dataStore } from '../../data'
 import type {
+  BrickActual,
+  EnduranceActual,
   Exercise,
   Id,
   IsoDate,
@@ -8,6 +10,7 @@ import type {
   SessionStatus,
   WorkoutTemplate,
 } from '../../data/types'
+import { clearSessionActual, setSessionActual } from '../../lib/enduranceActual'
 import { createLiveWorkout, startSession } from '../../lib/liveWorkout'
 import { moveSession } from '../../lib/reorder'
 import {
@@ -120,6 +123,22 @@ export function useCalendarSessions() {
     await dataStore.saveLiveWorkout(createLiveWorkout(session, now))
   }, [])
 
+  /** Eseguito endurance inserito a mano: la seduta diventa completata. */
+  const saveActual = useCallback(
+    (id: Id, actual: EnduranceActual | BrickActual) =>
+      change((cur) =>
+        setSessionActual(cur, id, actual, new Date().toISOString()),
+      ),
+    [change],
+  )
+
+  /** Elimina l'eseguito endurance: la seduta torna programmata. */
+  const clearActual = useCallback(
+    (id: Id) =>
+      change((cur) => clearSessionActual(cur, id, new Date().toISOString())),
+    [change],
+  )
+
   const remove = useCallback(
     (id: Id) => change((cur) => removeSession(cur, id)),
     [change],
@@ -136,6 +155,8 @@ export function useCalendarSessions() {
     duplicate,
     setStatus,
     start,
+    saveActual,
+    clearActual,
     remove,
   }
 }

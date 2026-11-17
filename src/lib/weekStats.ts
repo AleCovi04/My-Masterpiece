@@ -1,5 +1,6 @@
 import type { IsoDate, Session, Sport } from '../data/types'
 import { brickSecondsBySport } from './brick'
+import { brickActualSecondsBySport, brickActualTotals } from './enduranceActual'
 import { addDays, parseIsoDate, toIsoDate } from './dates'
 import { sessionDurationSec } from './sessions'
 
@@ -26,6 +27,7 @@ export function actualSeconds(s: Session): number {
       Math.round((Date.parse(a.endedAt) - Date.parse(a.startedAt)) / 1000),
     )
   }
+  if (a.discipline === 'brick') return brickActualTotals(a).durationS
   return a.durationS
 }
 
@@ -76,11 +78,17 @@ export function loadByDiscipline(
   ) as Record<Sport, { plannedS: number; actualS: number }>
   for (const s of sessions) {
     if (s.discipline === 'brick') {
-      // il brick si divide tra gli sport delle frazioni (l'eseguito arriverà con la registrazione endurance)
+      // il brick si divide tra gli sport delle frazioni (previsto ed eseguito)
       if (s.status === 'skipped') continue
       const parts = brickSecondsBySport(s.plan.legs, s.estimatedDurationSec)
       for (const [d, sec] of Object.entries(parts))
         out[d as Sport].plannedS += sec
+      if (s.status === 'done' && s.actual) {
+        for (const [d, sec] of Object.entries(
+          brickActualSecondsBySport(s.actual),
+        ))
+          out[d as Sport].actualS += sec
+      }
       continue
     }
     const d = s.discipline

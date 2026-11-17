@@ -11,7 +11,8 @@ import { actualSeconds } from '../../lib/weekStats'
 /** Distanza: quella eseguita se c'è, altrimenti quella del piano (può mancare). */
 function distanceText(s: Session): string | null {
   if (s.discipline === 'strength' || s.discipline === 'brick') return null
-  if (s.actual) return formatDistance(s.actual.distanceM, s.discipline)
+  if (s.actual?.distanceM)
+    return formatDistance(s.actual.distanceM, s.discipline)
   const totals = templateTotals({ discipline: s.discipline, ...s.plan })
   if (totals.distanceM === null) return null
   return `${totals.distanceComplete ? '' : '≥ '}${formatDist(totals.distanceM, s.discipline)}`

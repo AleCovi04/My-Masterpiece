@@ -185,6 +185,59 @@ describe('migrazioni', () => {
     expect(dropped).toBe(3)
   })
 
+  it('v4 → v5: via passo e velocità medi dall’eseguito endurance, giri sempre presenti', () => {
+    const d: RawData = {
+      exercises: [],
+      templates: [],
+      sessions: [
+        {
+          id: 'c',
+          discipline: 'run',
+          actual: {
+            discipline: 'run',
+            source: 'manual',
+            distanceM: 10000,
+            durationS: 3000,
+            avgPaceSecPerKm: 300,
+          },
+        },
+        {
+          id: 'b',
+          discipline: 'bike',
+          actual: {
+            discipline: 'bike',
+            source: 'manual',
+            distanceM: 30000,
+            durationS: 3600,
+            avgSpeedKmh: 30,
+            laps: [{ distanceM: 1000, durationS: 120 }],
+          },
+        },
+        { id: 'f', discipline: 'strength', actual: { exercises: [] } },
+      ],
+      raceDate: null,
+    }
+    const out = MIGRATIONS[4].migrate(d)
+    expect(out.sessions[0]).toEqual({
+      id: 'c',
+      discipline: 'run',
+      actual: {
+        discipline: 'run',
+        source: 'manual',
+        distanceM: 10000,
+        durationS: 3000,
+        laps: [],
+      },
+    })
+    expect(out.sessions[1]).toMatchObject({
+      actual: { laps: [{ distanceM: 1000, durationS: 120 }] },
+    })
+    expect((out.sessions[1] as { actual: object }).actual).not.toHaveProperty(
+      'avgSpeedKmh',
+    )
+    expect(out.sessions[2]).toBe(d.sessions[2])
+  })
+
   it('migrate applica solo le migrazioni mancanti ed è valida alla fine', () => {
     const d = migrate(v0(), 0)
     expect(sanitize(d).dropped).toBe(0)
