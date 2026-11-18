@@ -20,7 +20,7 @@ describe('filtri a chip', () => {
     expect(isolateChip(ALL, [], 'a')).toEqual(['a'])
   })
 
-  it('la durata della pressione è una costante di circa 2 s', () => {
-    expect(HOLD_MS).toBe(2000)
+  it('la durata della pressione è una costante di circa 0,5 s', () => {
+    expect(HOLD_MS).toBe(500)
   })
 })

@@ -1,7 +1,7 @@
 // Logica dei filtri a chip, uguale in tutta l'app (componente `FilterChips`).
 
 /** Quanto tenere premuto un chip per isolarlo (ms). */
-export const HOLD_MS = 2000
+export const HOLD_MS = 500
 
 /** Movimento oltre cui la pressione lunga si annulla (px): si sta scorrendo la pagina. */
 export const HOLD_MOVE_PX = 10
