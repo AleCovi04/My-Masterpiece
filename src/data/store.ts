@@ -1,4 +1,4 @@
-// Interfaccia di salvataggio: oggi IndexedDB (Dexie), domani anche Supabase.
+// Interfaccia di salvataggio: IndexedDB (Dexie), sincronizzato con Supabase.
 // L'app usa solo `DataStore`; per cambiare backend basta un'altra implementazione.
 import type { ExportFile } from './exportFile'
 import type {
@@ -25,6 +25,8 @@ export type BackupReason =
   | 'pre-restore'
   /** Prima di una migrazione dello schema. */
   | 'pre-migration'
+  /** Prima del primo collegamento a un account (sincronizzazione). */
+  | 'pre-sync'
 
 export interface BackupInfo {
   id: number
@@ -66,6 +68,9 @@ export interface DataStore {
   loadLiveWorkout(): Promise<LiveWorkout | null>
   /** Si chiama a ogni azione; `null` cancella la bozza (allenamento terminato). */
   saveLiveWorkout(workout: LiveWorkout | null): Promise<void>
+
+  /** Avvisa quando arrivano dati da un altro dispositivo (per ricaricare le pagine). */
+  subscribe(listener: () => void): () => void
 
   /** Apre il salvataggio: migrazioni, persistenza, backup automatico. Si può chiamare più volte. */
   init(): Promise<void>

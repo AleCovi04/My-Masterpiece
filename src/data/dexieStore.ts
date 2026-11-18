@@ -9,6 +9,18 @@ import {
 import { migrate, SCHEMA_VERSION, type RawData } from './migrations'
 import { generateSampleExercises } from './sampleData'
 import type { BackupInfo, BackupReason, DataStore } from './store'
+import { normalizeListItem, normalizeMeta } from './sync/items'
+import {
+  EPOCH,
+  LIST_KINDS,
+  META_IDS,
+  type ListKind,
+  type MetaId,
+  type SyncChange,
+  type SyncKind,
+  type SyncLocal,
+  type SyncMeta,
+} from './sync/types'
 import {
   defaultSettings,
   type AppData,
@@ -37,6 +49,8 @@ interface Row {
   id: string
   pos: number
   item: unknown
+  /** Ora dell'ultima modifica (per la sincronizzazione); assente = mai modificata dalla v3. */
+  updatedAt?: IsoDateTime
 }
 
 interface MetaRow {
@@ -47,7 +61,23 @@ interface MetaRow {
     | 'legacyImportedAt'
     | 'liveWorkout'
     | 'settings'
+    /** Dispositivo appena installato, mai modificato: al primo login vincono i dati del server. */
+    | 'pristine'
+    /** Ultima sincronizzazione (`SyncMeta`). */
+    | 'sync'
   value: unknown
+  /** Solo per `raceDate` e `settings`: ora dell'ultima modifica. */
+  updatedAt?: IsoDateTime
+}
+
+/** Modifica locale da inviare al server (una per voce: conta l'ultima). */
+interface ChangeRow {
+  /** `<kind>/<id>` */
+  key: string
+  kind: SyncKind
+  id: string
+  updatedAt: IsoDateTime
+  deleted: boolean
 }
 
 interface BackupRow {
@@ -58,8 +88,11 @@ interface BackupRow {
   data: RawData
 }
 
-type ListKey =
-  'exercises' | 'templates' | 'sessions' | 'blocks' | 'phases' | 'applications'
+type ListKey = ListKind
+
+const changeKey = (kind: SyncKind, id: string) => `${kind}/${id}`
+const sameJson = (a: unknown, b: unknown) =>
+  JSON.stringify(a) === JSON.stringify(b)
 
 class MmDb extends Dexie {
   exercises!: Table<Row, string>
@@ -70,6 +103,7 @@ class MmDb extends Dexie {
   applications!: Table<Row, string>
   meta!: Table<MetaRow, string>
   backups!: Table<BackupRow, number>
+  changes!: Table<ChangeRow, string>
 
   constructor(name: string, options?: DexieOptions) {
     super(name, options)
@@ -87,6 +121,10 @@ class MmDb extends Dexie {
       blocks: 'id, pos',
       phases: 'id, pos',
       applications: 'id, pos',
+    })
+    // v3: coda delle modifiche da sincronizzare
+    this.version(3).stores({
+      changes: 'key',
     })
   }
 }
@@ -106,25 +144,37 @@ function browserStorageManager(): StorageManager | undefined {
   return typeof navigator === 'undefined' ? undefined : navigator.storage
 }
 
-export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
+export function createDexieStore(
+  options: DexieStoreOptions = {},
+): DataStore & SyncLocal {
   const now = options.now ?? (() => new Date())
   const legacy = options.legacy ?? null
   const db = new MmDb(options.dbName ?? DB_NAME, options.idb)
-  const all = [
+  const lists = [
     db.exercises,
     db.templates,
     db.sessions,
     db.blocks,
     db.phases,
     db.applications,
-    db.meta,
-    db.backups,
   ]
+  const all = [...lists, db.meta, db.backups, db.changes]
 
   /** Se IndexedDB non è disponibile i dati vivono solo in memoria, per questa sessione. */
   let mem: AppData | null = null
   let memLive: LiveWorkout | null = null
   let ready: Promise<void> | null = null
+
+  /** Salvataggi locali (per la sincronizzazione) e dati arrivati dal server (per le pagine). */
+  const localListeners = new Set<() => void>()
+  const remoteListeners = new Set<() => void>()
+  const emit = (set: Set<() => void>) => set.forEach((fn) => fn())
+  const listen = (set: Set<() => void>, fn: () => void) => {
+    set.add(fn)
+    return () => {
+      set.delete(fn)
+    }
+  }
 
   const freshData = (): AppData => ({
     exercises: generateSampleExercises(now()),
@@ -182,22 +232,74 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     }
   }
 
-  const writeList = async (key: ListKey, items: { id: string }[]) => {
-    await db[key].clear()
-    await db[key].bulkPut(
-      items.map((item, pos) => ({ id: item.id, pos, item })),
-    )
+  /** Mette in coda la modifica di una voce; il dispositivo non è più "appena installato". */
+  const queue = async (
+    kind: SyncKind,
+    id: string,
+    updatedAt: IsoDateTime,
+    deleted: boolean,
+  ) => {
+    await db.changes.put({
+      key: changeKey(kind, id),
+      kind,
+      id,
+      updatedAt,
+      deleted,
+    })
   }
 
-  const writeAll = async (data: AppData) => {
-    await writeList('exercises', data.exercises)
-    await writeList('templates', data.templates)
-    await writeList('sessions', data.sessions)
-    await writeList('blocks', data.blocks)
-    await writeList('phases', data.phases)
-    await writeList('applications', data.applications)
-    await db.meta.put({ key: 'raceDate', value: data.raceDate })
-    await db.meta.put({ key: 'settings', value: data.settings })
+  /**
+   * Scrive un elenco intero. Con `track` le voci nuove, cambiate (anche solo di
+   * posizione) o tolte vanno nella coda della sincronizzazione.
+   */
+  const writeList = async (
+    key: ListKey,
+    items: { id: string }[],
+    track = true,
+  ) => {
+    if (!track) {
+      await db[key].clear()
+      await db[key].bulkPut(
+        items.map((item, pos) => ({ id: item.id, pos, item })),
+      )
+      return
+    }
+    const old = new Map((await db[key].toArray()).map((r) => [r.id, r]))
+    const stamp = now().toISOString()
+    const changed: Row[] = []
+    items.forEach((item, pos) => {
+      const prev = old.get(item.id)
+      old.delete(item.id)
+      if (prev && prev.pos === pos && sameJson(prev.item, item)) return
+      changed.push({ id: item.id, pos, item, updatedAt: stamp })
+    })
+    const removed = [...old.keys()]
+    if (changed.length === 0 && removed.length === 0) return
+    await db[key].bulkDelete(removed)
+    await db[key].bulkPut(changed)
+    for (const r of changed) await queue(key, r.id, stamp, false)
+    for (const id of removed) await queue(key, id, stamp, true)
+    await db.meta.delete('pristine')
+  }
+
+  /** Data gara o impostazioni; con `track` in coda se il valore cambia. */
+  const writeMeta = async (key: MetaId, value: unknown, track = true) => {
+    if (!track) {
+      await db.meta.put({ key, value })
+      return
+    }
+    const prev = await db.meta.get(key)
+    if (prev && sameJson(prev.value, value)) return
+    const stamp = now().toISOString()
+    await db.meta.put({ key, value, updatedAt: stamp })
+    await queue('meta', key, stamp, false)
+    await db.meta.delete('pristine')
+  }
+
+  const writeAll = async (data: AppData, track = true) => {
+    for (const key of LIST_KINDS) await writeList(key, data[key], track)
+    await writeMeta('raceDate', data.raceDate, track)
+    await writeMeta('settings', data.settings, track)
   }
 
   const addBackup = async (
@@ -226,16 +328,19 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     if (typeof stored !== 'number') {
       // primo avvio su questo database: si parte dal vecchio localStorage, se c'è
       const old = legacy ? readLegacy(legacy) : null
-      const data = old ? fromLegacy(old) : freshData()
       await db.transaction('rw', all, async () => {
-        await writeAll(data)
-        await db.meta.put({ key: 'schemaVersion', value: SCHEMA_VERSION })
         if (old) {
+          await writeAll(fromLegacy(old))
           await db.meta.put({
             key: 'legacyImportedAt',
             value: now().toISOString(),
           })
+        } else {
+          // dati di partenza: non sono modifiche dell'utente
+          await writeAll(freshData(), false)
+          await db.meta.put({ key: 'pristine', value: true })
         }
+        await db.meta.put({ key: 'schemaVersion', value: SCHEMA_VERSION })
       })
       // solo a dati al sicuro in IndexedDB le chiavi vecchie diventano copie di backup
       if (old && legacy) backupLegacyKeys(legacy)
@@ -279,17 +384,27 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     return mem ? mem[key] : readList(key)
   }
 
+  /** Esegue una scrittura tracciata e avvisa la sincronizzazione. */
+  const tracked = async (
+    label: string,
+    tables: Table[],
+    write: () => Promise<void>,
+  ) => {
+    try {
+      await db.transaction('rw', [...tables, db.meta, db.changes], write)
+      emit(localListeners)
+    } catch (error) {
+      console.error(`Salvataggio non riuscito (${label})`, error)
+    }
+  }
+
   const save = async (key: ListKey, items: { id: string }[]) => {
     await init()
     if (mem) {
       mem = { ...mem, [key]: items }
       return
     }
-    try {
-      await db.transaction('rw', db[key], () => writeList(key, items))
-    } catch (error) {
-      console.error(`Salvataggio non riuscito (${key})`, error)
-    }
+    await tracked(key, [db[key]], () => writeList(key, items))
   }
 
   const current = async (): Promise<AppData> => {
@@ -297,7 +412,146 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
     return mem ?? sanitize(await db.transaction('r', all, readRaw)).data
   }
 
+  // ---------- sincronizzazione (lato dispositivo) ----------
+
+  const sync: SyncLocal = {
+    async pendingChanges() {
+      await init()
+      if (mem) return []
+      return db.transaction('r', all, async () => {
+        const out: SyncChange[] = []
+        for (const c of await db.changes.toArray()) {
+          const base = {
+            kind: c.kind,
+            id: c.id,
+            updatedAt: c.updatedAt,
+            schemaVersion: SCHEMA_VERSION,
+          }
+          if (c.kind === 'meta') {
+            const row = await db.meta.get(c.id)
+            out.push({
+              ...base,
+              pos: 0,
+              item: row?.value ?? null,
+              deleted: false,
+            })
+            continue
+          }
+          const row = c.deleted ? undefined : await db[c.kind].get(c.id)
+          out.push(
+            row
+              ? { ...base, pos: row.pos, item: row.item, deleted: false }
+              : { ...base, pos: 0, item: null, deleted: true },
+          )
+        }
+        return out
+      })
+    },
+
+    async ackChanges(sent) {
+      await init()
+      if (mem || sent.length === 0) return
+      await db.transaction('rw', db.changes, async () => {
+        for (const c of sent) {
+          const key = changeKey(c.kind, c.id)
+          const row = await db.changes.get(key)
+          if (row && row.updatedAt === c.updatedAt) await db.changes.delete(key)
+        }
+      })
+    },
+
+    async applyRemote(changes) {
+      await init()
+      if (mem || changes.length === 0) return 0
+      let applied = 0
+      await db.transaction('rw', all, async () => {
+        for (const c of changes) {
+          const key = changeKey(c.kind, c.id)
+          const pending = await db.changes.get(key)
+          if (c.kind === 'meta') {
+            if (!(META_IDS as readonly string[]).includes(c.id) || c.deleted)
+              continue
+            const id = c.id as MetaId
+            const row = await db.meta.get(id)
+            const localAt = latest(row?.updatedAt, pending?.updatedAt)
+            if (c.updatedAt <= localAt) continue
+            const value = normalizeMeta(id, c.item, c.schemaVersion)
+            await db.meta.put({ key: id, value, updatedAt: c.updatedAt })
+          } else {
+            if (!(LIST_KINDS as readonly string[]).includes(c.kind)) continue
+            const row = await db[c.kind].get(c.id)
+            const localAt = latest(row?.updatedAt, pending?.updatedAt)
+            if (c.updatedAt <= localAt) continue
+            if (c.deleted) {
+              await db[c.kind].delete(c.id)
+            } else {
+              const item = normalizeListItem(c.kind, c.item, c.schemaVersion)
+              if (!item || item.id !== c.id) continue
+              await db[c.kind].put({
+                id: c.id,
+                pos: c.pos,
+                item,
+                updatedAt: c.updatedAt,
+              })
+            }
+          }
+          if (pending) await db.changes.delete(key)
+          applied += 1
+        }
+      })
+      if (applied > 0) emit(remoteListeners)
+      return applied
+    },
+
+    async startAccount(remoteHasData) {
+      await init()
+      if (mem) return
+      await db.transaction('rw', all, async () => {
+        await addBackup('pre-sync', await readRaw(), SCHEMA_VERSION)
+        const pristine = (await db.meta.get('pristine'))?.value === true
+        await db.meta.delete('pristine')
+        if (pristine && remoteHasData) {
+          // dispositivo nuovo: i dati di partenza lasciano il posto a quelli del server
+          for (const table of lists) await table.clear()
+          await db.changes.clear()
+          return
+        }
+        for (const kind of LIST_KINDS) {
+          for (const row of await db[kind].toArray()) {
+            const at = row.updatedAt ?? EPOCH
+            if (!row.updatedAt) await db[kind].put({ ...row, updatedAt: at })
+            await queue(kind, row.id, at, false)
+          }
+        }
+        for (const id of META_IDS) {
+          const row = await db.meta.get(id)
+          if (!row) continue
+          const at = row.updatedAt ?? EPOCH
+          if (!row.updatedAt) await db.meta.put({ ...row, updatedAt: at })
+          await queue('meta', id, at, false)
+        }
+      })
+    },
+
+    async getSyncMeta() {
+      await init()
+      if (mem) return null
+      const value = (await db.meta.get('sync'))?.value
+      return isSyncMeta(value) ? value : null
+    },
+    async setSyncMeta(meta) {
+      await init()
+      if (mem) return
+      if (meta) await db.meta.put({ key: 'sync', value: meta })
+      else await db.meta.delete('sync')
+    },
+
+    onLocalChange: (fn) => listen(localListeners, fn),
+  }
+
   return {
+    ...sync,
+    subscribe: (fn) => listen(remoteListeners, fn),
     init,
     async isPersistent() {
       try {
@@ -325,14 +579,14 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         mem = { ...mem, sessions, applications }
         return
       }
-      try {
-        await db.transaction('rw', db.sessions, db.applications, async () => {
+      await tracked(
+        'applicazione',
+        [db.sessions, db.applications],
+        async () => {
           await writeList('sessions', sessions)
           await writeList('applications', applications)
-        })
-      } catch (error) {
-        console.error('Salvataggio non riuscito (applicazione)', error)
-      }
+        },
+      )
     },
 
     async loadRaceDate() {
@@ -344,11 +598,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         mem = { ...mem, raceDate: date }
         return
       }
-      try {
-        await db.meta.put({ key: 'raceDate', value: date })
-      } catch (error) {
-        console.error('Salvataggio non riuscito (raceDate)', error)
-      }
+      await tracked('raceDate', [], () => writeMeta('raceDate', date))
     },
 
     async loadSettings() {
@@ -362,11 +612,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         mem = { ...mem, settings }
         return
       }
-      try {
-        await db.meta.put({ key: 'settings', value: settings })
-      } catch (error) {
-        console.error('Salvataggio non riuscito (settings)', error)
-      }
+      await tracked('settings', [], () => writeMeta('settings', settings))
     },
 
     async loadLiveWorkout() {
@@ -413,6 +659,7 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         await addBackup('pre-import', await readRaw(), SCHEMA_VERSION)
         await writeAll(data)
       })
+      emit(localListeners)
     },
 
     async listBackups() {
@@ -438,6 +685,24 @@ export function createDexieStore(options: DexieStoreOptions = {}): DataStore {
         await addBackup('pre-restore', await readRaw(), SCHEMA_VERSION)
         await writeAll(data)
       })
+      emit(localListeners)
     },
   }
+}
+
+/** La più recente di due ore ISO (stringa vuota se nessuna). */
+function latest(a?: IsoDateTime, b?: IsoDateTime): IsoDateTime {
+  const x = a ?? ''
+  const y = b ?? ''
+  return x > y ? x : y
+}
+
+function isSyncMeta(v: unknown): v is SyncMeta {
+  if (!v || typeof v !== 'object') return false
+  const m = v as Record<string, unknown>
+  return (
+    typeof m.userId === 'string' &&
+    (m.cursor === null || typeof m.cursor === 'string') &&
+    typeof m.lastSyncAt === 'string'
+  )
 }
