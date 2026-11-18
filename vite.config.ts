@@ -8,7 +8,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon-64.png', 'apple-touch-icon.png'],
+      // registrazione in main.tsx: nell'app Android (Capacitor) il service worker non serve
+      injectRegister: null,
       manifest: {
         name: 'My Masterpiece',
         short_name: 'Masterpiece',
