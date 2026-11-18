@@ -1,0 +1,75 @@
+# Costruisce l'APK Android firmato e lo pubblica nelle Release di GitHub.
+# Si avvia a mano (Actions → Android APK → Run workflow) o con un tag `v*`.
+# Segreti richiesti: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ANDROID_KEYSTORE_BASE64,
+# ANDROID_KEYSTORE_PASSWORD (vedi docs/android.md).
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: ${{ github.ref_type == 'tag' && github.ref_name || format('build-{0}', github.run_number) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Controllo dei segreti
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KP: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          SU: ${{ secrets.SUPABASE_URL }}
+          SK: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          for v in KS KP SU SK; do
+            if [ -z "${!v}" ]; then echo "::error::Segreto mancante ($v): vedi docs/android.md"; exit 1; fi
+          done
+
+      - run: npm ci
+
+      - name: Build dell'app web
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
+
+      - run: npx cap sync android
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build dell'APK firmato
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: mymasterpiece
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.p12"
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/release.p12"
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/my-masterpiece.apk"
+
+      - name: Pubblicazione nelle Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('apk-{0}', github.run_number) }}
+          name: My Masterpiece ${{ env.VERSION_NAME }}
+          make_latest: true
+          files: ${{ runner.temp }}/my-masterpiece.apk
