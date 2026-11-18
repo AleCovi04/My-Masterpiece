@@ -26,7 +26,7 @@ import { useSortable } from '../planner/useSortable'
 import FinishDialog from './FinishDialog'
 import LiveExerciseCard, { type SetErrors } from './LiveExerciseCard'
 import RestBar from './RestBar'
-import { useLiveWorkout, useNow, useWakeLock } from './hooks'
+import { useLiveWorkout, useNow, useRestAlert, useWakeLock } from './hooks'
 import '../planner/planner.css'
 import './live.css'
 
@@ -58,6 +58,11 @@ export default function LivePage() {
   const scrollTo = useRef<string | null>(null)
 
   useWakeLock(!!w)
+  useRestAlert(live.loading ? null : (w?.rest?.endsAt ?? null), {
+    title: l.restOver,
+    body: l.restAlertBody,
+    channel: l.restChannel,
+  })
 
   const { drag, handleProps } = useSortable({
     listRef,

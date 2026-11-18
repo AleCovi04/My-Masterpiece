@@ -7,6 +7,11 @@ import {
   liveActual,
   resumeLive,
 } from '../../lib/liveWorkout'
+import {
+  cancelRestAlert,
+  scheduleRestAlert,
+  type RestAlertTexts,
+} from './restAlert'
 
 /** Percorso della schermata live (un solo allenamento in corso alla volta). */
 export const LIVE_PATH = '/allenamento'
@@ -69,6 +74,7 @@ export function useLiveWorkout() {
       const sessions = finishSession(data.sessions, actual, w.sessionId, now)
       await dataStore.saveSessions(sessions)
       await dataStore.saveLiveWorkout(null)
+      void cancelRestAlert()
       latest.current = null
       setData({ ...data, sessions, workout: null })
     },
@@ -86,6 +92,7 @@ export function useLiveWorkout() {
     )
     await dataStore.saveSessions(sessions)
     await dataStore.saveLiveWorkout(null)
+    void cancelRestAlert()
     latest.current = null
     setData({ ...data, sessions, workout: null })
   }, [data])
@@ -99,6 +106,18 @@ export function useLiveWorkout() {
     finish,
     cancel,
   }
+}
+
+/**
+ * App Android: notifica a fine recupero, riprogrammata a ogni cambio (−15 s, +15 s,
+ * a mano) e annullata se il recupero si salta. Uscendo dalla schermata resta valida.
+ */
+export function useRestAlert(endsAt: number | null, texts: RestAlertTexts) {
+  const { title, body, channel } = texts
+  useEffect(() => {
+    if (endsAt === null) void cancelRestAlert()
+    else void scheduleRestAlert(endsAt, { title, body, channel })
+  }, [endsAt, title, body, channel])
 }
 
 /** Ora corrente, aggiornata ogni `ms` e al ritorno in primo piano. */

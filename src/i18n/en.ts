@@ -146,6 +146,8 @@ export const en: Dictionary = {
     noExercises: 'No exercises: add one from the catalog.',
     restTitle: 'Rest',
     restOver: 'Rest over',
+    restAlertBody: 'Ready for the next set.',
+    restChannel: 'End of rest',
     restSet: 'Set the rest manually',
     restInput: 'Rest (m:ss or seconds)',
     restMinus: '−15 s',

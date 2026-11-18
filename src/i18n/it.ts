@@ -144,6 +144,8 @@ export const it = {
     noExercises: 'Nessun esercizio: aggiungine uno dal catalogo.',
     restTitle: 'Recupero',
     restOver: 'Recupero finito',
+    restAlertBody: 'Pronto per la prossima serie.',
+    restChannel: 'Fine del recupero',
     restSet: 'Imposta il recupero a mano',
     restInput: 'Recupero (m:ss o secondi)',
     restMinus: '−15 s',
