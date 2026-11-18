@@ -327,7 +327,6 @@ export const en: Dictionary = {
     latestRecords: 'Latest records',
     noRecordsYet: 'No records yet',
     moreRecords: '+{n}',
-    exercisesTitle: 'Exercises',
     filterBy: 'Filter: {m}',
     clearFilter: 'Clear filter',
     hideNever: 'Hide never done',
@@ -337,7 +336,8 @@ export const en: Dictionary = {
     recentRecord: 'Record in the last 14 days',
     noExercises: 'No exercises found.',
     back: 'Back',
-    pickExercise: 'Tap an exercise to see its records and charts.',
+    pickExerciseTitle: 'Choose exercise',
+    lastTimeOn: 'Last time: {date}',
   },
   plan: {
     title: 'The Plan',

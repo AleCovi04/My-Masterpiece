@@ -329,7 +329,6 @@ export const it = {
     latestRecords: 'Ultimi record',
     noRecordsYet: 'Nessun record ancora',
     moreRecords: '+{n}',
-    exercisesTitle: 'Esercizi',
     filterBy: 'Filtro: {m}',
     clearFilter: 'Togli il filtro',
     hideNever: 'Nascondi mai fatti',
@@ -339,7 +338,8 @@ export const it = {
     recentRecord: 'Record negli ultimi 14 giorni',
     noExercises: 'Nessun esercizio trovato.',
     back: 'Indietro',
-    pickExercise: 'Tocca un esercizio per vedere record e grafici.',
+    pickExerciseTitle: 'Scegli esercizio',
+    lastTimeOn: 'Ultima volta: {date}',
   },
   plan: {
     title: 'Il Piano',

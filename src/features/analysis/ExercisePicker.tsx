@@ -5,6 +5,7 @@ import { useI18n } from '../../i18n/context'
 import { daysBetween, parseIsoDate } from '../../lib/dates'
 import { filterByMuscles, normalizeName } from '../../lib/exercises'
 import type { ExerciseSummary } from '../../lib/strengthRecords'
+import Modal from '../planner/Modal'
 import MuscleFilterDialog from '../planner/MuscleFilterDialog'
 import type { ListFilters } from './strengthUi'
 
@@ -19,10 +20,15 @@ interface Props {
   onFilters: (f: ListFilters) => void
   selected: Id | null
   onSelect: (id: Id) => void
+  /** "Indietro": chiude senza cambiare esercizio. */
+  onClose: () => void
 }
 
-/** Lista degli esercizi con ricerca, filtro per muscolo e card compatte. */
-export default function ExerciseList({
+/**
+ * Finestra di scelta dell'esercizio: ricerca, filtro per muscolo e card
+ * compatte. Si esce solo con "Indietro" (anche Esc) o scegliendo un esercizio.
+ */
+export default function ExercisePicker({
   exercises,
   summaries,
   today,
@@ -30,6 +36,7 @@ export default function ExerciseList({
   onFilters,
   selected,
   onSelect,
+  onClose,
 }: Props) {
   const { t, lang } = useI18n()
   const a = t.analysis
@@ -119,9 +126,14 @@ export default function ExerciseList({
   const muscleText = filters.muscles.map((m) => groupName(m, lang)).join(', ')
 
   return (
-    <section className="panel st-list">
-      <h3>{a.exercisesTitle}</h3>
-      <div className="pl-toolbar">
+    <Modal
+      title={a.pickExerciseTitle}
+      closeLabel={a.back}
+      onClose={onClose}
+      wide
+      backdropClose={false}
+    >
+      <div className="pl-toolbar st-tools">
         <input
           type="search"
           className="pl-inp pl-search"
@@ -184,6 +196,12 @@ export default function ExerciseList({
         <ul className="st-cards">{list.map(card)}</ul>
       )}
 
+      <div className="pl-actions">
+        <button type="button" className="pl-btn" onClick={onClose}>
+          ← {a.back}
+        </button>
+      </div>
+
       {choosing && (
         <MuscleFilterDialog
           selected={filters.muscles}
@@ -194,6 +212,6 @@ export default function ExerciseList({
           onClose={() => setChoosing(false)}
         />
       )}
-    </section>
+    </Modal>
   )
 }

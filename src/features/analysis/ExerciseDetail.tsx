@@ -20,8 +20,10 @@ interface Props {
   /** Storico completo dell'esercizio. */
   history: ExerciseSession[]
   range: Range
-  /** Torna alla lista (su telefono il dettaglio è a schermo intero). */
-  onBack: () => void
+  /** Riga sotto il nome (ultima volta, record recente…). */
+  meta?: string
+  /** Apre la finestra di scelta dell'esercizio. */
+  onPick: () => void
 }
 
 type LoadKey = 'maxKg' | 'r4' | 'r6' | 'r8' | 'r10' | 'r12'
@@ -56,7 +58,8 @@ export default function ExerciseDetail({
   name,
   history,
   range,
-  onBack,
+  meta,
+  onPick,
 }: Props) {
   const { t, lang } = useI18n()
   const a = t.analysis
@@ -109,14 +112,17 @@ export default function ExerciseDetail({
 
   return (
     <div className="st-detail" role="region" aria-label={name}>
-      <div className="st-detail-top">
-        <button type="button" className="pl-btn st-back" onClick={onBack}>
-          ← {a.back}
-        </button>
-        <h2 className="st-detail-name">{name}</h2>
-      </div>
-
       <section className="panel">
+        <div className="st-head">
+          <div className="st-head-text">
+            <span className="st-head-label">{a.exercise}</span>
+            <h2 className="st-head-name">{name}</h2>
+            {meta && <span className="st-head-meta">{meta}</span>}
+          </div>
+          <button type="button" className="pl-btn acc" onClick={onPick}>
+            {a.pickExerciseTitle}
+          </button>
+        </div>
         <h3>{a.records}</h3>
         <table className="ana-table ana-recs">
           <thead>
