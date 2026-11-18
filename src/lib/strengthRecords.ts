@@ -127,20 +127,20 @@ function mergeBest(
 export interface ExerciseSession {
   sessionId: Id
   date: IsoDate
+  /** Posizione della seduta nel giorno. */
+  order: number
   stats: SessionStats
   /** Metriche in cui la seduta ha battuto tutto lo storico precedente. */
   records: RecordMetric[]
 }
 
 /**
- * Storico di un esercizio, una voce per seduta svolta (in ordine di data e di
- * posizione nel giorno), con i nuovi record di ogni seduta rispetto a tutte
- * quelle precedenti. Esercizi saltati e sedute senza serie esclusi.
+ * Storico di ogni esercizio in una sola passata: una voce per seduta svolta
+ * (in ordine di data e di posizione nel giorno), con i nuovi record di ogni
+ * seduta rispetto a tutte quelle precedenti. Esercizi saltati e sedute senza
+ * serie esclusi.
  */
-export function exerciseHistory(
-  sessions: Session[],
-  exerciseId: Id,
-): ExerciseSession[] {
+export function allHistories(sessions: Session[]): Map<Id, ExerciseSession[]> {
   const done = sessions
     .flatMap((s) =>
       s.status === 'done' && s.discipline === 'strength' && s.actual
@@ -148,23 +148,113 @@ export function exerciseHistory(
         : [],
     )
     .sort((a, b) => a.s.date.localeCompare(b.s.date) || a.s.order - b.s.order)
-  const out: ExerciseSession[] = []
-  let best = emptyValues()
+  const out = new Map<Id, ExerciseSession[]>()
+  const best = new Map<Id, Record<RecordMetric, number | null>>()
   for (const { s, actual } of done) {
-    const sets = actual.exercises
-      .filter((e) => e.exerciseId === exerciseId && !e.skipped)
-      .flatMap((e) => e.sets)
-    if (sets.length === 0) continue
-    const stats = sessionStats(sets)
-    out.push({
-      sessionId: s.id,
-      date: s.date,
-      stats,
-      records: recordHits(best, stats, RECORD_METRICS).map((h) => h.metric),
-    })
-    best = mergeBest(best, stats)
+    const byExercise = new Map<Id, SetLike[]>()
+    for (const e of actual.exercises) {
+      if (e.skipped || e.sets.length === 0) continue
+      byExercise.set(e.exerciseId, [
+        ...(byExercise.get(e.exerciseId) ?? []),
+        ...e.sets,
+      ])
+    }
+    for (const [id, sets] of byExercise) {
+      const stats = sessionStats(sets)
+      const prev = best.get(id) ?? emptyValues()
+      const list = out.get(id) ?? []
+      list.push({
+        sessionId: s.id,
+        date: s.date,
+        order: s.order,
+        stats,
+        records: recordHits(prev, stats, RECORD_METRICS).map((h) => h.metric),
+      })
+      out.set(id, list)
+      best.set(id, mergeBest(prev, stats))
+    }
   }
   return out
+}
+
+/** Storico di un esercizio (vedi `allHistories`). */
+export function exerciseHistory(
+  sessions: Session[],
+  exerciseId: Id,
+): ExerciseSession[] {
+  return allHistories(sessions).get(exerciseId) ?? []
+}
+
+/** Riepilogo di un esercizio per la lista dell'Analisi. */
+export interface ExerciseSummary {
+  /** Peso massimo di sempre. */
+  maxKg: number | null
+  /** Volume massimo in una serie di sempre. */
+  setVolume: number | null
+  /** Ultima seduta in cui è stato fatto. */
+  lastDate: IsoDate
+  /** Ultima seduta con un nuovo record (`null` = nessuno). */
+  lastRecordDate: IsoDate | null
+}
+
+export function exerciseSummary(
+  history: ExerciseSession[],
+): ExerciseSummary | null {
+  if (history.length === 0) return null
+  const best = bestValues(history)
+  const withRecord = history.filter((h) => h.records.length > 0)
+  return {
+    maxKg: best.maxKg,
+    setVolume: best.setVolume,
+    lastDate: history[history.length - 1].date,
+    lastRecordDate: withRecord.at(-1)?.date ?? null,
+  }
+}
+
+/** Un record recente: il primo battuto in quella seduta (ordine della tabella) e quanti altri. */
+export interface LatestRecord {
+  exerciseId: Id
+  sessionId: Id
+  date: IsoDate
+  /** Posizione della seduta nel giorno. */
+  order: number
+  metric: RecordMetric
+  value: number
+  set?: SetRef
+  /** Altri record battuti nella stessa seduta sullo stesso esercizio. */
+  others: number
+}
+
+/**
+ * Gli ultimi `limit` record, dal più recente: uno per esercizio e seduta, il
+ * primo nell'ordine della tabella (N = 1 coincide con il peso massimo e non
+ * si conta due volte).
+ */
+export function latestRecords(
+  histories: Map<Id, ExerciseSession[]>,
+  limit = 5,
+): LatestRecord[] {
+  const all: LatestRecord[] = []
+  for (const [exerciseId, history] of histories) {
+    for (const h of history) {
+      const hits = HIT_METRICS.filter((m) => h.records.includes(m))
+      if (hits.length === 0) continue
+      const metric = hits[0]
+      all.push({
+        exerciseId,
+        sessionId: h.sessionId,
+        date: h.date,
+        order: h.order,
+        metric,
+        value: h.stats.values[metric] as number,
+        ...(h.stats.sets[metric] && { set: h.stats.sets[metric] }),
+        others: hits.length - 1,
+      })
+    }
+  }
+  return all
+    .sort((a, b) => b.date.localeCompare(a.date) || b.order - a.order)
+    .slice(0, limit)
 }
 
 /** Migliori valori di tutto lo storico (per confrontare una seduta nuova). */

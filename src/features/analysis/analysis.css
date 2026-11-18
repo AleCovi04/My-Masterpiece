@@ -750,3 +750,217 @@
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* ---------- Forza: ultimi record, lista esercizi e dettaglio ---------- */
+.st-strip {
+  list-style: none;
+  margin: 0;
+  padding: 2px 2px 6px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  overscroll-behavior-x: contain;
+}
+.st-strip > li {
+  flex: 0 0 min(240px, 78%);
+  scroll-snap-align: start;
+  min-width: 0;
+}
+.st-rec {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: 14px var(--f-body);
+  cursor: pointer;
+}
+.st-rec:hover {
+  background: var(--accent-soft);
+}
+.st-rec b {
+  overflow-wrap: anywhere;
+}
+.st-rec strong {
+  color: var(--accent);
+}
+.st-rec small {
+  color: var(--muted);
+}
+.st-more {
+  font-weight: 600;
+}
+@media (min-width: 1024px) {
+  .st-strip {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    overflow: visible;
+  }
+}
+
+.st-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+.st-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.st-filter {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  padding: 4px 4px 4px 12px;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  font: 600 14px var(--f-body);
+}
+.st-filter > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.st-filter button {
+  border: 0;
+  background: none;
+  color: inherit;
+  padding: 4px 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.st-cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.st-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 2px 10px;
+  padding: 10px 12px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font: 14px var(--f-body);
+  cursor: pointer;
+}
+.st-card:hover {
+  background: var(--accent-soft);
+}
+.st-card.sel {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.st-card.never {
+  opacity: 0.65;
+}
+.st-card-name {
+  font-weight: 700;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.st-trophy {
+  margin-left: 6px;
+}
+.st-card-date {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.st-card-meta {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.st-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  background: var(--bg);
+}
+.st-detail-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.st-detail-name {
+  margin: 0;
+  font-size: 20px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.st-empty {
+  display: none;
+}
+
+/* telefono: dettaglio a schermo intero sopra intestazione e menu */
+@media (max-width: 1023.98px) {
+  .st-detail {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 max(16px, env(safe-area-inset-right, 0px))
+      calc(16px + env(safe-area-inset-bottom, 0px))
+      max(16px, env(safe-area-inset-left, 0px));
+  }
+  .st-detail-top {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: calc(10px + env(safe-area-inset-top, 0px)) 0 10px;
+    background: var(--bg);
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+/* PC: lista a sinistra, dettaglio in un pannello a destra */
+@media (min-width: 1024px) {
+  .st-main {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+  .st-detail,
+  .st-empty {
+    position: sticky;
+    top: 16px;
+  }
+  .st-empty {
+    display: block;
+  }
+  .st-back {
+    display: none;
+  }
+}
+.st-list .pl-toolbar {
+  flex-wrap: wrap;
+}
+.st-list .pl-search {
+  flex: 1 1 100%;
+}
+.st-list .pl-btn {
+  white-space: nowrap;
+}

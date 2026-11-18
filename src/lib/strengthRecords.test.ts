@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest'
 import type { Session } from '../data/types'
 import {
+  allHistories,
   bestValues,
   exerciseHistory,
   exerciseRecords,
+  exerciseSummary,
+  latestRecords,
   newRecords,
   recordHits,
   sessionStats,
@@ -162,5 +165,50 @@ describe('nuovi record a fine allenamento', () => {
       'setVolume',
     ])
     expect(out[0].hits[0]).toMatchObject({ value: 40, previous: 38 })
+  })
+})
+
+describe('storici, riepiloghi e ultimi record', () => {
+  const sessions = [
+    sess('a', '2026-10-01', [
+      { id: 'panca', sets: [[60, 8]] },
+      { id: 'squat', sets: [[80, 5]] },
+    ]),
+    sess('b', '2026-10-08', [
+      { id: 'panca', sets: [[62.5, 8]] },
+      { id: 'squat', sets: [[80, 5]] },
+    ]),
+    sess('c', '2026-10-15', [{ id: 'squat', sets: [[85, 6]] }]),
+    sess('d', '2026-10-22', [{ id: 'panca', sets: [[50, 10]] }]),
+  ]
+  const histories = allHistories(sessions)
+
+  it('allHistories coincide con exerciseHistory per ogni esercizio', () => {
+    expect(histories.get('panca')).toEqual(exerciseHistory(sessions, 'panca'))
+    expect(histories.get('squat')?.map((h) => h.sessionId)).toEqual([
+      'a',
+      'b',
+      'c',
+    ])
+  })
+
+  it('riepilogo: massimi di sempre, ultima volta e ultimo record', () => {
+    expect(exerciseSummary(histories.get('panca') ?? [])).toEqual({
+      maxKg: 62.5,
+      setVolume: 500,
+      lastDate: '2026-10-22',
+      lastRecordDate: '2026-10-08', // il 22: prima volta con ≥ 10 rip., non è un record
+    })
+  })
+
+  it('ultimi record dal più recente, uno per esercizio e seduta', () => {
+    const r = latestRecords(histories)
+    expect(r.map((x) => [x.exerciseId, x.date, x.metric])).toEqual([
+      ['squat', '2026-10-15', 'maxKg'],
+      ['panca', '2026-10-08', 'maxKg'],
+    ])
+    expect(r[0].others).toBe(3) // ≥ 4 rip., ≥ 6 rip., volume in serie e in seduta
+    expect(latestRecords(histories, 1)).toHaveLength(1)
+    expect(latestRecords(new Map())).toEqual([])
   })
 })

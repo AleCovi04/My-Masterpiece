@@ -37,6 +37,9 @@ interface Props {
   today: IsoDate
   settings: Settings
   onSettingsChange: (settings: Settings) => void
+  /** Muscolo scelto: filtra anche la lista degli esercizi. */
+  muscle: BodyGroup | null
+  onMuscleChange: (muscle: BodyGroup | null) => void
   /** Tocco su un esercizio del dettaglio: lo si sceglie per record e grafici. */
   onPickExercise: (id: Id) => void
 }
@@ -64,12 +67,13 @@ export default function MusclePanel({
   today,
   settings,
   onSettingsChange,
+  muscle,
+  onMuscleChange: setMuscle,
   onPickExercise,
 }: Props) {
   const { t, lang } = useI18n()
   const a = t.analysis
   const [mode, setMode] = useState<Mode>('recovery')
-  const [muscle, setMuscle] = useState<BodyGroup | null>(null)
   // "adesso" fisso finché la scheda resta aperta
   const [nowMs] = useState(() => Date.now())
 

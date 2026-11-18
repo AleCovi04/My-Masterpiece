@@ -20,6 +20,7 @@ import { useAnalysisData } from './useAnalysisData'
 import LoadTab from './LoadTab'
 import PeriodPicker from './PeriodPicker'
 import StrengthTab from './StrengthTab'
+import { INITIAL_STRENGTH_UI, type StrengthUi } from './strengthUi'
 import VolumeTab from './VolumeTab'
 import '../overview/overview.css'
 import '../planner/planner.css'
@@ -48,6 +49,8 @@ export default function AnalysisPage() {
   // null = automatica (per giorno fino a 4 settimane); la scelta resta sul dispositivo
   const [grain, setGrain] = useState<Granularity | null>(readGrain)
   const [tab, setTab] = useState<Tab>('volumes')
+  // scelte della Forza (esercizio, ricerca, filtri): restano finché si è nella pagina
+  const [strengthUi, setStrengthUi] = useState<StrengthUi>(INITIAL_STRENGTH_UI)
   const today = todayIso()
 
   const changeChoice = (c: PeriodChoice) => {
@@ -172,6 +175,8 @@ export default function AnalysisPage() {
           today={today}
           settings={data.settings}
           onSettingsChange={setSettings}
+          ui={strengthUi}
+          onUi={setStrengthUi}
         />
       )}
     </div>
