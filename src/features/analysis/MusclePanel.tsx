@@ -52,11 +52,15 @@ const ZONE_COLOR: Record<VolumeZone, string> = {
 }
 const ZONES: VolumeZone[] = ['below', 'in', 'above']
 
-/** Rosso pieno = affaticato, colore del muscolo = recuperato. */
+/**
+ * Rosso pieno = affaticato, colore del muscolo = recuperato. Sempre un colore
+ * esplicito: senza, la mappa userebbe la scala automatica rispetto al massimo
+ * e un residuo minimo di fatica sembrerebbe rosso pieno.
+ */
 const fatigueColor = (level: number) =>
   level > 0
-    ? `color-mix(in srgb, var(--heat-hi) ${(15 + 85 * level).toFixed(1)}%, var(--bm-muscle))`
-    : undefined
+    ? `color-mix(in srgb, var(--heat-hi) ${(10 + 90 * level).toFixed(1)}%, var(--bm-muscle))`
+    : 'var(--bm-muscle)'
 
 /** Mappa muscolare con Recupero (oggi) o Volume (periodo), lista ordinata e dettaglio. */
 export default function MusclePanel({
@@ -212,7 +216,9 @@ export default function MusclePanel({
                       width: `${Math.min(100, barWidth(m))}%`,
                       background:
                         mode === 'recovery'
-                          ? (fatigueColor(level(m)) ?? 'transparent')
+                          ? level(m) > 0
+                            ? fatigueColor(level(m))
+                            : 'transparent'
                           : ZONE_COLOR[zoneOf(m)],
                     }}
                   />
