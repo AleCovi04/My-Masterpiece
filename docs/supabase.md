@@ -12,23 +12,12 @@ Senza queste operazioni l'app funziona come prima, solo sul dispositivo. Servono
 1. **SQL Editor** → **New query**.
 2. Incolla tutto il contenuto di [`supabase/schema.sql`](../supabase/schema.sql) e premi **Run**. Si può rieseguire senza perdere dati.
 
-## 3. Login con codice via email
+## 3. Login con link via email
 
 1. **Authentication** → **Sign In / Providers**: il provider **Email** deve essere attivo (lo è di default).
-2. **Authentication** → **Emails** → modelli **Magic Link** e **Confirm signup** (il secondo arriva al primissimo accesso): aggiungi il codice nel testo dell'email, così puoi inserirlo nell'app (utile soprattutto dall'app installata sul telefono). Esempio:
+2. **Authentication** → **URL Configuration**: in **Site URL** metti l'indirizzo dell'app (per ora `http://localhost:5173`); in **Redirect URLs** aggiungi anche l'indirizzo dove sarà pubblicata.
 
-   ```html
-   <h2>Accedi a My Masterpiece</h2>
-   <p>Il tuo codice: <strong>{{ .Token }}</strong></p>
-   <p>
-     Oppure <a href="{{ .ConfirmationURL }}">apri questo link</a> dal
-     dispositivo su cui vuoi accedere.
-   </p>
-   ```
-
-3. **Authentication** → **URL Configuration**: in **Site URL** metti l'indirizzo dove è pubblicata l'app; in **Redirect URLs** aggiungi anche `http://localhost:5173` per lo sviluppo.
-
-Nota: il servizio email incluso nel piano gratuito invia poche email all'ora. Per un utente basta; con più utenti servirà un SMTP proprio (Authentication → Emails → SMTP Settings).
+L'email contiene un link: va aperto **nello stesso browser** da cui lo hai chiesto (il browser interno di VS Code e Chrome sono due "dispositivi" diversi). Nel piano gratuito i modelli delle email si modificano solo con un SMTP proprio (Authentication → Emails → Set up SMTP, es. Resend): servirà per avere anche il codice da digitare (app Android) e per inviare più di poche email all'ora.
 
 ## 4. Chiavi nell'app
 
@@ -49,6 +38,6 @@ Se il progetto va comunque in pausa: ricevi un'email, l'app mostra "Sincronizzaz
 
 ## 6. Primo accesso
 
-1. Apri l'app sul dispositivo con i dati veri → **Dati** → **Account e sincronizzazione** → inserisci l'email → **Inviami il codice** → inserisci il codice.
+1. Apri l'app sul dispositivo con i dati veri → **Dati** → **Account e sincronizzazione** → inserisci l'email → **Inviami il link** → apri il link dell'email nello stesso browser.
 2. Prima del collegamento viene salvato un backup ("Prima del collegamento all'account"); poi i dati vengono inviati al server.
 3. Sugli altri dispositivi accedi con la stessa email: un dispositivo appena installato prende i dati del server; uno già usato li unisce ai suoi.

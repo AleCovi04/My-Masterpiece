@@ -714,10 +714,10 @@ export const en: Dictionary = {
     unavailable:
       'Sync is not configured: the Supabase keys are missing (see docs/supabase.md).',
     email: 'Email',
-    sendCode: 'Send me the code',
+    sendCode: 'Send me the link',
     codeSent:
-      'We sent you an email with a code: enter it below (or open the link in the email on this device).',
-    code: 'Code',
+      'We sent you an email: open the link in this same browser to sign in. If the email contains a code, you can enter it below.',
+    code: 'Code (if any)',
     signIn: 'Sign in',
     changeEmail: 'Change email',
     sendFailed: 'Sending failed. Check the email and try again in a minute.',

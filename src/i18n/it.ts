@@ -719,10 +719,10 @@ export const it = {
     unavailable:
       'Sincronizzazione non configurata: mancano le chiavi di Supabase (vedi docs/supabase.md).',
     email: 'Email',
-    sendCode: 'Inviami il codice',
+    sendCode: 'Inviami il link',
     codeSent:
-      'Ti abbiamo inviato un’email con un codice: inseriscilo qui sotto (oppure apri il link dell’email da questo dispositivo).',
-    code: 'Codice',
+      'Ti abbiamo inviato un’email: apri il link da questo stesso browser per accedere. Se l’email contiene un codice, puoi inserirlo qui sotto.',
+    code: 'Codice (se presente)',
     signIn: 'Accedi',
     changeEmail: 'Cambia email',
     sendFailed:
