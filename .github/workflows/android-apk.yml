@@ -2,6 +2,7 @@
 # Si avvia a mano (Actions → Android APK → Run workflow) o con un tag `v*`.
 # Segreti richiesti: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ANDROID_KEYSTORE_BASE64,
 # ANDROID_KEYSTORE_PASSWORD (vedi docs/android.md).
+# Gli errori finiscono anche nelle annotazioni del run (leggibili senza accesso ai log).
 name: Android APK
 
 on:
@@ -53,17 +54,36 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Controllo della chiave di firma
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if ! printf '%s' "$KEYSTORE_BASE64" | tr -d '[:space:]' | base64 -d > "$RUNNER_TEMP/release.p12"; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 non è un testo base64 valido"
+            exit 1
+          fi
+          if ! keytool -list -storetype pkcs12 -keystore "$RUNNER_TEMP/release.p12" \
+            -storepass "$(printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | tr -d '[:space:]')" > /dev/null; then
+            echo "::error::Chiave non leggibile: controlla ANDROID_KEYSTORE_PASSWORD e ANDROID_KEYSTORE_BASE64"
+            exit 1
+          fi
+
       - name: Build dell'APK firmato
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: mymasterpiece
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.p12"
           export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/release.p12"
+          export ANDROID_KEYSTORE_PASSWORD="$(printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | tr -d '[:space:]')"
           echo "Android SDK: $ANDROID_HOME"
           cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          set -o pipefail
+          if ! ./gradlew assembleRelease --no-daemon 2>&1 | tee "$RUNNER_TEMP/gradle.log"; then
+            python3 ../.github/scripts/gradle-error.py "$RUNNER_TEMP/gradle.log"
+            exit 1
+          fi
           cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/my-masterpiece.apk"
 
       - name: Pubblicazione nelle Release
