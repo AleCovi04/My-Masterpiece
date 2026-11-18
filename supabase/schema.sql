@@ -23,6 +23,11 @@ create table if not exists public.items (
 
 create index if not exists items_user_server_at on public.items (user_id, server_at);
 
+-- Permessi (i progetti nuovi non li concedono in automatico). `anon` può solo leggere,
+-- ma la RLS non gli mostra nessuna riga: serve al ping anti-pausa.
+grant select on public.items to anon;
+grant select, insert, update on public.items to authenticated;
+
 -- Ognuno vede e modifica solo le proprie righe.
 alter table public.items enable row level security;
 
