@@ -18,6 +18,7 @@ import type { DataCounts, IsoDateTime } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import Modal from '../planner/Modal'
 import '../planner/planner.css'
+import AccountCard from './AccountCard'
 import './data.css'
 
 /** Promemoria se l'ultimo export manuale ha più di questi giorni. */
@@ -167,6 +168,8 @@ export default function DataPage() {
           {notice.text}
         </p>
       )}
+
+      <AccountCard dateTime={dateTime} />
 
       <Grid cols={2}>
         <section className="dt-card">

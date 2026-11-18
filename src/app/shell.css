@@ -319,3 +319,18 @@
     padding: 7px 9px;
   }
 }
+
+/* stato della sincronizzazione nell'header */
+.sync-badge {
+  color: var(--ok);
+}
+.sync-badge.is-syncing {
+  color: var(--planned);
+}
+.sync-badge.is-offline,
+.sync-badge.is-newer {
+  color: var(--warn);
+}
+.sync-badge.is-error {
+  color: var(--accent);
+}

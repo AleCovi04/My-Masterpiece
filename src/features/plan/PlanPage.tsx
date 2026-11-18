@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PlanIcon, TrashIcon } from '../../components/ui/Icons'
-import { dataStore } from '../../data'
+import { dataStore, useDataRevision } from '../../data'
 import type { IsoDate, Phase, TrainingBlock } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { blockWeeks, phaseWeeks } from '../../lib/blocks'
@@ -35,6 +35,7 @@ export default function PlanPage() {
   const [pick, setPick] = useState<Pick | null>(null)
   const today = todayIso()
 
+  const revision = useDataRevision()
   useEffect(() => {
     let cancelled = false
     void dataStore.loadRaceDate().then((d) => {
@@ -43,7 +44,7 @@ export default function PlanPage() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [revision])
 
   const items = useMemo(
     () => buildPlan(planning.applications, planning.sessions, today),

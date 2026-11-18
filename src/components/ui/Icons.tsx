@@ -60,6 +60,12 @@ export const SunIcon = () => (
   </Svg>
 )
 
+export const CloudIcon = () => (
+  <Svg>
+    <path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 8.5a4.75 4.75 0 0 1-.5 9.5z" />
+  </Svg>
+)
+
 export const OverviewIcon = () => (
   <Svg>
     <rect x="3" y="3" width="7" height="9" rx="1.5" />

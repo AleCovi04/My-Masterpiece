@@ -1,5 +1,6 @@
 import { MoonIcon, SunIcon } from '../components/ui/Icons'
 import { useI18n, type Lang } from '../i18n/context'
+import SyncBadge from './SyncBadge'
 import { useTheme } from './theme'
 
 const LANGS: Lang[] = ['it', 'en']
@@ -10,6 +11,7 @@ export default function Tools() {
   const { theme, toggleTheme } = useTheme()
   return (
     <div className="tools">
+      <SyncBadge />
       <div className="seg" role="group" aria-label={t.language}>
         {LANGS.map((l) => (
           <button

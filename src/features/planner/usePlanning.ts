@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { dataStore } from '../../data'
+import { dataStore, useDataRevision } from '../../data'
 import type {
   BlockApplication,
   Exercise,
@@ -65,6 +65,7 @@ export function usePlanning() {
   const [data, setData] = useState<Loaded | null>(null)
   const latest = useRef<Loaded | null>(null)
 
+  const revision = useDataRevision()
   useEffect(() => {
     let cancelled = false
     Promise.all([
@@ -92,7 +93,7 @@ export function usePlanning() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [revision])
 
   const update = useCallback((patch: Partial<Loaded>) => {
     const cur = latest.current

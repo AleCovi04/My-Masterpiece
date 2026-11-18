@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { dataStore } from '../../data'
+import { dataStore, useDataRevision } from '../../data'
 import type {
   BlockApplication,
   BrickActual,
@@ -39,6 +39,7 @@ export function useCalendarSessions() {
   const [data, setData] = useState<Loaded | null>(null)
   const latest = useRef<Session[] | null>(null)
 
+  const revision = useDataRevision()
   useEffect(() => {
     let cancelled = false
     Promise.all([
@@ -54,7 +55,7 @@ export function useCalendarSessions() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [revision])
 
   const change = useCallback((fn: (current: Session[]) => Session[]) => {
     const current = latest.current

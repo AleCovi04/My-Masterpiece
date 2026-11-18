@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { dataStore } from '../../data'
+import { dataStore, useDataRevision } from '../../data'
 import type { Exercise, Id, Session, WorkoutTemplate } from '../../data/types'
 import { exerciseUsage, type ExerciseUsage } from '../../lib/exercises'
 
@@ -14,6 +14,7 @@ export function useExercises() {
   const [data, setData] = useState<Loaded | null>(null)
   const latest = useRef<Exercise[]>([])
 
+  const revision = useDataRevision()
   useEffect(() => {
     let cancelled = false
     Promise.all([
@@ -28,7 +29,7 @@ export function useExercises() {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [revision])
 
   const commit = useCallback((next: Exercise[]) => {
     latest.current = next

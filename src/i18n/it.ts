@@ -704,12 +704,50 @@ export const it = {
       'pre-import': 'Prima di un import',
       'pre-restore': 'Prima di un ripristino',
       'pre-migration': 'Prima di un aggiornamento dei dati',
+      'pre-sync': 'Prima del collegamento all’account',
     },
     restore: 'Ripristina',
     confirmRestore: 'Sostituire i dati attuali con questo backup?',
     restoreYes: 'Sì, ripristina',
     restored: 'Backup ripristinato.',
     schemaVersion: 'Versione dello schema dei dati',
+  },
+  sync: {
+    title: 'Account e sincronizzazione',
+    intro:
+      'Con un account i dati si sincronizzano tra i tuoi dispositivi. Senza, restano solo su questo.',
+    unavailable:
+      'Sincronizzazione non configurata: mancano le chiavi di Supabase (vedi docs/supabase.md).',
+    email: 'Email',
+    sendCode: 'Inviami il codice',
+    codeSent:
+      'Ti abbiamo inviato un’email con un codice: inseriscilo qui sotto (oppure apri il link dell’email da questo dispositivo).',
+    code: 'Codice',
+    signIn: 'Accedi',
+    changeEmail: 'Cambia email',
+    sendFailed:
+      'Invio non riuscito. Controlla l’email e riprova tra un minuto.',
+    verifyFailed: 'Codice non valido o scaduto.',
+    signedInAs: 'Collegato come',
+    syncNow: 'Sincronizza ora',
+    signOut: 'Esci',
+    confirmSignOut:
+      'Uscire dall’account? I dati restano su questo dispositivo, ma non si sincronizzano più.',
+    signOutYes: 'Sì, esci',
+    cancel: 'Annulla',
+    lastSync: 'Ultima sincronizzazione',
+    never: 'mai',
+    status: {
+      off: 'Non collegato',
+      idle: 'Sincronizzato',
+      syncing: 'Sincronizzazione in corso…',
+      offline: 'Offline: le modifiche partiranno al ritorno della connessione.',
+      error:
+        'Sincronizzazione non riuscita. Se succede da giorni, il progetto Supabase potrebbe essere in pausa: riattivalo dalla dashboard (Restore).',
+      newer:
+        'Sul server ci sono dati di una versione più recente dell’app: aggiorna l’app per sincronizzare.',
+    },
+    badge: 'Stato della sincronizzazione',
   },
   filters: {
     noSeries: 'Nessuna serie selezionata',

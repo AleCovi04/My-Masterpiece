@@ -699,12 +699,49 @@ export const en: Dictionary = {
       'pre-import': 'Before an import',
       'pre-restore': 'Before a restore',
       'pre-migration': 'Before a data upgrade',
+      'pre-sync': 'Before linking the account',
     },
     restore: 'Restore',
     confirmRestore: 'Replace the current data with this backup?',
     restoreYes: 'Yes, restore',
     restored: 'Backup restored.',
     schemaVersion: 'Data schema version',
+  },
+  sync: {
+    title: 'Account and sync',
+    intro:
+      'With an account your data syncs across your devices. Without one, it stays on this device only.',
+    unavailable:
+      'Sync is not configured: the Supabase keys are missing (see docs/supabase.md).',
+    email: 'Email',
+    sendCode: 'Send me the code',
+    codeSent:
+      'We sent you an email with a code: enter it below (or open the link in the email on this device).',
+    code: 'Code',
+    signIn: 'Sign in',
+    changeEmail: 'Change email',
+    sendFailed: 'Sending failed. Check the email and try again in a minute.',
+    verifyFailed: 'Invalid or expired code.',
+    signedInAs: 'Signed in as',
+    syncNow: 'Sync now',
+    signOut: 'Sign out',
+    confirmSignOut:
+      'Sign out? Your data stays on this device but will no longer sync.',
+    signOutYes: 'Yes, sign out',
+    cancel: 'Cancel',
+    lastSync: 'Last sync',
+    never: 'never',
+    status: {
+      off: 'Not signed in',
+      idle: 'Synced',
+      syncing: 'Syncing…',
+      offline: 'Offline: changes will be sent when you are back online.',
+      error:
+        'Sync failed. If this has been happening for days, the Supabase project may be paused: restore it from the dashboard.',
+      newer:
+        'The server has data from a newer version of the app: update the app to sync.',
+    },
+    badge: 'Sync status',
   },
   filters: {
     noSeries: 'No series selected',

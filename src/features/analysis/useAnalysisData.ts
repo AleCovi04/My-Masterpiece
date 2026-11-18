@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { dataStore } from '../../data'
+import { dataStore, useDataRevision } from '../../data'
 import type {
   BlockApplication,
   Exercise,
@@ -25,6 +25,7 @@ export function useAnalysisData(): {
   const [data, setData] = useState<AnalysisData | null>(null)
   const latest = useRef<AnalysisData | null>(null)
 
+  const revision = useDataRevision()
   useEffect(() => {
     let cancelled = false
     Promise.all([
@@ -40,7 +41,7 @@ export function useAnalysisData(): {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [revision])
 
   const setRpe = useCallback((id: Id, rpe: number) => {
     const d = latest.current

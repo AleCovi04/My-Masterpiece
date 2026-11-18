@@ -149,3 +149,36 @@
   color: var(--text);
   line-height: 1;
 }
+
+/* Account e sincronizzazione */
+.dt-login {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 420px;
+}
+.dt-login label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.dt-card .dt-sync {
+  color: var(--text);
+  padding-left: 10px;
+  border-left: 3px solid var(--line);
+}
+.dt-card .dt-sync.is-idle {
+  border-color: var(--ok);
+}
+.dt-card .dt-sync.is-syncing {
+  border-color: var(--planned);
+}
+.dt-card .dt-sync.is-offline,
+.dt-card .dt-sync.is-newer {
+  border-color: var(--warn);
+}
+.dt-card .dt-sync.is-error {
+  border-color: var(--accent);
+}
