@@ -1,6 +1,6 @@
 import type { IsoDate, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { dayStatus } from '../../lib/dayStatus'
+import { dayStatus, firstSessionDate } from '../../lib/dayStatus'
 import { parseIsoDate, toIsoDate, todayIso } from '../../lib/dates'
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
 }
 
 export default function YearView({ anchor, sessions, onPickMonth }: Props) {
+  // da qui in poi i giorni di riposo conclusi contano come svolti
+  const since = firstSessionDate(sessions)
   const { t } = useI18n()
   const today = todayIso()
   const year = parseIsoDate(anchor).getFullYear()
@@ -45,7 +47,7 @@ export default function YearView({ anchor, sessions, onPickMonth }: Props) {
               {Array.from({ length: days }, (_, i) => {
                 const date = toIsoDate(new Date(year, month, i + 1))
                 const list = byDate.get(date) ?? []
-                const status = dayStatus(list, date, today)
+                const status = dayStatus(list, date, today, since)
                 const cls = [
                   date === today ? 'td' : list.length ? 'has' : '',
                   status ? `st-${status}` : '',

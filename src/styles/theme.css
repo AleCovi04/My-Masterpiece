@@ -17,6 +17,14 @@
   --ok: #1d8c4a;
   --warn: #e07a00;
   --miss: #9e2a2f;
+  /* discipline: colori pieni e accesi */
+  --swim: #0a9cf0;
+  --bike: #10b553;
+  --run: #f2b200;
+  --strength: #f0234f;
+  --brick: #7c4dff;
+  /* quanto colore nello sfondo delle card */
+  --card-tint: 20%;
   color-scheme: light;
 }
 
@@ -37,15 +45,16 @@
   --ok: #3ac473;
   --warn: #f59e0b;
   --miss: #b8484d;
+  --swim: #29b6ff;
+  --bike: #2fd36b;
+  --run: #ffc31f;
+  --strength: #ff3d68;
+  --brick: #9d7bff;
+  --card-tint: 26%;
   color-scheme: dark;
 }
 
 :root {
-  --swim: #1ea7e1;
-  --bike: #22a85a;
-  --run: #e2ad00;
-  --strength: #e23f6b;
-  --brick: #8b5cf6;
   /* fasi: un colore neutro per tutte */
   --phase: var(--text);
   --f-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;

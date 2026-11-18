@@ -7,7 +7,7 @@ import {
   toIsoDate,
   todayIso,
 } from '../../lib/dates'
-import { dayStatus } from '../../lib/dayStatus'
+import { dayStatus, firstSessionDate } from '../../lib/dayStatus'
 import { sessionsOn } from '../../lib/reorder'
 import { weekdayShortNames } from './period'
 
@@ -18,6 +18,8 @@ interface Props {
 }
 
 export default function MonthView({ anchor, sessions, onPickDay }: Props) {
+  // da qui in poi i giorni di riposo conclusi contano come svolti
+  const since = firstSessionDate(sessions)
   const { t } = useI18n()
   const today = todayIso()
   const a = parseIsoDate(anchor)
@@ -43,7 +45,7 @@ export default function MonthView({ anchor, sessions, onPickDay }: Props) {
             {week.map((d) => {
               const date = toIsoDate(d)
               const list = sessionsOn(sessions, date)
-              const status = dayStatus(list, date, today)
+              const status = dayStatus(list, date, today, since)
               return (
                 <button
                   type="button"

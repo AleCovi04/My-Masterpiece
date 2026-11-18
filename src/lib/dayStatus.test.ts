@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Session, SessionStatus } from '../data/types'
-import { dayStatus } from './dayStatus'
+import { dayStatus, firstSessionDate } from './dayStatus'
 
 const today = '2026-11-17'
 
@@ -45,5 +45,21 @@ describe('dayStatus', () => {
     expect(dayStatus([s('2026-11-20', 'done')], '2026-11-20', today)).toBeNull()
     expect(dayStatus([], '2026-11-10', today)).toBeNull()
     expect(dayStatus([s('2026-11-11', 'done')], '2026-11-10', today)).toBeNull()
+  })
+
+  it('riposo concluso → done, solo dalla prima seduta e mai oggi', () => {
+    const since = '2026-11-01'
+    expect(dayStatus([], '2026-11-10', today, since)).toBe('done')
+    expect(dayStatus([], since, today, since)).toBe('done')
+    expect(dayStatus([], '2026-10-31', today, since)).toBeNull()
+    expect(dayStatus([], today, today, since)).toBeNull()
+    expect(dayStatus([], '2026-11-20', today, since)).toBeNull()
+  })
+
+  it('prima seduta: la data più vecchia, null senza sedute', () => {
+    expect(
+      firstSessionDate([s('2026-11-10', 'done'), s('2026-10-02', 'planned')]),
+    ).toBe('2026-10-02')
+    expect(firstSessionDate([])).toBeNull()
   })
 })
