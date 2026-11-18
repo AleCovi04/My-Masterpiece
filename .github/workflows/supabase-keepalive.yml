@@ -18,8 +18,8 @@ jobs:
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_PUBLISHABLE_KEY" ]; then
-            echo "Segreti non configurati: salto."
-            exit 0
+            echo "::error::Segreti SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY non configurati."
+            exit 1
           fi
           curl --fail --silent --show-error \
             -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
