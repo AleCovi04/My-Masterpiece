@@ -49,3 +49,12 @@ Brevi, al massimo 4 righe, più eventuali domande aperte o dubbi.
 ## Comandi
 
 `npm run dev` · `npm run build` · `npm run lint` · `npm test` · `npm run format` · `npm run format:check`
+
+## Ambiente e utilizzo
+
+- **Uso:** soprattutto come PWA installata su Android; da PC su Windows con VS Code. Istruzioni pensate per il telefono o per il browser normale; il browser interno di VS Code è un "dispositivo" a parte (dati e login suoi): non usarlo per provare login e dati.
+- **Sito:** https://my-masterpiece.vercel.app, deploy automatico su Vercel a ogni push su `main`. `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` sono in Vercel (tipo Config) e in `.env.local` (fuori da git); una variabile cambiata vale solo dopo un nuovo deploy. Per verificare il deploy: scaricare il bundle pubblicato e cercarci l'URL di Supabase.
+- **Dati:** sincronizzati con Supabase (piano gratuito). Login con link via email, da aprire nello stesso browser/app da cui è stato chiesto; senza SMTP proprio i modelli email non si modificano (niente codice da digitare). Site URL e Redirect URLs: il sito Vercel e `http://localhost:5173`.
+- **Schema del server:** `supabase/schema.sql`, da rieseguire nel SQL Editor di Supabase dopo ogni modifica; i progetti nuovi non concedono permessi in automatico (servono i `grant` espliciti).
+- **Anti-pausa:** workflow `supabase-keepalive` su GitHub Actions, con i segreti del repository `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY`. Il repository `AleCovi04/My-Masterpiece` è pubblico: l'esito dei workflow si controlla con l'API pubblica di GitHub (`curl`); `gh` non è installato.
+- **Istruzioni all'utente:** passo passo, con il percorso esatto dei menu (Supabase, Vercel, GitHub) o link diretti, una cosa alla volta.
