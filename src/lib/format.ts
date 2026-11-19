@@ -28,3 +28,6 @@ export function formatLongDate(iso: IsoDate, monthsShort: string[]): string {
   const d = parseIsoDate(iso)
   return `${d.getDate()} ${monthsShort[d.getMonth()]} ${d.getFullYear()}`
 }
+
+/** Ore decimali compatte: 1.5 → "1.5h", 2.333 → "2.33h". */
+export const formatHoursShort = (h: number) => `${+h.toFixed(2)}h`

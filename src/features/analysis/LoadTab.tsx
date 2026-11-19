@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import RpeScale from '../../components/ui/RpeScale'
 import type { Id, IsoDate, Session, Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
+import { formatHoursShort } from '../../lib/format'
 import { timeSeries, type Bucket, type Range } from '../../lib/analysis'
 import { parseIsoDate } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
@@ -49,7 +50,6 @@ const FRESH_COLOR: Record<FreshnessZone, string> = {
 }
 
 const int = (v: number) => String(Math.round(v))
-const hoursLabel = (h: number) => `${+h.toFixed(2)}h`
 const signed = (v: number) => `${v > 0 ? '+' : v < 0 ? '−' : '±'}${Math.abs(v)}`
 
 /** Carico: progressione (ACWR), freschezza, carico e ore per settimana, tendenza della forma. */
@@ -212,7 +212,7 @@ export default function LoadTab({
             (x) => DISCIPLINES.reduce((s, d) => s + x[d].plannedS, 0) / 3600,
           )}
           plannedLabel={a.planned}
-          format={hoursLabel}
+          format={formatHoursShort}
         />
         <p className="note ana-legend">
           {a.legendBars} · <PlannedKey /> {a.legendDash}

@@ -6,7 +6,7 @@ export type CalendarView = 'week' | 'month' | 'year'
 
 type Names = Pick<Dictionary, 'monthsShort' | 'monthsLong' | 'weekdaysLong'>
 
-export const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
+const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1)
 
 /** I 7 giorni (lunedì → domenica) della settimana che contiene `anchor`. */
 export function weekDates(anchor: IsoDate): IsoDate[] {

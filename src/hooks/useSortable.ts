@@ -7,12 +7,12 @@ import {
   type RefObject,
 } from 'react'
 
-export const LONG_PRESS_MS = 400
+const LONG_PRESS_MS = 400
 const TOUCH_TOLERANCE_PX = 8
 const MOUSE_THRESHOLD_PX = 4
 const EDGE_PX = 64
 
-export interface Drag {
+interface Drag {
   from: number
   /** Posizione di arrivo nella lista senza l'elemento trascinato. */
   to: number

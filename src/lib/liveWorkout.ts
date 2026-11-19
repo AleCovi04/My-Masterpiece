@@ -18,7 +18,7 @@ import { lastPerformance, previousSet } from './strength'
 import { newRecords, type RecordHit } from './strengthRecords'
 
 /** Serie di un esercizio aggiunto durante la sessione senza storico. */
-export const DEFAULT_LIVE_SETS = 3
+const DEFAULT_LIVE_SETS = 3
 
 const liveSet = (t?: TemplateSet): LiveSet => ({
   id: newId(),
@@ -83,7 +83,7 @@ const toFocus = (list: LiveExercise[], s: Slot | undefined) =>
   s ? { exercise: list[s.ex].id, set: s.set } : null
 
 /** Prima serie da fare, nell'ordine dei giri. */
-export function firstPending(list: LiveExercise[]): LiveWorkout['focus'] {
+function firstPending(list: LiveExercise[]): LiveWorkout['focus'] {
   return toFocus(
     list,
     allSlots(list).find((s) => isPending(list, s)),
@@ -168,7 +168,7 @@ export function resumeLive(
 // ---------- serie ----------
 
 /** Valori in grigio di una serie: ultima volta (stessa serie) e obiettivo del piano. */
-export interface SetHint {
+interface SetHint {
   kg?: number
   reps?: number
   targetReps?: number
@@ -189,21 +189,21 @@ export function setHint(
 }
 
 /** `undefined` = campo vuoto, `null` = valore non valido. */
-export function parseKg(text: string): number | null | undefined {
+function parseKg(text: string): number | null | undefined {
   const t = text.trim().replace(',', '.')
   if (!t) return undefined
   const n = Number(t)
   return Number.isFinite(n) && n >= 0 && n <= 1000 ? n : null
 }
 
-export function parseReps(text: string): number | null | undefined {
+function parseReps(text: string): number | null | undefined {
   const t = text.trim()
   if (!t) return undefined
   const n = Number(t)
   return Number.isInteger(n) && n >= 1 && n <= 999 ? n : null
 }
 
-export type ResolvedSet =
+type ResolvedSet =
   | { ok: true; kg: number; reps: number }
   | { ok: false; kg: boolean; reps: boolean }
 
@@ -502,13 +502,13 @@ export function cancelSession(
   })
 }
 
-export interface LiveRecord {
+interface LiveRecord {
   exerciseId: Id
   /** Nuovi record (peso massimo, a N ripetizioni, volume in serie e in seduta). */
   hits: RecordHit[]
 }
 
-export interface LiveSummary {
+interface LiveSummary {
   durationS: number
   setsDone: number
   volumeKg: number

@@ -1,6 +1,7 @@
 import { useMemo, useState, type CSSProperties } from 'react'
 import type { EnduranceDiscipline, Session, Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
+import { formatHoursShort } from '../../lib/format'
 import {
   distanceSeries,
   ENDURANCE,
@@ -20,8 +21,6 @@ interface Props {
   ticks: string[]
   titles: string[]
 }
-
-const hoursLabel = (h: number) => `${+h.toFixed(2)}h`
 
 /** Volumi: ore per disciplina e distanza per sport, eseguito contro pianificato. */
 export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
@@ -82,7 +81,7 @@ export default function VolumeTab({ sessions, buckets, ticks, titles }: Props) {
             )}
             plannedLabel={a.plannedOne}
             totalLabel={a.total}
-            format={hoursLabel}
+            format={formatHoursShort}
             formatTip={(h) => formatDuration(Math.round(h * 3600))}
           />
         )}

@@ -13,7 +13,7 @@ export function applyTheme(theme: Theme): void {
   document.documentElement.dataset.theme = theme
 }
 
-export interface ThemeCtx {
+interface ThemeCtx {
   theme: Theme
   toggleTheme: () => void
 }

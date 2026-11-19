@@ -10,7 +10,7 @@ import MuscleFilterDialog from '../forger/MuscleFilterDialog'
 import type { ListFilters } from './strengthUi'
 
 /** 🏆 se l'ultimo record è di questi giorni (oggi compreso). */
-export const RECENT_RECORD_DAYS = 14
+const RECENT_RECORD_DAYS = 14
 
 interface Props {
   exercises: Exercise[]

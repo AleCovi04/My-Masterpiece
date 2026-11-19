@@ -34,7 +34,7 @@ const avg = (values: number[]) =>
     ? values.reduce((sum, v) => sum + v, 0) / values.length
     : undefined
 
-export interface Split {
+interface Split {
   /** Numero del parziale, da 1. */
   n: number
   distanceM: number
@@ -149,15 +149,15 @@ export function hrZoneBounds(maxHr: number, restHr?: number): number[] {
 export const powerZoneBounds = (ftp: number) =>
   [0.55, 0.75, 0.9, 1.05, 1.2, 1.5].map((p) => Math.round(ftp * p))
 
-export interface BestEffort {
+interface BestEffort {
   /** Metri (corsa) o secondi (potenza). */
   target: number
   /** Secondi impiegati (corsa) o watt medi (potenza). */
   value: number
 }
 
-export const RUN_EFFORTS = [400, 1000, 5000, 10000, 21097.5, 42195]
-export const POWER_EFFORTS = [5, 60, 300, 1200, 3600]
+const RUN_EFFORTS = [400, 1000, 5000, 10000, 21097.5, 42195]
+const POWER_EFFORTS = [5, 60, 300, 1200, 3600]
 
 /** Tempo più breve per coprire ciascuna distanza (interpolato tra i campioni). */
 export function bestRunEfforts(points: FitPoint[]): BestEffort[] {

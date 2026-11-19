@@ -40,7 +40,7 @@ export function sortedMuscles(e: Pick<Exercise, 'muscles'>) {
   return [...e.muscles].sort((a, b) => b.percent - a.percent)
 }
 
-export function involvesMuscle(e: Exercise, muscle: MuscleId): boolean {
+function involvesMuscle(e: Exercise, muscle: MuscleId): boolean {
   return e.muscles.some((m) => m.muscle === muscle)
 }
 
@@ -50,13 +50,13 @@ export function primaryMuscles(e: Pick<Exercise, 'muscles'>): MuscleId[] {
   return e.muscles.filter((m) => m.percent === max).map((m) => m.muscle)
 }
 
-export interface MuscleMatch {
+interface MuscleMatch {
   exercise: Exercise
   /** Somma delle % dei soli muscoli scelti. */
   sum: number
 }
 
-export interface MuscleSections {
+interface MuscleSections {
   primary: MuscleMatch[]
   secondary: MuscleMatch[]
 }

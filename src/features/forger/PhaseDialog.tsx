@@ -6,7 +6,7 @@ import type {
   WorkoutTemplate,
 } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { moveItem } from '../../lib/brick'
+import { moveInList } from '../../lib/reorder'
 import { phaseWeeks, weekTotals } from '../../lib/blocks'
 import { formatDuration } from '../../lib/format'
 import { newId } from '../../lib/ids'
@@ -59,7 +59,7 @@ export default function PhaseDialog({
 
   const { drag, handleProps } = useSortable({
     listRef,
-    onMove: (from, to) => setRows((rs) => moveItem(rs, from, to)),
+    onMove: (from, to) => setRows((rs) => moveInList(rs, from, to)),
   })
 
   const blockIds = rows.map((r) => r.blockId)
@@ -180,12 +180,14 @@ export default function PhaseDialog({
                       {
                         label: p.moveUp,
                         disabled: i === 0,
-                        onSelect: () => setRows((rs) => moveItem(rs, i, i - 1)),
+                        onSelect: () =>
+                          setRows((rs) => moveInList(rs, i, i - 1)),
                       },
                       {
                         label: p.moveDown,
                         disabled: i === rows.length - 1,
-                        onSelect: () => setRows((rs) => moveItem(rs, i, i + 1)),
+                        onSelect: () =>
+                          setRows((rs) => moveInList(rs, i, i + 1)),
                       },
                       {
                         label: f.repeatBlock,

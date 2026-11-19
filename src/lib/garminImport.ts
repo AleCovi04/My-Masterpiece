@@ -35,7 +35,7 @@ const r = (v: number | undefined) =>
   v === undefined ? undefined : Math.round(v)
 
 /** Le metriche di una frazione nella forma dell'app. */
-export function fitMetrics(act: FitActivity, s: FitSession): EnduranceMetrics {
+function fitMetrics(act: FitActivity, s: FitSession): EnduranceMetrics {
   const pts = act.points.slice(s.pointStart, s.pointEnd)
   return clean({
     durationS: Math.max(1, s.timerS),
@@ -82,7 +82,7 @@ const kept = (prev?: { rpe?: number; notes?: string }) =>
   clean({ rpe: prev?.rpe, notes: prev?.notes })
 
 /** Eseguito di una seduta singola. */
-export function enduranceActualFromFit(
+function enduranceActualFromFit(
   act: FitActivity,
   prev?: EnduranceActual,
 ): EnduranceActual {
@@ -98,7 +98,7 @@ export function enduranceActualFromFit(
 }
 
 /** Eseguito di un brick: una frazione dell'attività per frazione del piano (stesso ordine). */
-export function brickActualFromFit(
+function brickActualFromFit(
   act: FitActivity,
   session: BrickSession,
 ): BrickActual {
@@ -161,7 +161,7 @@ function unplannedSession(act: FitActivity, now: IsoDateTime, id: Id): Session {
   return emptySession(act.sessions[0].discipline, date, now, id)
 }
 
-export interface ImportOutcome {
+interface ImportOutcome {
   sessions: Session[]
   record: ImportRecord
   sessionId: Id

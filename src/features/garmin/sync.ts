@@ -15,15 +15,15 @@ import { fitDecoder, importFit, type ImportResult } from './importer'
 import { downloadFile, IntervalsError, listActivities } from './intervals'
 
 /** Giorni controllati all'apertura. */
-export const AUTO_DAYS = 14
+const AUTO_DAYS = 14
 /** Giorni mostrati da "Sincronizza Garmin". */
-export const MANUAL_DAYS = 30
+const MANUAL_DAYS = 30
 /** Al ritorno visibile si ricontrolla al massimo ogni tanto. */
 const AUTO_EVERY_MS = 30 * 60_000
 
-export type GarminError = 'notLinked' | 'auth' | 'offline'
+type GarminError = 'notLinked' | 'auth' | 'offline'
 
-export interface GarminSyncState {
+interface GarminSyncState {
   running: boolean
   /** Finestra "Collega" aperta: `auto` = solo le attività con una seduta. */
   open: false | 'auto' | 'manual'
@@ -155,7 +155,7 @@ export async function ignoreGarminActivity(row: LinkProposal): Promise<void> {
 }
 
 /** Una scelta della finestra: seduta esistente o `null` = nuova seduta. */
-export interface LinkChoice {
+interface LinkChoice {
   row: LinkProposal
   target: Id | null
 }

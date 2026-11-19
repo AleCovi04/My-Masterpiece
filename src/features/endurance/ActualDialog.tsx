@@ -17,6 +17,7 @@ import {
   type MetricsDraft,
 } from '../../lib/enduranceActual'
 import { formatClock, parseClock } from '../../lib/enduranceTemplate'
+import { isTransitionValid } from '../../lib/brick'
 import RpeScale from '../../components/ui/RpeScale'
 import Modal from '../../components/ui/Modal'
 import MetricsFields from './MetricsFields'
@@ -34,9 +35,6 @@ interface Props {
   onSave: (actual: EnduranceActual | BrickActual) => void
   onClose: () => void
 }
-
-const transitionOk = (raw: string) =>
-  raw.trim() === '' || parseClock(raw) !== null
 
 /** Inserimento manuale dell'eseguito: seduta singola o brick per frazione. */
 export default function ActualDialog({ session: s, onSave, onClose }: Props) {
@@ -85,7 +83,7 @@ export default function ActualDialog({ session: s, onSave, onClose }: Props) {
   const valid = isBrick
     ? !noLegs &&
       parsedLegs.every((p) => p.metrics) &&
-      legs.every((l, i) => i === 0 || transitionOk(l.transition))
+      legs.every((l, i) => i === 0 || isTransitionValid(l.transition))
     : !!single?.metrics
   const complete = valid && rpe !== null
 
@@ -155,7 +153,9 @@ export default function ActualDialog({ session: s, onSave, onClose }: Props) {
                       inputMode="numeric"
                       placeholder="mm:ss"
                       value={l.transition}
-                      aria-invalid={submitted && !transitionOk(l.transition)}
+                      aria-invalid={
+                        submitted && !isTransitionValid(l.transition)
+                      }
                       onChange={(ev) =>
                         patchLeg(i, { transition: ev.target.value })
                       }

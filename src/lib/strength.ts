@@ -9,13 +9,12 @@ import type {
 } from '../data/types'
 import { MUSCLES } from '../data/types'
 
-export const setVolume = (s: Pick<ActualSet, 'kg' | 'reps'>): number =>
-  s.kg * s.reps
+const setVolume = (s: Pick<ActualSet, 'kg' | 'reps'>): number => s.kg * s.reps
 
 export const totalVolume = (sets: Pick<ActualSet, 'kg' | 'reps'>[]): number =>
   sets.reduce((sum, s) => sum + setVolume(s), 0)
 
-export interface PersonalRecords {
+interface PersonalRecords {
   maxKg?: { kg: number; reps: number; date: IsoDate }
   bestSet?: { kg: number; reps: number; volume: number; date: IsoDate }
 }
@@ -123,7 +122,7 @@ export function muscleSetsIn(
   return total
 }
 
-export interface MuscleExercise {
+interface MuscleExercise {
   exerciseId: Id
   /** Serie completate dell'esercizio. */
   sets: number

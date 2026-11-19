@@ -3,7 +3,7 @@ import { axisScale } from '../../lib/analysis'
 import ChartTip from './ChartTip'
 import { chartHeight, useChartWidth } from '../../hooks/useChartWidth'
 
-export interface LineSeries {
+interface LineSeries {
   key: string
   label: string
   /** Colore CSS, da una variabile del tema. */

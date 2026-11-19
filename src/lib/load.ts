@@ -5,21 +5,21 @@ import { brickActualSecondsBySport } from './enduranceActual'
 import { actualSeconds, DISCIPLINES } from './weekStats'
 
 /** Scala dell'RPE. */
-export const RPE_MIN = 1
-export const RPE_MAX = 10
+const RPE_MIN = 1
+const RPE_MAX = 10
 export const RPE_VALUES = Array.from(
   { length: RPE_MAX - RPE_MIN + 1 },
   (_, i) => RPE_MIN + i,
 )
 
 /** Giorni delle medie: Forma (lungo periodo) e Fatica (breve periodo). */
-export const FITNESS_DAYS = 42
-export const FATIGUE_DAYS = 7
+const FITNESS_DAYS = 42
+const FATIGUE_DAYS = 7
 /** Finestre del rapporto acuto/cronico. */
-export const ACUTE_DAYS = 7
-export const CHRONIC_DAYS = 28
+const ACUTE_DAYS = 7
+const CHRONIC_DAYS = 28
 /** Storico minimo (dalla prima seduta con RPE) per mostrare gli indicatori. */
-export const MIN_HISTORY_DAYS = 28
+const MIN_HISTORY_DAYS = 28
 
 /** Zone del rapporto acuto/cronico, in ordine: vale la prima con `v < max`. */
 export const ACWR_ZONES = [
@@ -42,11 +42,11 @@ export const FRESHNESS_ZONES = [
 export type FreshnessZone = (typeof FRESHNESS_ZONES)[number]['key']
 
 /** Tendenza della Forma: confronto con N giorni prima, soglia in %. */
-export const TREND_DAYS = 14
-export const TREND_THRESHOLD_PCT = 5
-export type Trend = 'up' | 'flat' | 'down'
+const TREND_DAYS = 14
+const TREND_THRESHOLD_PCT = 5
+type Trend = 'up' | 'flat' | 'down'
 
-export type SportLoad = Record<Sport, number>
+type SportLoad = Record<Sport, number>
 
 const emptyLoad = (): SportLoad =>
   Object.fromEntries(DISCIPLINES.map((d) => [d, 0])) as SportLoad
@@ -110,7 +110,7 @@ function dailyLoad(sessions: Session[]) {
   return { daily, first }
 }
 
-export interface FitnessPoint {
+interface FitnessPoint {
   date: IsoDate
   /** Media esponenziale a 42 giorni del carico giornaliero. */
   fitness: number
@@ -160,7 +160,7 @@ export function trendOf(now: number, before: number): Trend {
   return 'flat'
 }
 
-export type LoadStatus =
+type LoadStatus =
   | { enough: false; historyDays: number }
   | {
       enough: true

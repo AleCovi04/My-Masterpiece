@@ -13,7 +13,7 @@
 import type { ActualSet, Id, IsoDate, Session } from '../data/types'
 
 export const REP_TARGETS = [1, 4, 6, 8, 10, 12] as const
-export type RepTarget = (typeof REP_TARGETS)[number]
+type RepTarget = (typeof REP_TARGETS)[number]
 
 export type RepMetric = `r${RepTarget}`
 export type RecordMetric = 'maxKg' | RepMetric | 'setVolume' | 'sessionVolume'
@@ -21,7 +21,7 @@ export type RecordMetric = 'maxKg' | RepMetric | 'setVolume' | 'sessionVolume'
 export const repMetric = (n: RepTarget): RepMetric => `r${n}`
 
 /** Tutte le metriche, nell'ordine della tabella. */
-export const RECORD_METRICS: RecordMetric[] = [
+const RECORD_METRICS: RecordMetric[] = [
   'maxKg',
   ...REP_TARGETS.map(repMetric),
   'setVolume',
@@ -29,9 +29,7 @@ export const RECORD_METRICS: RecordMetric[] = [
 ]
 
 /** Metriche segnalate come nuovi record (N = 1 è già il peso massimo). */
-export const HIT_METRICS: RecordMetric[] = RECORD_METRICS.filter(
-  (m) => m !== 'r1',
-)
+const HIT_METRICS: RecordMetric[] = RECORD_METRICS.filter((m) => m !== 'r1')
 
 type SetLike = Pick<ActualSet, 'kg' | 'reps'>
 
@@ -212,7 +210,7 @@ export function exerciseSummary(
 }
 
 /** Un record recente: il primo battuto in quella seduta (ordine della tabella) e quanti altri. */
-export interface LatestRecord {
+interface LatestRecord {
   exerciseId: Id
   sessionId: Id
   date: IsoDate
@@ -265,7 +263,7 @@ export function bestValues(
 }
 
 /** Un record dello storico, con la data in cui è stato fatto. */
-export interface DatedRecord {
+interface DatedRecord {
   value: number
   date: IsoDate
   set?: SetRef

@@ -30,7 +30,7 @@ const round = (v: number | undefined, digits = 0) =>
   v === undefined ? undefined : Math.round(v * 10 ** digits) / 10 ** digits
 
 /** Sport del FIT → disciplina dell'app; `null` = attività da ignorare. */
-export function disciplineOf(sport: unknown): EnduranceDiscipline | null {
+function disciplineOf(sport: unknown): EnduranceDiscipline | null {
   if (sport === 'running') return 'run'
   if (sport === 'cycling' || sport === 'eBiking') return 'bike'
   if (sport === 'swimming') return 'swim'

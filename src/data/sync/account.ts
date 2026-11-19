@@ -17,7 +17,7 @@ export interface AccountState extends SyncState {
   email: string | null
 }
 
-export interface Account {
+interface Account {
   getState(): AccountState
   subscribe(listener: () => void): () => void
   /** Invia l'email con il codice (e il link) di accesso. */

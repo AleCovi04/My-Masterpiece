@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Session } from '../data/types'
-import { moveSession, sessionsOn } from './reorder'
+import { moveInList, moveSession, sessionsOn } from './reorder'
 
 const plan = {
   mode: 'simple',
@@ -63,5 +63,12 @@ describe('moveSession', () => {
     expect(r.find((x) => x.id === 'c')?.updatedAt).toBe(
       '2026-12-01T00:00:00.000Z',
     )
+  })
+})
+
+describe('moveInList', () => {
+  it('sposta un elemento nella lista', () => {
+    expect(moveInList(['a', 'b', 'c'], 0, 2)).toEqual(['b', 'c', 'a'])
+    expect(moveInList(['a', 'b', 'c'], 2, 0)).toEqual(['c', 'a', 'b'])
   })
 })

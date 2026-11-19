@@ -40,7 +40,7 @@ export function sessionsInWeek(
   return sessions.filter((s) => s.date >= monday && s.date <= sunday)
 }
 
-export interface WeekSummary {
+interface WeekSummary {
   plannedS: number
   doneS: number
   adherencePct: number

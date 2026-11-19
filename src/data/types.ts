@@ -5,7 +5,7 @@ export type Id = string
 export type IsoDate = string // YYYY-MM-DD
 export type IsoDateTime = string // 2026-11-14T10:30:00.000Z
 
-export interface Entity {
+interface Entity {
   id: Id
   createdAt: IsoDateTime
   updatedAt: IsoDateTime
@@ -290,8 +290,6 @@ export interface BrickActual {
   garmin?: GarminRef
 }
 
-export type Actual = StrengthActual | EnduranceActual | BrickActual
-
 // ---------- Seduta ----------
 
 export type SessionStatus = 'planned' | 'in_progress' | 'done' | 'skipped'
@@ -312,8 +310,6 @@ export interface EndurancePlan {
 export interface BrickPlan {
   legs: BrickLeg[]
 }
-
-export type Plan = StrengthPlan | EndurancePlan | BrickPlan
 
 interface SessionBase extends Entity {
   date: IsoDate
@@ -463,7 +459,7 @@ export interface SetRange {
   max: number
 }
 
-export const DEFAULT_MUSCLE_VOLUME: SetRange = { min: 10, max: 20 }
+const DEFAULT_MUSCLE_VOLUME: SetRange = { min: 10, max: 20 }
 
 /** Impostazioni dell'utente, valide su ogni dispositivo. */
 export interface Settings {

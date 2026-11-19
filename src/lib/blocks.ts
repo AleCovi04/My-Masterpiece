@@ -34,7 +34,7 @@ export const emptyDays = (): BlockItem[][] =>
 export const newWeek = (): BlockWeek => ({ id: newId(), days: emptyDays() })
 
 /** Copia della settimana con id nuovi. */
-export const cloneWeek = (w: BlockWeek): BlockWeek => ({
+const cloneWeek = (w: BlockWeek): BlockWeek => ({
   id: newId(),
   days: w.days.map((d) => d.map((it) => ({ ...it, id: newId() }))),
 })
@@ -98,7 +98,7 @@ export function moveItem(
 
 // ---------- totali ----------
 
-export interface WeekTotals {
+interface WeekTotals {
   /** Secondi previsti per sport (il brick si divide tra le sue frazioni). */
   bySport: Record<Sport, number>
   totalS: number

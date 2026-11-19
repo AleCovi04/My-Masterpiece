@@ -9,7 +9,7 @@ import type {
 } from '../../data/types'
 import { setSessionRpe } from '../../lib/load'
 
-export interface AnalysisData {
+interface AnalysisData {
   sessions: Session[]
   applications: BlockApplication[]
   exercises: Exercise[]

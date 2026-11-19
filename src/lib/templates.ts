@@ -7,11 +7,11 @@ import type {
 } from '../data/types'
 
 /** Elemento che può far parte di una superserie. */
-export interface Linked {
+interface Linked {
   supersetId?: string
 }
 
-export interface Block {
+interface Block {
   /** Indice del primo elemento. */
   start: number
   /** Indice dopo l'ultimo elemento. */

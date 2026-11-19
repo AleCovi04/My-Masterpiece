@@ -21,8 +21,7 @@ import { DISCIPLINES, loadByDiscipline } from './weekStats'
 export const ENDURANCE: EnduranceDiscipline[] = ['swim', 'bike', 'run']
 
 /** Periodo scelto nel filtro dell'Analisi. */
-export type Period =
-  { kind: 'all' } | { kind: 'range'; start: IsoDate; end: IsoDate }
+type Period = { kind: 'all' } | { kind: 'range'; start: IsoDate; end: IsoDate }
 
 export interface Range {
   start: IsoDate
@@ -95,7 +94,7 @@ export function bucketsOf(
 const inBucket = (sessions: Session[], b: Bucket) =>
   sessions.filter((s) => s.date >= b.start && s.date <= b.end)
 
-export type SportTime = Record<Sport, { plannedS: number; actualS: number }>
+type SportTime = Record<Sport, { plannedS: number; actualS: number }>
 
 /** Ore previste ed eseguite per disciplina in ogni intervallo (brick diviso per frazione). */
 export function timeSeries(
@@ -105,7 +104,7 @@ export function timeSeries(
   return buckets.map((b) => loadByDiscipline(inBucket(sessions, b)))
 }
 
-export type SportDistance = Record<
+type SportDistance = Record<
   EnduranceDiscipline,
   { plannedM: number; actualM: number }
 >
@@ -283,7 +282,7 @@ export function addMonthsIso(d: IsoDate, k: number): IsoDate {
  * Intervallo delle ultime N unità che finisce oggi (spostato di `offset` periodi):
  * 6 settimane = 42 giorni fino a oggi; 3 mesi = dal giorno dopo la stessa data di 3 mesi fa.
  */
-export function lastRange(
+function lastRange(
   unit: LastUnit,
   n: number,
   offset: number,

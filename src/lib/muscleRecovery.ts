@@ -22,7 +22,7 @@ export const RECOVERY_TAU_H = 48
 export const FATIGUE_FULL = 8
 
 /** Sotto questa fatica il muscolo si considera recuperato (colore neutro). */
-export const FATIGUE_MIN = 0.25
+const FATIGUE_MIN = 0.25
 
 const HOUR_MS = 3_600_000
 
@@ -91,7 +91,7 @@ export function muscleFatigue(
 export const fatigueLevel = (f: number): number =>
   f < FATIGUE_MIN ? 0 : Math.min(1, f / FATIGUE_FULL)
 
-export interface LastTrained {
+interface LastTrained {
   date: IsoDate
   /** Istante della seduta (ms). */
   at: number

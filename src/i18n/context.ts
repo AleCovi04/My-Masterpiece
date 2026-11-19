@@ -3,7 +3,7 @@ import type { Dictionary } from './it'
 
 export type Lang = 'it' | 'en'
 
-export interface I18n {
+interface I18n {
   lang: Lang
   setLang: (lang: Lang) => void
   t: Dictionary

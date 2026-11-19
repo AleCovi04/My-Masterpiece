@@ -9,7 +9,7 @@ import {
 } from '../components/ui/Icons'
 import type { Dictionary } from '../i18n/it'
 
-export interface NavItem {
+interface NavItem {
   to: string
   end?: boolean
   icon: ReactNode

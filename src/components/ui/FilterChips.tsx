@@ -15,7 +15,7 @@ import {
 } from '../../lib/filterChips'
 import './filterChips.css'
 
-export interface ChipItem<K extends string> {
+interface ChipItem<K extends string> {
   key: K
   label: string
   /** Colore del chip, da una variabile del tema (es. `var(--swim)`). */

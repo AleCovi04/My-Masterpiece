@@ -43,7 +43,7 @@ import {
 export const DB_NAME = 'my-masterpiece'
 export const DEFAULT_RACE_DATE: IsoDate = '2028-08-20'
 /** Backup automatico se l'ultimo ha più di questi giorni. */
-export const AUTO_BACKUP_DAYS = 7
+const AUTO_BACKUP_DAYS = 7
 /** Quanti backup si tengono (i più recenti). */
 export const MAX_BACKUPS = 8
 

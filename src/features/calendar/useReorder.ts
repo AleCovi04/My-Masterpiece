@@ -8,10 +8,10 @@ import {
 } from 'react'
 import type { Id, IsoDate } from '../../data/types'
 
-export const LONG_PRESS_MS = 400
+const LONG_PRESS_MS = 400
 const MOVE_TOLERANCE_PX = 8
 
-export interface DropIndicator {
+interface DropIndicator {
   date: IsoDate
   index: number
   /** Posizione verticale della linea, in px dall'alto della lista. */

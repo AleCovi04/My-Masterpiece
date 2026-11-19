@@ -8,7 +8,8 @@ import {
   type EnduranceDiscipline,
 } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import { brickTotals, legAmount, moveItem } from '../../lib/brick'
+import { brickTotals, isTransitionValid, legAmount } from '../../lib/brick'
+import { moveInList } from '../../lib/reorder'
 import { formatClock, parseClock } from '../../lib/enduranceTemplate'
 import { newId } from '../../lib/ids'
 import ActionMenu, { type MenuAction } from './ActionMenu'
@@ -42,9 +43,6 @@ const legDraft = (leg: BrickLeg, open: boolean): LegDraft => ({
   transition: leg.transitionBeforeS ? formatClock(leg.transitionBeforeS) : '',
   open,
 })
-
-const transitionOk = (raw: string) =>
-  raw.trim() === '' || parseClock(raw) !== null
 
 interface Props {
   /** `null` = nuovo brick. */
@@ -106,7 +104,7 @@ export default function BrickDialog({
   const totals = useMemo(() => brickTotals(built), [built])
 
   const legOk = (i: number) =>
-    evals[i].valid && (i === 0 || transitionOk(legs[i].transition))
+    evals[i].valid && (i === 0 || isTransitionValid(legs[i].transition))
   const nameError = name.trim() || forSession ? null : p.nameRequired
   const overrideError =
     override !== null && override.trim() !== '' && parseClock(override) === null
@@ -155,11 +153,11 @@ export default function BrickDialog({
       ls.length <= BRICK_MIN_LEGS ? ls : ls.filter((l) => l.id !== id),
     )
   const shiftLeg = (i: number, delta: number) =>
-    setLegs((ls) => moveItem(ls, i, i + delta))
+    setLegs((ls) => moveInList(ls, i, i + delta))
 
   const { drag, handleProps } = useSortable({
     listRef,
-    onMove: (from, to) => setLegs((ls) => moveItem(ls, from, to)),
+    onMove: (from, to) => setLegs((ls) => moveInList(ls, from, to)),
   })
 
   const legActions = (l: LegDraft, i: number): MenuAction[] => [
@@ -310,7 +308,9 @@ export default function BrickDialog({
                         inputMode="numeric"
                         placeholder="mm:ss"
                         value={l.transition}
-                        aria-invalid={submitted && !transitionOk(l.transition)}
+                        aria-invalid={
+                          submitted && !isTransitionValid(l.transition)
+                        }
                         onChange={(e) =>
                           patchLeg(l.id, { transition: e.target.value })
                         }

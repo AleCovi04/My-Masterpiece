@@ -35,7 +35,7 @@ export function formatClock(seconds: number): string {
 }
 
 /** Numero positivo con al massimo due decimali (virgola o punto). */
-export function parseDecimal(raw: string): number | null {
+function parseDecimal(raw: string): number | null {
   const v = raw.trim().replace(',', '.')
   if (!/^\d{1,4}(\.\d{1,2})?$/.test(v)) return null
   const n = Number(v)
@@ -83,7 +83,7 @@ export const intensityUnit = (d: EnduranceDiscipline): string =>
 // ---------- distanza ↔ tempo ----------
 
 /** Metri al secondo. */
-export function speedMps(d: EnduranceDiscipline, intensity: number): number {
+function speedMps(d: EnduranceDiscipline, intensity: number): number {
   if (d === 'run') return 1000 / intensity
   if (d === 'swim') return 100 / intensity
   return intensity / 3.6
@@ -183,7 +183,7 @@ export function simpleStats(d: EnduranceDiscipline, s: EnduranceSimple): Stats {
 }
 
 /** Contenuto endurance di un template o di una seduta. */
-export interface EnduranceContent {
+interface EnduranceContent {
   discipline: EnduranceDiscipline
   mode: 'simple' | 'structured'
   simple?: EnduranceSimple
@@ -238,7 +238,7 @@ const amount = (s: EnduranceStep, d: EnduranceDiscipline): string =>
     ? formatDist(s.distanceM, d)
     : formatShortTime(s.durationS ?? 0)
 
-export interface TypeLabels {
+interface TypeLabels {
   warmup: string
   recovery: string
   cooldown: string
@@ -271,7 +271,7 @@ export interface DropTarget {
 }
 
 /** Toglie i blocchi rimasti senza passi. */
-export function pruneEmpty(items: EnduranceItem[]): EnduranceItem[] {
+function pruneEmpty(items: EnduranceItem[]): EnduranceItem[] {
   return items.filter((it) => it.kind === 'step' || it.steps.length > 0)
 }
 

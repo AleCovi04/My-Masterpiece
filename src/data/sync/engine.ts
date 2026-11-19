@@ -21,17 +21,17 @@ export interface SyncState {
 }
 
 /** Quanto si torna indietro col cursore: copre le scritture concorrenti sul server. */
-export const CURSOR_OVERLAP_MS = 5000
+const CURSOR_OVERLAP_MS = 5000
 /** Voci per richiesta di invio. */
-export const PUSH_CHUNK = 500
+const PUSH_CHUNK = 500
 
-export interface SyncEngineOptions {
+interface SyncEngineOptions {
   local: SyncLocal
   now?: () => Date
   isOnline?: () => boolean
 }
 
-export interface SyncEngine {
+interface SyncEngine {
   /** Collega (o scollega, con `null`) l'account e il server. */
   setRemote(remote: { userId: string; api: SyncRemote } | null): Promise<void>
   /** Sincronizza adesso; se è già in corso, ne fa un'altra subito dopo. */

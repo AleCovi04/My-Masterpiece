@@ -65,7 +65,7 @@ const isLegList = (v: unknown, allowEmpty = false) =>
         typeof l.transitionBeforeS === 'number'),
   )
 
-export function isExercise(v: unknown): v is Exercise {
+function isExercise(v: unknown): v is Exercise {
   return (
     isObj(v) &&
     typeof v.id === 'string' &&
@@ -75,7 +75,7 @@ export function isExercise(v: unknown): v is Exercise {
   )
 }
 
-export function isTemplate(v: unknown): v is WorkoutTemplate {
+function isTemplate(v: unknown): v is WorkoutTemplate {
   if (!isObj(v) || typeof v.id !== 'string' || typeof v.name !== 'string') {
     return false
   }
@@ -85,7 +85,7 @@ export function isTemplate(v: unknown): v is WorkoutTemplate {
     : ENDURANCE.has(v.discipline as string) && isMode(v.mode)
 }
 
-export function isSession(v: unknown): v is Session {
+function isSession(v: unknown): v is Session {
   if (!isObj(v) || typeof v.id !== 'string' || !isIsoDate(v.date)) return false
   if (!isObj(v.plan)) return false
   if (v.discipline === 'brick') return isLegList(v.plan.legs, true)
@@ -102,7 +102,7 @@ const isBlockItem = (v: unknown) =>
   ((v.kind === 'template' && typeof v.templateId === 'string') ||
     (v.kind === 'empty' && DISCIPLINES.has(v.discipline as string)))
 
-export function isBlock(v: unknown): v is TrainingBlock {
+function isBlock(v: unknown): v is TrainingBlock {
   return (
     isObj(v) &&
     typeof v.id === 'string' &&
@@ -121,7 +121,7 @@ export function isBlock(v: unknown): v is TrainingBlock {
   )
 }
 
-export function isPhase(v: unknown): v is Phase {
+function isPhase(v: unknown): v is Phase {
   return (
     isObj(v) &&
     typeof v.id === 'string' &&
@@ -131,7 +131,7 @@ export function isPhase(v: unknown): v is Phase {
   )
 }
 
-export function isApplication(v: unknown): v is BlockApplication {
+function isApplication(v: unknown): v is BlockApplication {
   return (
     isObj(v) &&
     typeof v.id === 'string' &&
@@ -150,7 +150,7 @@ export function isApplication(v: unknown): v is BlockApplication {
   )
 }
 
-export function isImport(v: unknown): v is ImportRecord {
+function isImport(v: unknown): v is ImportRecord {
   return (
     isObj(v) &&
     typeof v.id === 'string' &&
@@ -196,7 +196,7 @@ export function isRawData(v: unknown): v is RawData {
 }
 
 /** Una fascia valida: numeri finiti ≥ 0 con minimo ≤ massimo. */
-export const isSetRange = (v: unknown): v is SetRange =>
+const isSetRange = (v: unknown): v is SetRange =>
   isObj(v) &&
   typeof v.min === 'number' &&
   typeof v.max === 'number' &&

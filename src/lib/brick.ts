@@ -3,10 +3,10 @@ import type {
   BrickLeg,
   EnduranceDiscipline,
   EnduranceItem,
-  EnduranceSimple,
 } from '../data/types'
 import {
   formatDist,
+  parseClock,
   formatShortTime,
   templateTotals,
 } from './enduranceTemplate'
@@ -21,7 +21,7 @@ export const legTotals = (leg: BrickLeg) =>
     items: leg.items,
   })
 
-export interface BrickTotals {
+interface BrickTotals {
   /** Somma delle frazioni note più le transizioni; 0 se non si sa nulla. */
   durationS: number
   /** Falso se qualche frazione non ha una durata calcolabile. */
@@ -159,22 +159,7 @@ function cloneItems(items: EnduranceItem[]): EnduranceItem[] {
   )
 }
 
-/** Piano della frazione nella forma salvata: solo la parte della modalità scelta. */
-export function legPlan(
-  mode: 'simple' | 'structured',
-  simple: EnduranceSimple | undefined,
-  items: EnduranceItem[] | undefined,
-): Pick<BrickLeg, 'mode' | 'simple' | 'items'> {
-  return mode === 'simple'
-    ? { mode, simple: simple ?? { goal: 'distance' } }
-    : { mode, items: items ?? [] }
-}
-
-/** Sposta l'elemento `from` in `to` (posizione nella lista senza l'elemento spostato). */
-export function moveItem<T>(list: T[], from: number, to: number): T[] {
-  if (from === to || from < 0 || from >= list.length) return list
-  const out = [...list]
-  const [moved] = out.splice(from, 1)
-  out.splice(Math.max(0, Math.min(to, out.length)), 0, moved)
-  return out
+/** Transizione valida: vuota oppure un tempo leggibile ("1:30"). */
+export function isTransitionValid(raw: string): boolean {
+  return raw.trim() === '' || parseClock(raw) !== null
 }

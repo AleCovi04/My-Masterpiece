@@ -1,7 +1,7 @@
 import type { IsoDate, Session } from '../data/types'
 
 /** Esito di un giorno nel calendario: colore nelle viste Mese e Anno. */
-export type DayStatus = 'done' | 'partial' | 'missed'
+type DayStatus = 'done' | 'partial' | 'missed'
 
 /**
  * Esito del giorno `date` rispetto a `today`.

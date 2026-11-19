@@ -32,9 +32,9 @@ export interface MetricsDraft {
 
 export type MetricsErrors = Partial<Record<keyof MetricsDraft, true>>
 
-export const HR_MIN = 30
-export const HR_MAX = 250
-export const ELEV_MAX = 10000
+const HR_MIN = 30
+const HR_MAX = 250
+const ELEV_MAX = 10000
 
 /** Il dislivello si chiede solo per corsa e bici. */
 export const hasElevation = (d: EnduranceDiscipline) => d !== 'swim'
@@ -133,7 +133,7 @@ export function deviationPct(
   return Math.round(((actual - planned) / planned) * 100)
 }
 
-export interface BrickActualTotals {
+interface BrickActualTotals {
   durationS: number
   transitionsS: number
   /** Distanza per sport (solo dove inserita). */

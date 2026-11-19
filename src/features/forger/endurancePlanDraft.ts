@@ -54,9 +54,9 @@ export interface PlanContent {
   items?: EnduranceItem[]
 }
 
-export const MAX_TIMES = 99
+const MAX_TIMES = 99
 
-export const stepUnit = (d: EnduranceDiscipline): DistUnit =>
+const stepUnit = (d: EnduranceDiscipline): DistUnit =>
   d === 'bike' ? 'km' : 'm'
 const simpleUnit = (d: EnduranceDiscipline): DistUnit =>
   d === 'swim' ? 'm' : 'km'
@@ -120,7 +120,7 @@ export function draftFromPlan(
 }
 
 /** Valore principale (distanza o tempo) valido? */
-export const mainOk = (f: Fields) =>
+const mainOk = (f: Fields) =>
   f.by === 'distance'
     ? parseDistanceM(f.dist, f.unit) !== null
     : parseClock(f.time) !== null

@@ -22,7 +22,7 @@ export interface RawData {
   imports?: unknown[]
 }
 
-export interface Migration {
+interface Migration {
   /** Versione dello schema dopo la migrazione. */
   to: number
   description: string

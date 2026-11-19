@@ -18,7 +18,6 @@ const store = createDexieStore({ legacy: legacyStorage() })
 export const dataStore: DataStore = store
 /** Account e sincronizzazione con Supabase. */
 export const account = createAccount(store)
-export type { DataStore, AccountState }
 
 /** Stato dell'account e della sincronizzazione, aggiornato in tempo reale. */
 export function useAccount(): AccountState {

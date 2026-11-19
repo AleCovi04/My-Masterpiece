@@ -49,7 +49,7 @@ const shift = (date: IsoDate, days: number): IsoDate =>
 const timingOf = (start: IsoDate, end: IsoDate, today: IsoDate): Timing =>
   today > end ? 'past' : today < start ? 'future' : 'current'
 
-export interface PlanWeek {
+interface PlanWeek {
   start: IsoDate
   end: IsoDate
   /** Settimana del blocco (da 1) e settimane del blocco. */
@@ -149,7 +149,7 @@ export function buildPlan(
     )
 }
 
-export interface RaceInfo {
+interface RaceInfo {
   /** Settimane da questa (inclusa) a quella della gara (esclusa). */
   weeksToRace: number
   /** Di queste, quante non sono coperte da nessuna fase o blocco. */

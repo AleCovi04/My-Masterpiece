@@ -3,7 +3,7 @@ import { axisScale } from '../../lib/analysis'
 import ChartTip, { type TipRow } from './ChartTip'
 import { chartHeight, useChartWidth } from '../../hooks/useChartWidth'
 
-export interface BarStack {
+interface BarStack {
   key: string
   /** Nome della serie, per il riquadro di dettaglio. */
   label: string

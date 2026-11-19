@@ -44,3 +44,12 @@ export function moveSession(
     return { ...s, date: next[0], order: next[1], updatedAt: now }
   })
 }
+
+/** Sposta l'elemento `from` in `to` (posizione nella lista senza l'elemento spostato). */
+export function moveInList<T>(list: T[], from: number, to: number): T[] {
+  if (from === to || from < 0 || from >= list.length) return list
+  const out = [...list]
+  const [moved] = out.splice(from, 1)
+  out.splice(Math.max(0, Math.min(to, out.length)), 0, moved)
+  return out
+}

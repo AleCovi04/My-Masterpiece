@@ -7,7 +7,6 @@ import {
   brickTotals,
   cloneLegs,
   newLeg,
-  moveItem,
 } from './brick'
 
 const names = { swim: 'Nuoto', bike: 'Bici', run: 'Corsa' }
@@ -68,11 +67,9 @@ describe('brick', () => {
     expect(brickSecondsBySport(emptyLegs(), 3600)).toEqual({ bike: 3600 })
   })
 
-  it('copia con id nuovi e spostamento in lista', () => {
+  it('copia con id nuovi', () => {
     const [c] = cloneLegs([bike])
     expect(c.id).not.toBe(bike.id)
     expect(c.simple).toEqual(bike.simple)
-    expect(moveItem(['a', 'b', 'c'], 0, 2)).toEqual(['b', 'c', 'a'])
-    expect(moveItem(['a', 'b', 'c'], 2, 0)).toEqual(['c', 'a', 'b'])
   })
 })

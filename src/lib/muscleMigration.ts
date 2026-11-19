@@ -22,7 +22,7 @@ const LEGACY: Record<string, MuscleId> = {
 
 const VALID = new Set<string>(MUSCLES.map((m) => m.id))
 
-export function migrateMuscleId(raw: unknown): MuscleId | null {
+function migrateMuscleId(raw: unknown): MuscleId | null {
   if (typeof raw !== 'string') return null
   if (VALID.has(raw)) return raw as MuscleId
   return LEGACY[raw.trim().toLocaleLowerCase()] ?? null

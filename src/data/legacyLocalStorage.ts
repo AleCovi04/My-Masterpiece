@@ -14,11 +14,11 @@ const KEYS = {
 } as const
 
 /** Dopo la migrazione `mm.sessions` diventa `mm.sessions.backup-idb`, e così le altre. */
-export const LEGACY_BACKUP_SUFFIX = '.backup-idb'
+const LEGACY_BACKUP_SUFFIX = '.backup-idb'
 
 const DEFAULT_RACE_DATE = '2028-08-20'
 
-export interface LegacyData {
+interface LegacyData {
   raw: RawData
   /** Versione dello schema dei dati trovati: 0 o 1. */
   version: number

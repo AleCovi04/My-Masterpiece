@@ -3,7 +3,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { DataStore } from '../store'
 
-export const FIT_BUCKET = 'fit'
+const FIT_BUCKET = 'fit'
 
 export type FitCache = Pick<
   DataStore,

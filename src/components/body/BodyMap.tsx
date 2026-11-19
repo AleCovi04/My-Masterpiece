@@ -36,7 +36,7 @@ interface HeatProps {
   onSelect?: (id: BodyGroup | null) => void
 }
 
-export type BodyMapProps = (SelectProps | HeatProps) & { className?: string }
+type BodyMapProps = (SelectProps | HeatProps) & { className?: string }
 
 type View = 'front' | 'back'
 
