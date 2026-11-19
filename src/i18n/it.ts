@@ -935,10 +935,6 @@ export const it = {
     setVolume: 'Volume max in una serie',
     sessionVolume: 'Volume max in una seduta',
   },
-  quote: {
-    text: "L'impedimento all'azione fa avanzare l'azione. Ciò che ostacola la via diventa la via.",
-    author: 'Marco Aurelio',
-  },
   // domenica = 0, come Date.getDay()
   weekdaysLong: [
     'domenica',

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import FilterChips, { NoSeries } from '../../components/ui/FilterChips'
 import type { Sport } from '../../data/types'
 import { useI18n } from '../../i18n/context'
+import { QUOTE_COUNT, quoteAt } from '../../i18n/quotes'
+import { dailyQuoteIndex } from '../../lib/dailyQuote'
 import {
   addDays,
   daysBetween,
@@ -26,7 +28,7 @@ import { useOverviewData } from './useOverviewData'
 import './overview.css'
 
 export default function OverviewPage() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const goal = useGoal()
   const { data, setRaceDate } = useOverviewData()
   const [active, setActive] = useState<Sport[]>(DISCIPLINES)
@@ -35,6 +37,7 @@ export default function OverviewPage() {
 
   const o = t.overview
   const today = todayIso()
+  const quote = quoteAt(dailyQuoteIndex(today, QUOTE_COUNT), lang)
   const monday = mondayOf(new Date())
   const sunday = addDays(monday, 6)
   const week = sessionsInWeek(data.sessions, toIsoDate(monday))
@@ -83,8 +86,11 @@ export default function OverviewPage() {
       </section>
 
       <blockquote className="quote">
-        <p>“{t.quote.text}”</p>
-        <cite>— {t.quote.author}</cite>
+        <p>“{quote.text}”</p>
+        <cite>
+          — {quote.author}
+          <span className="quote-src">, {quote.source}</span>
+        </cite>
       </blockquote>
 
       <section className="week">

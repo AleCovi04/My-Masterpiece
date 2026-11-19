@@ -64,7 +64,7 @@ L'icona nell'intestazione mostra lo stato: sincronizzato, in corso, offline, err
 - **Forger** – la libreria: esercizi, allenamenti (forza, corsa/bici/nuoto, brick), **blocchi** (1–12 settimane tipo) e **fasi** (sequenze di blocchi). Qui si crea, non si mette niente in calendario.
 - **Il Piano** – mette fasi e blocchi in calendario da un lunedì (in coda alle sedute o sostituendo le programmate). Mostra la cronologia, il completamento per fase, blocco e settimana e il traguardo della gara. Da qui si può anche **rimuovere** un'applicazione (solo le sedute ancora programmate).
 - **Calendario** – viste Settimana, Mese e Anno. Il **+** aggiunge una seduta (da un allenamento o vuota); tenendo premuta una seduta la sposti. I colori nei giorni passati: verde tutte svolte, arancione in parte, rosso nessuna.
-- **Panoramica** – la settimana in corso, il carico e i giorni alla gara. Nel riquadro rosso tocca **Obiettivo** per scrivere il tuo (es. "70.3": l'app mostra "Road to 70.3" anche sotto il logo) e **Data gara** per scegliere la data. Valgono su tutti i dispositivi.
+- **Panoramica** – la settimana in corso, il carico e i giorni alla gara. Nel riquadro rosso tocca **Obiettivo** per scrivere il tuo (es. "70.3": l'app mostra "Road to 70.3" anche sotto il logo) e **Data gara** per scegliere la data. Valgono su tutti i dispositivi. Sotto c'è la **citazione del giorno**: cambia a mezzanotte ed è la stessa su telefono e PC.
 
 ## 4. Allenarsi e registrare
 
