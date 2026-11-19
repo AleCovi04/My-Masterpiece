@@ -4,6 +4,7 @@ import { PageContainer } from '../components/layout'
 import GarminLinks from '../features/garmin/GarminLinks'
 import LiveBanner from '../features/live/LiveBanner'
 import { readPreference, writePreference } from '../lib/preferences'
+import AppUpdate from './AppUpdate'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import SideMenu from './SideMenu'
@@ -43,6 +44,7 @@ export default function AppShell() {
       </div>
       <SideMenu open={menuOpen} onClose={closeMenu} />
       <GarminLinks />
+      <AppUpdate />
     </div>
   )
 }

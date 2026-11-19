@@ -749,6 +749,14 @@ export const it = {
     },
     badge: 'Stato della sincronizzazione',
   },
+  update: {
+    title: 'Nuova versione disponibile',
+    body: 'È uscita la build {new} dell’app (hai la {old}). Aggiorna per avere le ultime novità e continuare a sincronizzare.',
+    howTo:
+      'Il download parte nel browser: al termine tocca il file scaricato → Installa. I dati restano.',
+    now: 'Aggiorna',
+    later: 'Più tardi',
+  },
   garmin: {
     importFit: 'Importa .FIT',
     importing: 'Importazione…',

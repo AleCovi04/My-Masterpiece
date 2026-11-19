@@ -31,3 +31,4 @@ dist-ssr
 *.synctex.gz
 *.fls
 *.fdb_latexmk
+docs/guida.pdf

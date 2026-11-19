@@ -743,6 +743,14 @@ export const en: Dictionary = {
     },
     badge: 'Sync status',
   },
+  update: {
+    title: 'New version available',
+    body: 'Build {new} of the app is out (you have {old}). Update to get the latest features and keep syncing.',
+    howTo:
+      'The download starts in the browser: when it finishes, tap the downloaded file → Install. Your data is kept.',
+    now: 'Update',
+    later: 'Later',
+  },
   garmin: {
     importFit: 'Import .FIT',
     importing: 'Importing…',

@@ -45,6 +45,8 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          # numero di build: l'app lo confronta con l'ultima release per proporre l'aggiornamento
+          VITE_APP_BUILD: ${{ github.run_number }}
         run: npm run build
 
       - run: npx cap sync android
@@ -90,6 +92,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || format('apk-{0}', github.run_number) }}
-          name: My Masterpiece ${{ env.VERSION_NAME }}
+          # "build N" nel nome: l'app lo legge per sapere se c'è una versione nuova
+          name: ${{ github.ref_type == 'tag' && format('My Masterpiece {0} (build {1})', github.ref_name, github.run_number) || format('My Masterpiece build-{0}', github.run_number) }}
           make_latest: true
           files: ${{ runner.temp }}/my-masterpiece.apk

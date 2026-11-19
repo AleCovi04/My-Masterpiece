@@ -43,7 +43,7 @@ L'app è la stessa ovunque; cambia solo come la apri.
 
 Consiglio: sul telefono usa l'**APK** (notifica di fine recupero anche a schermo spento). La PWA va bene come riserva.
 
-**Aggiornare l'APK:** l'app non si aggiorna da sola. Quando c'è una versione nuova scarica il nuovo APK dalla stessa pagina e installalo sopra il vecchio: i dati restano. Il sito e la PWA invece si aggiornano da soli alla riapertura.
+**Aggiornare l'APK:** l'app non si installa gli aggiornamenti da sola, ma te lo dice: quando su GitHub c'è una versione nuova, all'apertura compare **Nuova versione disponibile**. **Aggiorna** scarica l'APK nel browser: al termine tocca il file → **Installa** (sopra il vecchio, i dati restano). **Più tardi** la ripropone dopo 24 ore. Serve internet; l'avviso c'è dalle versioni costruite dopo il 19/11/2026. Il sito e la PWA invece si aggiornano da soli alla riapertura.
 
 ## 2. Accedere e sincronizzare
 
@@ -255,11 +255,11 @@ Scegli un giorno fisso (es. il primo del mese) e segui l'ordine:
 
 ### Ogni 6 mesi
 
-| Cosa                                    | Come                                                                                                                                                                                       |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Copia della chiave di firma Android** | Controlla che la cartella `Documenti\MyMasterpiece-chiave-android\` esista ancora **e** che ci sia una copia altrove (Drive). Senza, niente aggiornamenti dell'APK sopra quello installato |
-| **APK aggiornato**                      | Confronta la versione sul telefono con l'ultima [Release](https://github.com/AleCovi04/My-Masterpiece/releases/latest); se è più vecchia, installa la nuova ([§14](#14-app-android-apk))   |
-| **Prova di ripristino** (facoltativa)   | Su un browser dove non usi l'app: **Dati** → **Importa** l'ultimo export e controlla che i dati ci siano. Così sai che il backup funziona davvero                                          |
+| Cosa                                            | Come                                                                                                                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Copia della chiave di firma Android**         | Controlla che la cartella `Documenti\MyMasterpiece-chiave-android\` esista ancora **e** che ci sia una copia altrove (Drive). Senza, niente aggiornamenti dell'APK sopra quello installato |
+| **APK aggiornato** (di solito te lo dice l'app) | Confronta la versione sul telefono con l'ultima [Release](https://github.com/AleCovi04/My-Masterpiece/releases/latest); se è più vecchia, installa la nuova ([§14](#14-app-android-apk))   |
+| **Prova di ripristino** (facoltativa)           | Su un browser dove non usi l'app: **Dati** → **Importa** l'ultimo export e controlla che i dati ci siano. Così sai che il backup funziona davvero                                          |
 
 ### Solo quando succede qualcosa
 
