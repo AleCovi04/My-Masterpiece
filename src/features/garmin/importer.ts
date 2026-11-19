@@ -2,7 +2,6 @@
 // salvata, con il FIT originale in cache e poi sul server.
 import { account, dataStore, refreshData } from '../../data'
 import type { Id, ImportRecord, IsoDate, Session } from '../../data/types'
-import { extractFitFiles, readFit } from '../../lib/fit/decode'
 import type { FitActivity } from '../../lib/fit/types'
 import {
   activityDate,
@@ -56,14 +55,19 @@ function fits(session: Session, act: FitActivity): boolean {
   )
 }
 
+/** Lettura dei FIT (con zip e SDK di Garmin): caricata solo quando serve. */
+const fitDecoder = () => import('../../lib/fit/decode')
+
 /** Importa un FIT già estratto. */
+export { fitDecoder }
+
 export async function importFit(
   bytes: Uint8Array,
   options: ImportOptions,
 ): Promise<ImportResult> {
   let act: FitActivity | null
   try {
-    act = await readFit(bytes)
+    act = await (await fitDecoder()).readFit(bytes)
   } catch {
     return { status: 'invalid' }
   }
@@ -128,6 +132,7 @@ export async function importFiles(
   for (const file of files) {
     let fits: Uint8Array[]
     try {
+      const { extractFitFiles } = await fitDecoder()
       fits = extractFitFiles(new Uint8Array(await file.arrayBuffer()))
     } catch {
       results.push({ status: 'invalid' })

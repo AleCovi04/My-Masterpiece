@@ -12,6 +12,8 @@ import { ThemeProvider } from './ThemeProvider'
 
 // caricata solo quando serve (in palestra)
 const LivePage = lazy(() => import('../features/live/LivePage'))
+// mappa e lettura dei FIT: solo quando si apre un'attività
+const ActivityPage = lazy(() => import('../features/garmin/ActivityPage'))
 
 function App() {
   return (
@@ -36,6 +38,14 @@ function App() {
                 element={
                   <Suspense fallback={null}>
                     <LivePage />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="attivita/:id"
+                element={
+                  <Suspense fallback={null}>
+                    <ActivityPage />
                   </Suspense>
                 }
               />

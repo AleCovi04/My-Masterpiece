@@ -4,8 +4,12 @@
 import { useSyncExternalStore } from 'react'
 import { dataStore, refreshData } from '../../data'
 import { addDays, toIsoDate } from '../../lib/dates'
-import { extractFitFiles } from '../../lib/fit/decode'
-import { importFit, type ImportOptions, type ImportResult } from './importer'
+import {
+  fitDecoder,
+  importFit,
+  type ImportOptions,
+  type ImportResult,
+} from './importer'
 import {
   downloadFile,
   IntervalsError,
@@ -102,6 +106,7 @@ export async function syncGarmin(auto = false): Promise<void> {
       )
     for (const a of todo) {
       try {
+        const { extractFitFiles } = await fitDecoder()
         const files = extractFitFiles(await downloadFile(link, a.id))
         for (const bytes of files)
           results.push(
