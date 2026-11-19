@@ -708,7 +708,7 @@ export const en: Dictionary = {
     intro:
       'With an account your data syncs across your devices. Without one, it stays on this device only.',
     unavailable:
-      'Sync is not configured: the Supabase keys are missing (see docs/supabase.md).',
+      'Sync is not configured: the Supabase keys are missing (see docs/guida.md).',
     email: 'Email',
     sendCode: 'Send me the link',
     codeSent:

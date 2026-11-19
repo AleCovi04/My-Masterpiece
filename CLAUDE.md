@@ -10,7 +10,7 @@ React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 ## Struttura
 
-- `docs/` roadmap, decisioni, modello dati
+- `docs/` roadmap, decisioni, modello dati, `guida.md` (uso dell'app e amministrazione dei servizi; da aggiornare quando cambia un flusso o un servizio), `archivio/`
 - `src/app/` entry e cornice dell'app
 - `src/features/` moduli per funzionalità (il Forger è in `forger/`, Il Piano in `plan/`); una feature può usare i componenti di un'altra
 - `src/components/` UI riutilizzabile (`ui/` con `Modal`, `layout/`, `body/`)
@@ -58,6 +58,6 @@ Brevi, al massimo 4 righe, più eventuali domande aperte o dubbi.
 - **Dati:** sincronizzati con Supabase (piano gratuito). Login via email: link (da aprire nello stesso browser) o codice da digitare (unico modo nell'app Android); SMTP con Resend, mittente `onboarding@resend.dev`, che senza dominio verificato invia solo all'email dell'account Resend (va bene finché l'utente è uno). Site URL e Redirect URLs: il sito Vercel e `http://localhost:5173`.
 - **Schema del server:** `supabase/schema.sql`, da rieseguire nel SQL Editor di Supabase dopo ogni modifica; i progetti nuovi non concedono permessi in automatico (servono i `grant` espliciti).
 - **Anti-pausa:** workflow `supabase-keepalive` su GitHub Actions, con i segreti del repository `SUPABASE_URL` e `SUPABASE_PUBLISHABLE_KEY`. Repository `AleCovi04/My-Masterpiece` (pubblico). `gh` è installato e collegato all'account (in Bash non è nel PATH: usare PowerShell o `"$env:ProgramFiles\GitHub CLI\gh.exe"`): log dei workflow, avvio dei run, release.
-- **App Android:** APK costruito dal workflow `Android APK` (GitHub Actions, avvio a mano o tag `v*`) e scaricato dalle Release; chiave di firma in `Documenti\MyMasterpiece-chiave-android\` e nei segreti `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD`. Guida in `docs/android.md`. Java e Android SDK non sono installati sul PC: niente build Android in locale.
-- **Garmin:** import dei `.FIT`/`.zip` e "Sincronizza Garmin" tramite intervals.icu (ID atleta e chiave API solo sul dispositivo); file FIT originali nel bucket privato `fit` dello Storage di Supabase (creato da `supabase/schema.sql`). Guida in `docs/garmin.md`.
+- **App Android:** APK costruito dal workflow `Android APK` (GitHub Actions, avvio a mano o tag `v*`) e scaricato dalle Release; chiave di firma in `Documenti\MyMasterpiece-chiave-android\` e nei segreti `ANDROID_KEYSTORE_BASE64` / `ANDROID_KEYSTORE_PASSWORD`. Guida in `docs/guida.md` (§14). Java e Android SDK non sono installati sul PC: niente build Android in locale.
+- **Garmin:** import dei `.FIT`/`.zip` e "Sincronizza Garmin" tramite intervals.icu (ID atleta e chiave API solo sul dispositivo); file FIT originali nel bucket privato `fit` dello Storage di Supabase (creato da `supabase/schema.sql`). Guida in `docs/guida.md` (§5, §16).
 - **Istruzioni all'utente:** passo passo, con il percorso esatto dei menu (Supabase, Vercel, GitHub) o link diretti, una cosa alla volta.

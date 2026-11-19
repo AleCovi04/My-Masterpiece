@@ -1,5 +1,5 @@
 -- My Masterpiece: schema del server per la sincronizzazione.
--- Da eseguire una volta in Supabase → SQL Editor (vedi docs/supabase.md).
+-- Da eseguire una volta in Supabase → SQL Editor (vedi docs/guida.md, §11).
 -- Si può rieseguire: non cancella dati.
 
 -- Una riga per voce (esercizio, template, seduta, blocco, fase, applicazione,

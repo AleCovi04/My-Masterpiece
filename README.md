@@ -1,73 +1,50 @@
-# React + TypeScript + Vite
+# My Masterpiece
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+App per preparare un triathlon (Ironman 70.3): libreria di allenamenti (Forger), periodizzazione in fasi e blocchi (Il Piano), calendario, registrazione della forza dal vivo e dell'endurance, import da Garmin, analisi di volumi, carico e forza. Funziona offline e si sincronizza tra dispositivi.
 
-Currently, two official plugins are available:
+- **Sito:** https://my-masterpiece.vercel.app (PWA)
+- **App Android:** APK nelle [Release](https://github.com/AleCovi04/My-Masterpiece/releases/latest)
+- **Guida all'uso e all'amministrazione:** [docs/guida.md](docs/guida.md)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Stack
 
-## React Compiler
+React 19 + TypeScript + Vite · Dexie (IndexedDB) · Supabase (login e sincronizzazione) · Capacitor (Android) · Vitest · ESLint + Prettier.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Sviluppo
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+cp .env.example .env.local   # URL e chiave publishable di Supabase (facoltativo)
+npm run dev                  # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+| Comando                | Cosa fa                    |
+| ---------------------- | -------------------------- |
+| `npm run dev`          | server di sviluppo         |
+| `npm run build`        | controllo dei tipi e build |
+| `npm run lint`         | ESLint                     |
+| `npm test`             | test (Vitest)              |
+| `npm run format`       | formatta con Prettier      |
+| `npm run format:check` | controlla la formattazione |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Struttura
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+  app/         cornice dell'app: rotte, intestazione, menu, tema
+  features/    una cartella per sezione: overview, calendar, plan, forger,
+               live, endurance, garmin, analysis, data
+  components/  UI riutilizzabile (ui/, layout/, body/ = mappa muscolare)
+  hooks/       hook React generici
+  lib/         calcoli puri (date, carico, record, FIT…), con i test
+  data/        tipi, dataStore (unico accesso ai dati), migrazioni, sync/
+  i18n/        testi in italiano e inglese
+  styles/      tema (colori) e stili condivisi
+docs/          guida, roadmap, decisioni, modello dati
+supabase/      schema del server
+android/       progetto Capacitor
+```
+
+Documenti per chi sviluppa: [roadmap](docs/roadmap.md) · [decisioni](docs/decisioni.md) · [modello dati](docs/modello-dati.md).
+
+Licenze di terze parti: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

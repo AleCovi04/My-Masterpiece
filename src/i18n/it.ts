@@ -713,7 +713,7 @@ export const it = {
     intro:
       'Con un account i dati si sincronizzano tra i tuoi dispositivi. Senza, restano solo su questo.',
     unavailable:
-      'Sincronizzazione non configurata: mancano le chiavi di Supabase (vedi docs/supabase.md).',
+      'Sincronizzazione non configurata: mancano le chiavi di Supabase (vedi docs/guida.md).',
     email: 'Email',
     sendCode: 'Inviami il link',
     codeSent:

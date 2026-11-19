@@ -10,7 +10,7 @@ export function Seg<V extends string>({
   options: [V, string][]
 }) {
   return (
-    <div className="seg" role="group" aria-label={label}>
+    <div className="ui-seg" role="group" aria-label={label}>
       {options.map(([v, text]) => (
         <button
           key={v}

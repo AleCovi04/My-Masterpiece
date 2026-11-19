@@ -1,6 +1,6 @@
 # Tiene sveglio il progetto Supabase gratuito (va in pausa dopo 7 giorni senza attività):
 # ogni 3 giorni una lettura sulla tabella `items` (con la RLS non restituisce dati).
-# Segreti richiesti nel repository: SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY (vedi docs/supabase.md).
+# Segreti richiesti nel repository: SUPABASE_URL e SUPABASE_PUBLISHABLE_KEY (vedi docs/guida.md, §13).
 name: Supabase keep-alive
 
 on:
