@@ -7,6 +7,7 @@ import {
   BRICK_MIN_LEGS,
   DAYS_PER_WEEK,
   defaultSettings,
+  GOAL_MAX,
   MUSCLES,
 } from './types'
 import type {
@@ -212,9 +213,18 @@ const threshold = (v: unknown, min: number, max: number) =>
     : undefined
 
 /** Impostazioni valide: i campi non validi tornano ai valori predefiniti. */
+/** Obiettivo pulito: testo senza spazi in eccesso, al massimo `GOAL_MAX` caratteri; vuoto = nessuno. */
+export function normalizeGoal(raw: unknown): string | undefined {
+  if (typeof raw !== 'string') return undefined
+  const v = raw.replace(/\s+/g, ' ').trim().slice(0, GOAL_MAX).trim()
+  return v || undefined
+}
+
 export function sanitizeSettings(raw: unknown): Settings {
   const out = defaultSettings()
   if (!raw || typeof raw !== 'object') return out
+  const goal = normalizeGoal((raw as { goal?: unknown }).goal)
+  if (goal) out.goal = goal
   const th = (raw as { thresholds?: unknown }).thresholds
   if (isObj(th)) {
     const maxHr = threshold(th.maxHr, 100, 230)

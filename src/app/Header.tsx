@@ -1,9 +1,11 @@
 import { MenuIcon } from '../components/ui/Icons'
+import { useGoal } from '../hooks/useGoal'
 import { useI18n } from '../i18n/context'
 import Tools from './Tools'
 
 export default function Header({ onMenu }: { onMenu: () => void }) {
   const { t } = useI18n()
+  const goal = useGoal()
 
   return (
     <header className="top">
@@ -18,7 +20,11 @@ export default function Header({ onMenu }: { onMenu: () => void }) {
         </button>
         <div className="brand">
           <b>{t.appName}</b>
-          <span>{t.appSub}</span>
+          {goal && (
+            <span>
+              {t.roadTo} {goal}
+            </span>
+          )}
         </div>
       </div>
       <Tools />

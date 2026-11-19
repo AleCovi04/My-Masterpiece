@@ -2,7 +2,8 @@ import type { Dictionary } from './it'
 
 export const en: Dictionary = {
   appName: 'My Masterpiece',
-  appSub: 'Road to 70.3',
+  roadTo: 'Road to',
+  goalFallback: 'the race',
   menu: 'Menu',
   closeMenu: 'Close menu',
   collapseSidebar: 'Collapse the sidebar',
@@ -37,6 +38,9 @@ export const en: Dictionary = {
     days: 'Days',
     weeks: 'Weeks',
     raceDate: 'Race date',
+    goal: 'Goal',
+    goalSet: 'Set',
+    goalPlaceholder: 'e.g. 70.3',
     infinite: '∞ In the future',
     prevMonth: 'Previous month',
     nextMonth: 'Next month',

@@ -1,6 +1,7 @@
 export const it = {
   appName: 'My Masterpiece',
-  appSub: 'Road to 70.3',
+  roadTo: 'Road to',
+  goalFallback: 'la gara',
   menu: 'Menu',
   closeMenu: 'Chiudi il menu',
   collapseSidebar: 'Comprimi la barra laterale',
@@ -35,6 +36,9 @@ export const it = {
     days: 'Giorni',
     weeks: 'Settimane',
     raceDate: 'Data gara',
+    goal: 'Obiettivo',
+    goalSet: 'Imposta',
+    goalPlaceholder: 'es. 70.3',
     infinite: '∞ Nel futuro',
     prevMonth: 'Mese precedente',
     nextMonth: 'Mese successivo',

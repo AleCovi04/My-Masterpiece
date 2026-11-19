@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { MenuIcon } from '../components/ui/Icons'
+import { useGoal } from '../hooks/useGoal'
 import { useI18n } from '../i18n/context'
 import { NAV_ITEMS } from './navItems'
 
@@ -11,6 +12,7 @@ interface Props {
 
 export default function SideMenu({ open, onClose }: Props) {
   const { t } = useI18n()
+  const goal = useGoal()
   const closeRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -47,7 +49,11 @@ export default function SideMenu({ open, onClose }: Props) {
           </button>
           <div className="brand">
             <b>{t.appName}</b>
-            <span>{t.appSub}</span>
+            {goal && (
+              <span>
+                {t.roadTo} {goal}
+              </span>
+            )}
           </div>
         </div>
         {NAV_ITEMS.map((item) => (

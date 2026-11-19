@@ -472,7 +472,15 @@ export interface Settings {
   }
   /** Zone di FC e potenza delle attività Garmin (schema v10). */
   thresholds: Thresholds
+  /**
+   * Obiettivo mostrato come "Road to …" (es. "70.3"); assente = non impostato.
+   * Campo facoltativo senza nuova versione dello schema.
+   */
+  goal?: string
 }
+
+/** Lunghezza massima dell'obiettivo. */
+export const GOAL_MAX = 40
 
 /** Soglie per le zone (FC in bpm, FTP in watt); assenti = non impostate. */
 export interface Thresholds {

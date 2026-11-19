@@ -18,6 +18,8 @@ import {
   summarize,
 } from '../../lib/weekStats'
 import LoadChart from './LoadChart'
+import { saveGoal, useGoal } from '../../hooks/useGoal'
+import GoalField from './GoalField'
 import RaceDatePicker from './RaceDatePicker'
 import TodayPanel from './TodayPanel'
 import { useOverviewData } from './useOverviewData'
@@ -25,6 +27,7 @@ import './overview.css'
 
 export default function OverviewPage() {
   const { t } = useI18n()
+  const goal = useGoal()
   const { data, setRaceDate } = useOverviewData()
   const [active, setActive] = useState<Sport[]>(DISCIPLINES)
 
@@ -58,7 +61,7 @@ export default function OverviewPage() {
         <div>
           <div className="eyebrow">{o.eyebrow}</div>
           <h1>
-            Road to <em>70.3</em>
+            {t.roadTo} <em>{goal ?? t.goalFallback}</em>
           </h1>
         </div>
         <div className="count">
@@ -73,7 +76,10 @@ export default function OverviewPage() {
             <span className="l">{o.weeks}</span>
           </div>
         </div>
-        <RaceDatePicker value={data.raceDate} onChange={setRaceDate} />
+        <div className="race-row">
+          <GoalField value={goal} onChange={(g) => void saveGoal(g)} />
+          <RaceDatePicker value={data.raceDate} onChange={setRaceDate} />
+        </div>
       </section>
 
       <blockquote className="quote">

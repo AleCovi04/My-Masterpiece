@@ -58,15 +58,21 @@
   color: var(--hero-muted);
   margin-top: 6px;
 }
+.race-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 32px;
+  border-top: 1px solid color-mix(in srgb, var(--hero-text) 28%, transparent);
+  padding-top: 16px;
+}
 .race {
   position: relative;
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  border-top: 1px solid color-mix(in srgb, var(--hero-text) 28%, transparent);
-  padding-top: 16px;
+  margin: 0;
 }
 .race .lbl {
   font-size: 12px;
@@ -90,6 +96,13 @@
 }
 .date-btn:focus-visible {
   outline-color: var(--hero-text);
+}
+.goal-inp {
+  width: 14ch;
+  cursor: text;
+}
+.goal-inp::placeholder {
+  color: var(--hero-muted);
 }
 
 /* calendario a comparsa */
