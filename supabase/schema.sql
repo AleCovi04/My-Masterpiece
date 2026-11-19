@@ -31,7 +31,8 @@ create index if not exists items_user_server_at on public.items (user_id, server
 -- Permessi (i progetti nuovi non li concedono in automatico). `anon` può solo leggere,
 -- ma la RLS non gli mostra nessuna riga: serve al ping anti-pausa.
 grant select on public.items to anon;
-grant select, insert, update on public.items to authenticated;
+-- `delete`: "Ricarica il server da questo dispositivo" e pulizia delle voci cancellate.
+grant select, insert, update, delete on public.items to authenticated;
 
 -- Ognuno vede e modifica solo le proprie righe.
 alter table public.items enable row level security;
@@ -100,3 +101,31 @@ drop policy if exists "fit: sostituire i propri" on storage.objects;
 create policy "fit: sostituire i propri" on storage.objects
   for update to authenticated
   using (bucket_id = 'fit' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- Cancellazione dei propri FIT: archiviazione e "Ricomincia da zero" (docs/spazio-dati.md).
+drop policy if exists "fit: cancellare i propri" on storage.objects;
+create policy "fit: cancellare i propri" on storage.objects
+  for delete to authenticated
+  using (bucket_id = 'fit' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+-- Pulizia delle voci cancellate: dopo `min_age_days` giorni la riga vuota di una voce
+-- cancellata non serve più agli altri dispositivi. La chiama l'app, al massimo
+-- una volta a settimana; tocca solo le righe dell'utente (RLS).
+create or replace function public.purge_deleted_items(min_age_days int default 90)
+returns integer
+language sql
+security invoker
+set search_path = ''
+as $$
+  with gone as (
+    delete from public.items
+    where user_id = (select auth.uid())
+      and deleted
+      and updated_at < now() - make_interval(days => greatest(min_age_days, 30))
+    returning 1
+  )
+  select count(*)::int from gone;
+$$;
+
+revoke all on function public.purge_deleted_items(int) from public, anon;
+grant execute on function public.purge_deleted_items(int) to authenticated;

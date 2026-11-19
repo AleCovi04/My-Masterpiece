@@ -2,7 +2,7 @@ import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { describe, expect, it } from 'vitest'
 import { createDexieStore } from '../dexieStore'
 import { SCHEMA_VERSION } from '../migrations'
-import type { Exercise } from '../types'
+import type { Exercise, ImportRecord } from '../types'
 import { createSyncEngine } from './engine'
 import type { RemoteChange, SyncChange, SyncRemote } from './types'
 
@@ -244,5 +244,106 @@ describe('sincronizzazione', () => {
     await a.store.saveExercises([exercise('x1')])
     await a.store.saveSettings(await a.store.loadSettings())
     expect(await a.store.pendingChanges()).toEqual([])
+  })
+})
+
+const record = (
+  id: string,
+  extra: Partial<ImportRecord> = {},
+): ImportRecord => ({
+  id,
+  createdAt: t0.toISOString(),
+  updatedAt: t0.toISOString(),
+  source: 'file',
+  startedAt: t0.toISOString(),
+  ...extra,
+})
+
+describe('ricomincia da zero e recupero', () => {
+  it('il reset cancella tutto, anche sugli altri dispositivi, e svuota la cache dei FIT', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.store.saveExercises([exercise('x1', 'Panca')])
+    await a.store.saveImports([record('fit-1')])
+    await a.store.putFitFile('fit-1', new Uint8Array([1, 2, 3]))
+    await a.store.saveRaceDate('2028-08-01')
+    await a.connect()
+    await a.engine.syncNow()
+
+    const b = device(server)
+    await b.connect()
+    await b.engine.syncNow()
+    await b.store.putFitFile('fit-1', new Uint8Array([1, 2, 3]))
+    expect(await names(b)).toEqual(['Panca'])
+
+    a.later(60_000)
+    await a.store.resetAll()
+    expect(await a.store.loadImports()).toEqual([])
+    expect(await a.store.loadRaceDate()).toBeNull()
+    expect(await a.store.getFitFile('fit-1')).toBeNull()
+    expect(await names(a)).not.toContain('Panca')
+    // backup prima del reset
+    expect((await a.store.listBackups())[0].reason).toBe('pre-reset')
+    await a.engine.syncNow()
+
+    b.later(120_000)
+    await b.engine.syncNow()
+    expect(await names(b)).not.toContain('Panca')
+    expect(await b.store.loadImports()).toEqual([])
+    expect(await b.store.loadRaceDate()).toBeNull()
+    // il FIT dell'attività cancellata sparisce anche dalla cache dell'altro dispositivo
+    expect(await b.store.getFitFile('fit-1')).toBeNull()
+  })
+
+  it("un'attività archiviata altrove toglie il FIT dalla cache", async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.store.saveImports([record('fit-2')])
+    await a.connect()
+    await a.engine.syncNow()
+    const b = device(server)
+    await b.connect()
+    await b.engine.syncNow()
+    await b.store.putFitFile('fit-2', new Uint8Array([9]))
+
+    a.later(60_000)
+    await a.store.saveImports([
+      record('fit-2', { archived: true, updatedAt: a.clock.now.toISOString() }),
+    ])
+    await a.engine.syncNow()
+    b.later(120_000)
+    await b.engine.syncNow()
+    expect((await b.store.loadImports())[0].archived).toBe(true)
+    expect(await b.store.getFitFile('fit-2')).toBeNull()
+  })
+
+  it('requeueAll rimette in coda tutto, anche i FIT', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.store.saveExercises([exercise('x1'), exercise('x2')])
+    await a.store.putFitFile('fit-3', new Uint8Array([7]))
+    await a.connect()
+    await a.engine.syncNow()
+    await a.store.markFitUploaded('fit-3')
+    expect(await a.store.pendingChanges()).toEqual([])
+    expect(await a.store.pendingFitUploads()).toEqual([])
+
+    // server svuotato a mano: si ricarica da questo dispositivo
+    server.rows.clear()
+    a.later(60_000)
+    await a.store.requeueAll()
+    const pending = await a.store.pendingChanges()
+    expect(
+      pending
+        .filter((c) => c.kind === 'exercises')
+        .map((c) => c.id)
+        .sort(),
+    ).toEqual(['x1', 'x2'])
+    expect(pending.some((c) => c.kind === 'meta' && c.id === 'settings')).toBe(
+      true,
+    )
+    expect(await a.store.pendingFitUploads()).toEqual(['fit-3'])
+    await a.engine.syncNow()
+    expect(server.rows.has('exercises/x1')).toBe(true)
   })
 })

@@ -8,6 +8,8 @@ import type { DataStore } from '../store'
 const FIT_BUCKET = 'fit'
 /** File per pagina nell'elenco dello Storage. */
 const LIST_PAGE = 1000
+/** File per richiesta di cancellazione. */
+const REMOVE_CHUNK = 500
 
 export type FitCache = Pick<
   DataStore,
@@ -89,5 +91,36 @@ export function createFitStorage(client: SupabaseClient, cache: FitCache) {
     }
   }
 
-  return { uploadPending, download, usage }
+  /**
+   * Cancella i percorsi a blocchi. Senza il permesso di cancellazione lo Storage
+   * non dà errore ma non cancella nulla: lo si segnala invece di continuare.
+   */
+  const removePaths = async (paths: string[]): Promise<void> => {
+    for (let i = 0; i < paths.length; i += REMOVE_CHUNK) {
+      const chunk = paths.slice(i, i + REMOVE_CHUNK)
+      const { data, error } = await bucket().remove(chunk)
+      if (error) throw error
+      if ((data?.length ?? 0) === 0)
+        throw new Error(
+          'Nessun file cancellato: manca il permesso (riesegui supabase/schema.sql)',
+        )
+    }
+  }
+
+  /** Toglie dal server i FIT indicati (archiviazione). */
+  const remove = (userId: string, ids: string[]): Promise<void> =>
+    removePaths(ids.map((id) => path(userId, id)))
+
+  /** Toglie dal server tutti i FIT dell'utente ("Ricomincia da zero"). */
+  const removeAll = async (userId: string): Promise<void> => {
+    for (;;) {
+      const { data, error } = await bucket().list(userId, { limit: LIST_PAGE })
+      if (error) throw error
+      if (!data || data.length === 0) return
+      await removePaths(data.map((f) => `${userId}/${f.name}`))
+      if (data.length < LIST_PAGE) return
+    }
+  }
+
+  return { uploadPending, download, usage, remove, removeAll }
 }

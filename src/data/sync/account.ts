@@ -3,6 +3,7 @@
 // ogni salvataggio. Senza chiavi in `.env` la sincronizzazione resta spenta.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createSyncEngine, type SyncState } from './engine'
+import type { DataStore } from '../store'
 import { createFitStorage, type FitCache, type FitUsage } from './fitStorage'
 import { createSupabaseRemote } from './supabaseRemote'
 import type { SyncLocal } from './types'
@@ -36,7 +37,28 @@ interface Account {
   uploadFitFiles(): Promise<void>
   /** Spazio dei FIT dell'utente sul server; `null` se non collegati o offline. */
   fitUsage(): Promise<FitUsage | null>
+  /** Toglie i FIT dal server e dalla cache (archiviazione). Serve la connessione. */
+  archiveFitFiles(ids: string[]): Promise<void>
+  /**
+   * Dopo `dataStore.resetAll()`: invia subito le cancellazioni e toglie tutti i
+   * FIT dal server. Senza account non fa nulla.
+   */
+  resetServer(): Promise<void>
+  /** Svuota le proprie righe sul server e le ricarica da questo dispositivo. */
+  rebuildServer(): Promise<void>
 }
+
+/** Ogni quanto si puliscono sul server le voci cancellate. */
+const PURGE_EVERY_MS = 7 * 864e5
+/** Età delle voci cancellate da togliere dal server. */
+const PURGE_AFTER_DAYS = 90
+
+type Local = SyncLocal &
+  FitCache &
+  Pick<
+    DataStore,
+    'deleteFitFiles' | 'requeueAll' | 'lastPurgeAt' | 'markPurged'
+  >
 
 function makeClient(): SupabaseClient | null {
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -53,7 +75,7 @@ function makeClient(): SupabaseClient | null {
   }
 }
 
-export function createAccount(local: SyncLocal & FitCache): Account {
+export function createAccount(local: Local): Account {
   const client = makeClient()
   const online = () =>
     typeof navigator === 'undefined' ? true : navigator.onLine !== false
@@ -75,10 +97,25 @@ export function createAccount(local: SyncLocal & FitCache): Account {
   const uploadFitFiles = async () => {
     if (files && userId && online()) await files.uploadPending(userId)
   }
+  /** Pulizia delle voci cancellate da più di 90 giorni (al massimo una volta a settimana). */
+  const purgeDeleted = async () => {
+    if (!client || !userId || !online()) return
+    const last = await local.lastPurgeAt()
+    if (last && Date.now() - Date.parse(last) < PURGE_EVERY_MS) return
+    const { error } = await client.rpc('purge_deleted_items', {
+      min_age_days: PURGE_AFTER_DAYS,
+    })
+    // funzione assente (schema non rieseguito) o errore: si riprova la prossima volta
+    if (error) console.warn('Pulizia delle voci cancellate non riuscita', error)
+    else await local.markPurged()
+  }
   let lastStatus = state.status
   engine.subscribe(() => {
     const status = engine.getState().status
-    if (status === 'idle' && lastStatus === 'syncing') void uploadFitFiles()
+    if (status === 'idle' && lastStatus === 'syncing') {
+      void uploadFitFiles()
+      void purgeDeleted()
+    }
     lastStatus = status
   })
 
@@ -168,6 +205,30 @@ export function createAccount(local: SyncLocal & FitCache): Account {
     async fitUsage() {
       if (!files || !userId || !online()) return null
       return files.usage(userId)
+    },
+    async archiveFitFiles(ids) {
+      if (!files || !userId) throw new Error('Account non collegato')
+      if (!online()) throw new Error('Serve la connessione')
+      await files.remove(userId, ids)
+      await local.deleteFitFiles(ids)
+    },
+    async resetServer() {
+      if (!files || !userId) return
+      if (!online()) throw new Error('Serve la connessione')
+      await engine.syncNow()
+      await files.removeAll(userId)
+    },
+    async rebuildServer() {
+      if (!client || !userId) throw new Error('Account non collegato')
+      if (!online()) throw new Error('Serve la connessione')
+      const { error } = await client
+        .from('items')
+        .delete()
+        .eq('user_id', userId)
+      if (error) throw error
+      await local.requeueAll()
+      await engine.syncNow()
+      await uploadFitFiles()
     },
   }
 }

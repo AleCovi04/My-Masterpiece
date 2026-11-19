@@ -28,6 +28,8 @@ export type BackupReason =
   | 'pre-migration'
   /** Prima del primo collegamento a un account (sincronizzazione). */
   | 'pre-sync'
+  /** Prima di "Ricomincia da zero". */
+  | 'pre-reset'
 
 export interface BackupInfo {
   id: number
@@ -80,6 +82,8 @@ export interface DataStore {
   pendingFitUploads(): Promise<string[]>
   /** Segna il file come presente sul server (con `bytes`, salva anche una copia scaricata). */
   markFitUploaded(id: string, bytes?: Uint8Array): Promise<void>
+  /** Toglie i file dalla cache del dispositivo (archiviazione). */
+  deleteFitFiles(ids: string[]): Promise<void>
 
   /** Collegamento a intervals.icu di questo dispositivo; `null` = non collegato. */
   loadIntervals(): Promise<IntervalsLink | null>
@@ -111,6 +115,17 @@ export interface DataStore {
   lastExportAt(): Promise<IsoDateTime | null>
   /** Sostituisce tutti i dati (import); prima salva un backup di quelli attuali. */
   replaceAll(data: AppData): Promise<void>
+  /**
+   * "Ricomincia da zero": backup, poi dati come appena installata. Le voci tolte
+   * vanno in coda come cancellazioni, così gli altri dispositivi si allineano.
+   * Restano login, intervals.icu, preferenze del dispositivo e backup.
+   */
+  resetAll(): Promise<void>
+  /** Rimette in coda tutte le voci e tutti i FIT (per ricaricare il server da questo dispositivo). */
+  requeueAll(): Promise<void>
+  /** Ultima pulizia delle voci cancellate sul server (solo questo dispositivo). */
+  lastPurgeAt(): Promise<IsoDateTime | null>
+  markPurged(): Promise<void>
 
   /** Backup salvati, dal più recente. */
   listBackups(): Promise<BackupInfo[]>

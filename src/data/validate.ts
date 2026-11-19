@@ -159,7 +159,8 @@ function isImport(v: unknown): v is ImportRecord {
     typeof v.startedAt === 'string' &&
     (v.intervalsId === undefined || typeof v.intervalsId === 'string') &&
     (v.sessionId === undefined || typeof v.sessionId === 'string') &&
-    (v.ignored === undefined || v.ignored === true)
+    (v.ignored === undefined || v.ignored === true) &&
+    (v.archived === undefined || v.archived === true)
   )
 }
 

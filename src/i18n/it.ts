@@ -705,6 +705,7 @@ export const it = {
       'pre-restore': 'Prima di un ripristino',
       'pre-migration': 'Prima di un aggiornamento dei dati',
       'pre-sync': 'Prima del collegamento all’account',
+      'pre-reset': 'Prima di Ricomincia da zero',
     },
     restore: 'Ripristina',
     confirmRestore: 'Sostituire i dati attuali con questo backup?',

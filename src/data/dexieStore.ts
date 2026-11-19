@@ -390,7 +390,7 @@ export function createDexieStore(
       await init()
       if (mem || changes.length === 0) return 0
       let applied = 0
-      await db.transaction('rw', all, async () => {
+      await db.transaction('rw', [...all, db.fitFiles], async () => {
         for (const c of changes) {
           const key = changeKey(c.kind, c.id)
           const pending = await db.changes.get(key)
@@ -410,9 +410,16 @@ export function createDexieStore(
             if (c.updatedAt <= localAt) continue
             if (c.deleted) {
               await db[c.kind].delete(c.id)
+              // attività importata cancellata: il suo FIT non serve più
+              if (c.kind === 'imports') await db.fitFiles.delete(c.id)
             } else {
               const item = normalizeListItem(c.kind, c.item, c.schemaVersion)
               if (!item || item.id !== c.id) continue
+              if (
+                c.kind === 'imports' &&
+                (item as { archived?: unknown }).archived
+              )
+                await db.fitFiles.delete(c.id)
               await db[c.kind].put({
                 id: c.id,
                 pos: c.pos,
@@ -545,6 +552,11 @@ export function createDexieStore(
         uploaded: 1,
       })
     },
+    async deleteFitFiles(ids) {
+      await init()
+      if (mem || ids.length === 0) return
+      await db.fitFiles.bulkDelete(ids)
+    },
 
     async loadIntervals() {
       await init()
@@ -645,6 +657,55 @@ export function createDexieStore(
         await writeAll(data)
       })
       emit(localListeners)
+    },
+
+    async resetAll() {
+      await init()
+      if (mem) {
+        mem = freshData()
+        memLive = null
+        emit(localListeners)
+        return
+      }
+      await db.transaction('rw', [...all, db.fitFiles], async () => {
+        await addBackup('pre-reset', await readRaw(), SCHEMA_VERSION)
+        await writeAll(freshData())
+        await db.fitFiles.clear()
+        await db.meta.delete('liveWorkout')
+      })
+      emit(localListeners)
+    },
+    async requeueAll() {
+      await init()
+      if (mem) return
+      await db.transaction('rw', [...all, db.fitFiles], async () => {
+        const stamp = now().toISOString()
+        for (const key of LIST_KINDS) {
+          for (const row of await db[key].toArray()) {
+            await db[key].put({ ...row, updatedAt: stamp })
+            await queue(key, row.id, stamp, false)
+          }
+        }
+        for (const id of META_IDS) {
+          const row = await db.meta.get(id)
+          if (!row) continue
+          await db.meta.put({ ...row, updatedAt: stamp })
+          await queue('meta', id, stamp, false)
+        }
+        await db.fitFiles.toCollection().modify({ uploaded: 0 })
+      })
+      emit(localListeners)
+    },
+    async lastPurgeAt() {
+      await init()
+      if (mem) return null
+      const v = (await db.meta.get('lastPurgeAt'))?.value
+      return typeof v === 'string' ? v : null
+    },
+    async markPurged() {
+      await init()
+      if (mem) return
+      await db.meta.put({ key: 'lastPurgeAt', value: now().toISOString() })
     },
 
     async listBackups() {

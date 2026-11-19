@@ -700,6 +700,7 @@ export const en: Dictionary = {
       'pre-restore': 'Before a restore',
       'pre-migration': 'Before a data upgrade',
       'pre-sync': 'Before linking the account',
+      'pre-reset': 'Before Start from scratch',
     },
     restore: 'Restore',
     confirmRestore: 'Replace the current data with this backup?',

@@ -514,6 +514,8 @@ export interface ImportRecord extends Entity {
    * già importata).
    */
   ignored?: true
+  /** File FIT tolto dal server e dalla cache per liberare spazio (resta il riepilogo nella seduta). */
+  archived?: true
 }
 
 // ---------- Insieme dei dati (salvataggio, export, backup) ----------

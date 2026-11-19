@@ -28,6 +28,8 @@ interface MetaRow {
     | 'sync'
     /** Collegamento a intervals.icu (solo su questo dispositivo). */
     | 'intervals'
+    /** Ultima pulizia delle voci cancellate sul server. */
+    | 'lastPurgeAt'
   value: unknown
   /** Solo per `raceDate` e `settings`: ora dell'ultima modifica. */
   updatedAt?: IsoDateTime
