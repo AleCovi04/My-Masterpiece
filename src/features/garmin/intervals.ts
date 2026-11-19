@@ -2,6 +2,7 @@
 // personale: Basic auth con utente `API_KEY`). Il sito accetta chiamate dal
 // browser (CORS), quindi non serve un server.
 import type { IntervalsLink } from '../../data/store'
+import type { RemoteActivity } from '../../lib/garminLink'
 
 const BASE = 'https://intervals.icu/api/v1'
 
@@ -11,13 +12,6 @@ export class IntervalsError extends Error {
     super(kind)
     this.kind = kind
   }
-}
-
-/** Un'attività dell'elenco (solo i campi usati). */
-export interface IntervalsActivity {
-  id: string
-  type?: string
-  start_date_local?: string
 }
 
 const headers = (link: Pick<IntervalsLink, 'apiKey'>) => ({
@@ -55,29 +49,31 @@ export async function listActivities(
   link: IntervalsLink,
   oldest: string,
   newest: string,
-): Promise<IntervalsActivity[]> {
+): Promise<RemoteActivity[]> {
   const res = await get(
     link,
     `/athlete/${athlete(link)}/activities?oldest=${oldest}&newest=${newest}`,
   )
   const data: unknown = await res.json()
   if (!Array.isArray(data)) return []
+  const str = (v: unknown) => (typeof v === 'string' ? v : undefined)
+  const num = (v: unknown) =>
+    typeof v === 'number' && Number.isFinite(v) && v > 0 ? v : undefined
   return data
     .filter(
-      (a): a is IntervalsActivity =>
+      (a): a is Record<string, unknown> =>
         !!a && typeof a === 'object' && typeof a.id === 'string',
     )
     .map((a) => ({
-      id: a.id,
-      type: typeof a.type === 'string' ? a.type : undefined,
-      start_date_local:
-        typeof a.start_date_local === 'string' ? a.start_date_local : undefined,
+      id: a.id as string,
+      type: str(a.type),
+      name: str(a.name),
+      startLocal: str(a.start_date_local),
+      startUtc: str(a.start_date),
+      distanceM: num(a.distance),
+      movingS: num(a.moving_time),
     }))
 }
-
-/** Sport che possono essere corsa, bici, nuoto o multisport (gli altri non si scaricano). */
-export const isEnduranceType = (type?: string) =>
-  !type || /run|ride|swim|triathlon|duathlon|multisport|transition/i.test(type)
 
 /** File originale dell'attività (FIT, a volte compresso: lo apre `extractFitFiles`). */
 export async function downloadFile(

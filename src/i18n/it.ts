@@ -778,7 +778,7 @@ export const it = {
     fromGarmin: 'Da Garmin',
     icuTitle: 'Garmin tramite intervals.icu',
     icuIntro:
-      'Collega intervals.icu (gratuito, riceve le attività da Garmin Connect) per portare nell’app le attività che mancano con “Sincronizza”.',
+      'Collega intervals.icu (gratuito, riceve le attività da Garmin Connect): all’apertura l’app propone di collegare le attività alle sedute dello stesso giorno e sport.',
     icuAthlete: 'ID atleta',
     icuKey: 'Chiave API',
     icuWhere:
@@ -795,7 +795,21 @@ export const it = {
     icuNever: 'mai',
     sync: 'Sincronizza Garmin',
     syncing: 'Sincronizzazione Garmin…',
-    syncNone: 'Nessuna attività nuova.',
+    syncNone: 'Nessuna attività nuova negli ultimi 30 giorni.',
+    linkTitle: 'Collega attività Garmin',
+    linkIntro:
+      'Attività dell’orologio nello stesso giorno e sport di una seduta programmata. Spunta quelle da collegare.',
+    linkIntroManual:
+      'Attività degli ultimi 30 giorni non ancora nell’app. Quelle senza seduta programmata possono diventare una seduta nuova.',
+    linkFromGarmin: 'Garmin',
+    linkTarget: 'Seduta in cui collegarla',
+    linkDoneManual: 'svolta (dati a mano)',
+    linkIgnore: 'Non collegare mai',
+    linkIgnoreHint:
+      '✕ = non proporla più. I dati di Garmin sostituiscono quelli inseriti a mano; RPE e note restano.',
+    linkLater: 'Più tardi',
+    linkConfirm: 'Collega ({n})',
+    linking: 'Collegamento…',
     syncNotLinked:
       'Per sincronizzare collega intervals.icu in Dati (oppure importa i file .fit).',
     thTitle: 'Soglie per le zone',

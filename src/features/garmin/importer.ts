@@ -27,6 +27,8 @@ export interface ImportOptions {
   intervalsId?: string
   /** Import dal dettaglio di una seduta: va solo lì. */
   targetId?: Id
+  /** Sempre in una seduta nuova non pianificata (scelta nella finestra "Collega"). */
+  forceNew?: boolean
   /**
    * Più sedute adatte: chiede quale. `null` = nuova seduta non pianificata,
    * `undefined` = annulla. Senza, si sceglie la prima.
@@ -95,6 +97,8 @@ export async function importFit(
     const s = sessions.find((x) => x.id === options.targetId)
     if (!s || !fits(s, act)) return { status: 'mismatch', date }
     target = s.id
+  } else if (options.forceNew) {
+    target = null
   } else {
     const candidates = importCandidates(sessions, act)
     if (candidates.length === 0) target = null

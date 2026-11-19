@@ -1,50 +1,53 @@
-// "Sincronizza Garmin": porta nell'app le attività di intervals.icu che
-// mancano. A mano dal Calendario, in automatico all'apertura (al massimo una
-// volta all'ora).
+// Garmin tramite intervals.icu: all'apertura dell'app (e al ritorno visibile)
+// cerca le attività nello stesso giorno e sport di una seduta programmata e
+// apre la finestra "Collega"; "Sincronizza Garmin" mostra anche le altre.
+// Niente viene importato senza conferma.
 import { useSyncExternalStore } from 'react'
 import { dataStore, refreshData } from '../../data'
+import type { Id } from '../../data/types'
 import { addDays, toIsoDate } from '../../lib/dates'
 import {
-  fitDecoder,
-  importFit,
-  type ImportOptions,
-  type ImportResult,
-} from './importer'
-import {
-  downloadFile,
-  IntervalsError,
-  isEnduranceType,
-  listActivities,
-} from './intervals'
+  ignoredImportId,
+  proposeLinks,
+  type LinkProposal,
+} from '../../lib/garminLink'
+import { fitDecoder, importFit, type ImportResult } from './importer'
+import { downloadFile, IntervalsError, listActivities } from './intervals'
 
-/** Giorni presi la prima volta. */
-export const FIRST_SYNC_DAYS = 30
-/** Ogni quanto al massimo il controllo automatico. */
-export const AUTO_SYNC_MS = 60 * 60_000
-/** Giorni ripresi a ogni controllo (attività caricate in ritardo su intervals.icu). */
-const OVERLAP_DAYS = 3
+/** Giorni controllati all'apertura. */
+export const AUTO_DAYS = 14
+/** Giorni mostrati da "Sincronizza Garmin". */
+export const MANUAL_DAYS = 30
+/** Al ritorno visibile si ricontrolla al massimo ogni tanto. */
+const AUTO_EVERY_MS = 30 * 60_000
+
+export type GarminError = 'notLinked' | 'auth' | 'offline'
 
 export interface GarminSyncState {
   running: boolean
-  /** Esito dell'ultima sincronizzazione (anche automatica). */
+  /** Finestra "Collega" aperta: `auto` = solo le attività con una seduta. */
+  open: false | 'auto' | 'manual'
+  rows: LinkProposal[]
+  linking: boolean
+  /** Esito dell'ultimo controllo o collegamento (per il tasto). */
   last?: {
     at: string
-    results: ImportResult[]
-    error?: 'notLinked' | 'auth' | 'offline'
+    error?: GarminError
+    none?: boolean
+    results?: ImportResult[]
   }
 }
 
-let state: GarminSyncState = { running: false }
-const listeners = new Set<() => void>()
-const set = (next: GarminSyncState) => {
-  state = next
-  listeners.forEach((fn) => fn())
+let state: GarminSyncState = {
+  running: false,
+  open: false,
+  rows: [],
+  linking: false,
 }
-
-let chooser: ImportOptions['choose']
-/** La finestra di scelta della seduta (montata nella cornice dell'app). */
-export function setGarminChooser(fn: ImportOptions['choose']) {
-  chooser = fn
+const listeners = new Set<() => void>()
+const set = (patch: Partial<GarminSyncState>) => {
+  state = { ...state, ...patch }
+  listeners.forEach((fn) => fn())
 }
 
 export function useGarminSync(): GarminSyncState {
@@ -59,77 +62,146 @@ export function useGarminSync(): GarminSyncState {
   )
 }
 
+/** Attività rimandate con "Più tardi": non riaprono la finestra fino al prossimo avvio. */
+const snoozed = new Set<string>()
+let lastAutoAt = 0
+
 /**
- * Sincronizza. `auto` = solo se collegati e se l'ultimo controllo ha più di
- * un'ora (nessun esito se non serve).
+ * Cerca le attività da collegare. `manual` = da "Sincronizza Garmin": ultimi
+ * 30 giorni, anche quelle senza seduta, e la finestra si apre sempre (o dice
+ * che non c'è niente). Automatico: ultimi 14 giorni, solo con una seduta,
+ * finestra solo se serve.
  */
-export async function syncGarmin(auto = false): Promise<void> {
-  if (state.running) return
+export async function checkGarmin(manual = false): Promise<void> {
+  if (state.running || state.linking || state.open) return
   const link = await dataStore.loadIntervals()
   const now = new Date()
   if (!link) {
-    if (!auto)
-      set({
-        running: false,
-        last: { at: now.toISOString(), results: [], error: 'notLinked' },
-      })
+    if (manual) set({ last: { at: now.toISOString(), error: 'notLinked' } })
     return
   }
-  if (
-    auto &&
-    link.lastCheckAt &&
-    now.getTime() - Date.parse(link.lastCheckAt) < AUTO_SYNC_MS
-  )
-    return
-  if (auto && typeof navigator !== 'undefined' && navigator.onLine === false)
-    return
+  if (!manual) {
+    if (Date.now() - lastAutoAt < AUTO_EVERY_MS) return
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return
+    lastAutoAt = Date.now()
+  }
 
-  set({ ...state, running: true })
-  const results: ImportResult[] = []
-  let error: 'auth' | 'offline' | undefined
+  set({ running: true })
   try {
-    const oldest = link.lastCheckAt
-      ? addDays(new Date(link.lastCheckAt), -OVERLAP_DAYS)
-      : addDays(now, -FIRST_SYNC_DAYS)
-    const list = await listActivities(
-      link,
-      toIsoDate(oldest),
-      toIsoDate(addDays(now, 1)),
-    )
-    const known = new Set(
-      (await dataStore.loadImports()).map((r) => r.intervalsId).filter(Boolean),
-    )
-    const todo = list
-      .filter((a) => !known.has(a.id) && isEnduranceType(a.type))
-      .sort((a, b) =>
-        (a.start_date_local ?? '').localeCompare(b.start_date_local ?? ''),
-      )
-    for (const a of todo) {
+    const days = manual ? MANUAL_DAYS : AUTO_DAYS
+    const [list, sessions, imports] = await Promise.all([
+      listActivities(
+        link,
+        toIsoDate(addDays(now, -days)),
+        toIsoDate(addDays(now, 1)),
+      ),
+      dataStore.loadSessions(),
+      dataStore.loadImports(),
+    ])
+    await dataStore.saveIntervals({ ...link, lastCheckAt: now.toISOString() })
+    const all = proposeLinks(list, sessions, imports).reverse()
+    const rows = manual
+      ? all
+      : all.filter((r) => r.target && !snoozed.has(r.activity.id))
+    set({
+      running: false,
+      rows,
+      open: rows.length ? (manual ? 'manual' : 'auto') : false,
+      last: manual
+        ? { at: now.toISOString(), none: rows.length === 0 }
+        : state.last,
+    })
+  } catch (e) {
+    set({
+      running: false,
+      ...(manual && {
+        last: {
+          at: now.toISOString(),
+          error: e instanceof IntervalsError ? e.kind : 'offline',
+        },
+      }),
+    })
+  }
+}
+
+/** "Più tardi": chiude; all'apertura successiva dell'app la finestra torna. */
+export function closeGarminLinks() {
+  if (state.linking) return
+  for (const r of state.rows) snoozed.add(r.activity.id)
+  set({ open: false, rows: [] })
+}
+
+/** ✕: l'attività non viene più proposta (su tutti i dispositivi). */
+export async function ignoreGarminActivity(row: LinkProposal): Promise<void> {
+  const a = row.activity
+  const now = new Date().toISOString()
+  const imports = await dataStore.loadImports()
+  const id = ignoredImportId(a.id)
+  if (!imports.some((r) => r.id === id))
+    await dataStore.saveImports([
+      ...imports,
+      {
+        id,
+        createdAt: now,
+        updatedAt: now,
+        source: 'intervals',
+        intervalsId: a.id,
+        startedAt: a.startUtc ?? `${row.date}T00:00:00.000Z`,
+        ignored: true,
+      },
+    ])
+  const rows = state.rows.filter((r) => r.activity.id !== a.id)
+  set({ rows, open: rows.length ? state.open : false })
+}
+
+/** Una scelta della finestra: seduta esistente o `null` = nuova seduta. */
+export interface LinkChoice {
+  row: LinkProposal
+  target: Id | null
+}
+
+/** "Collega": scarica i file delle attività scelte e li importa dove indicato. */
+export async function linkGarmin(choices: LinkChoice[]): Promise<void> {
+  const link = await dataStore.loadIntervals()
+  if (!link || state.linking) return
+  // le attività non spuntate non riaprono la finestra fino al prossimo avvio
+  for (const r of state.rows) snoozed.add(r.activity.id)
+  set({ linking: true })
+  const results: ImportResult[] = []
+  let error: GarminError | undefined
+  try {
+    const { extractFitFiles } = await fitDecoder()
+    for (const { row, target } of choices) {
       try {
-        const { extractFitFiles } = await fitDecoder()
-        const files = extractFitFiles(await downloadFile(link, a.id))
+        const files = extractFitFiles(await downloadFile(link, row.activity.id))
+        if (!files.length) results.push({ status: 'invalid' })
         for (const bytes of files)
           results.push(
             await importFit(bytes, {
               source: 'intervals',
-              intervalsId: a.id,
-              choose: chooser,
+              intervalsId: row.activity.id,
+              ...(target ? { targetId: target } : { forceNew: true }),
             }),
           )
       } catch (e) {
         // un'attività non scaricabile (es. arrivata da Strava) non ferma le altre
-        if (e instanceof IntervalsError && e.kind === 'offline') throw e
+        if (e instanceof IntervalsError) throw e
         results.push({ status: 'invalid' })
       }
     }
-    await dataStore.saveIntervals({ ...link, lastCheckAt: now.toISOString() })
   } catch (e) {
     error = e instanceof IntervalsError ? e.kind : 'offline'
   } finally {
     if (results.some((r) => r.status === 'imported')) refreshData()
     set({
-      running: false,
-      last: { at: now.toISOString(), results, ...(error && { error }) },
+      linking: false,
+      open: false,
+      rows: [],
+      last: {
+        at: new Date().toISOString(),
+        results,
+        ...(error && { error }),
+      },
     })
   }
 }

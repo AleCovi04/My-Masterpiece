@@ -342,3 +342,101 @@
   background: var(--c);
   opacity: calc(0.35 + var(--z, 0) * 0.65);
 }
+
+/* Finestra "Collega": attività Garmin → seduta */
+.gm-links {
+  list-style: none;
+  margin: 12px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gm-links li {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    'chk src x'
+    '. dst dst';
+  align-items: center;
+  gap: 6px 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  opacity: 0.7;
+}
+.gm-links li.on {
+  opacity: 1;
+  border-color: var(--accent);
+}
+.gm-links input[type='checkbox'] {
+  grid-area: chk;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+}
+.gm-link-src {
+  grid-area: src;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  cursor: pointer;
+}
+.gm-link-src small {
+  color: var(--muted);
+}
+.gm-link-arrow {
+  display: none;
+  color: var(--muted);
+  font-size: 18px;
+}
+.gm-link-dst {
+  grid-area: dst;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-weight: 600;
+}
+.gm-link-dst::before {
+  content: '→';
+  color: var(--muted);
+  font-weight: 400;
+}
+.gm-link-dst select {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+.gm-link-x {
+  grid-area: x;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 16px;
+  padding: 6px;
+  cursor: pointer;
+}
+.gm-link-x:hover {
+  color: var(--miss);
+}
+@media (min-width: 640px) {
+  .gm-links li {
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    grid-template-areas: 'chk src arrow dst x';
+  }
+  .gm-link-arrow {
+    display: block;
+    grid-area: arrow;
+  }
+  .gm-link-dst::before {
+    content: none;
+  }
+}

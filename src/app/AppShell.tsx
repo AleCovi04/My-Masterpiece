@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { PageContainer } from '../components/layout'
-import GarminAutoSync from '../features/garmin/GarminAutoSync'
+import GarminLinks from '../features/garmin/GarminLinks'
 import LiveBanner from '../features/live/LiveBanner'
 import { readPreference, writePreference } from '../lib/preferences'
 import Header from './Header'
@@ -42,7 +42,7 @@ export default function AppShell() {
         </main>
       </div>
       <SideMenu open={menuOpen} onClose={closeMenu} />
-      <GarminAutoSync />
+      <GarminLinks />
     </div>
   )
 }

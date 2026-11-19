@@ -772,7 +772,7 @@ export const en: Dictionary = {
     fromGarmin: 'From Garmin',
     icuTitle: 'Garmin via intervals.icu',
     icuIntro:
-      'Link intervals.icu (free, receives activities from Garmin Connect) to bring the missing activities into the app with “Sync”.',
+      'Link intervals.icu (free, receives activities from Garmin Connect): when opened, the app offers to link activities to the sessions on the same day and sport.',
     icuAthlete: 'Athlete ID',
     icuKey: 'API key',
     icuWhere:
@@ -789,7 +789,21 @@ export const en: Dictionary = {
     icuNever: 'never',
     sync: 'Sync Garmin',
     syncing: 'Syncing Garmin…',
-    syncNone: 'No new activities.',
+    syncNone: 'No new activities in the last 30 days.',
+    linkTitle: 'Link Garmin activities',
+    linkIntro:
+      'Watch activities on the same day and sport as a planned session. Tick the ones to link.',
+    linkIntroManual:
+      'Activities from the last 30 days not yet in the app. Those without a planned session can become a new session.',
+    linkFromGarmin: 'Garmin',
+    linkTarget: 'Session to link it to',
+    linkDoneManual: 'done (manual data)',
+    linkIgnore: 'Never link',
+    linkIgnoreHint:
+      '✕ = stop suggesting it. Garmin data replaces manually entered data; RPE and notes are kept.',
+    linkLater: 'Later',
+    linkConfirm: 'Link ({n})',
+    linking: 'Linking…',
     syncNotLinked:
       'To sync, link intervals.icu in Data (or import the .fit files).',
     thTitle: 'Zone thresholds',

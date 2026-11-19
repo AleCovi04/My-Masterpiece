@@ -18,6 +18,7 @@ import { toIsoDate } from './dates'
 import { setSessionActual } from './enduranceActual'
 import { movingTime } from './fit/analysis'
 import type { FitActivity, FitLap, FitSession } from './fit/types'
+import { linkCandidates } from './garminLink'
 import { newId } from './ids'
 import { emptySession, insertSession } from './sessions'
 
@@ -133,14 +134,17 @@ export function importCandidates(
   act: FitActivity,
 ): Session[] {
   const date = activityDate(act)
+  if (!isMultisport(act))
+    return linkCandidates(sessions, date, act.sessions[0].discipline)
   return sessions
-    .filter((s) => {
-      if (s.date !== date || s.status === 'skipped') return false
-      if (s.discipline === 'strength') return false
-      if (s.actual?.source === 'garmin_fit') return false
-      if (isMultisport(act)) return s.discipline === 'brick' && sameLegs(s, act)
-      return s.discipline === act.sessions[0].discipline
-    })
+    .filter(
+      (s) =>
+        s.date === date &&
+        s.status !== 'skipped' &&
+        s.discipline === 'brick' &&
+        s.actual?.source !== 'garmin_fit' &&
+        sameLegs(s, act),
+    )
     .sort((a, b) => a.order - b.order)
 }
 

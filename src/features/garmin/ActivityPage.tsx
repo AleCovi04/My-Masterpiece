@@ -50,7 +50,7 @@ const isEndurance = (s: Session): s is Endurance => s.discipline !== 'strength'
 /** Pagina di un'attività importata da Garmin: mappa, metriche, grafici, parziali, zone. */
 export default function ActivityPage() {
   const { id } = useParams()
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const g = t.garmin
   const navigate = useNavigate()
   const revision = useDataRevision()
@@ -126,10 +126,13 @@ export default function ActivityPage() {
   const d = legs[legIndex].discipline
   const startedAt = a.garmin?.startedAt
   const time = startedAt
-    ? new Date(startedAt).toLocaleTimeString(undefined, {
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+    ? new Date(startedAt).toLocaleTimeString(
+        lang === 'it' ? 'it-IT' : 'en-GB',
+        {
+          hour: '2-digit',
+          minute: '2-digit',
+        },
+      )
     : ''
   const sub = fs?.subSport
     ? (g.subSport as Record<string, string>)[fs.subSport]

@@ -157,7 +157,8 @@ export function isImport(v: unknown): v is ImportRecord {
     (v.source === 'file' || v.source === 'intervals') &&
     typeof v.startedAt === 'string' &&
     (v.intervalsId === undefined || typeof v.intervalsId === 'string') &&
-    (v.sessionId === undefined || typeof v.sessionId === 'string')
+    (v.sessionId === undefined || typeof v.sessionId === 'string') &&
+    (v.ignored === undefined || v.ignored === true)
   )
 }
 

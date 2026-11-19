@@ -503,6 +503,13 @@ export interface ImportRecord extends Entity {
   startedAt: IsoDateTime
   /** Seduta in cui è finita (può non esistere più). */
   sessionId?: Id
+  /**
+   * Attività di intervals.icu da non collegare mai (✕ nella finestra
+   * "Collega"): `id` = `icu-<intervalsId>`, senza seduta. Campo facoltativo
+   * aggiunto senza cambiare versione (le versioni precedenti la vedono come
+   * già importata).
+   */
+  ignored?: true
 }
 
 // ---------- Insieme dei dati (salvataggio, export, backup) ----------
