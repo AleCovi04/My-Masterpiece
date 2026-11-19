@@ -104,6 +104,7 @@ I filtri a chip: un tocco accende o spegne, **tenendo premuto** isoli quel chip.
 - **Backup automatici** sul dispositivo: uno alla settimana e prima delle operazioni rischiose (import, ripristino, primo collegamento). Se ne tengono gli ultimi 8. **Dati** → elenco dei backup → **Ripristina**.
 - **Export**: **Dati** → **Esporta** scarica un file `.json` con tutti i dati. Fallo ogni tanto e salvalo fuori dal telefono (Drive, PC): è l'unica copia che non dipende da Supabase.
 - **Import**: **Dati** → **Importa** un file esportato (prima l'app salva un backup).
+- **Ricomincia da zero**: **Dati** → in fondo, riquadro rosso. Cancella tutto (sedute, attività e file Garmin, Forger, data gara, obiettivo, impostazioni) qui e, con l'account, sul server; gli altri dispositivi si svuotano da soli alla sincronizzazione. Restano account, intervals.icu e un backup. Conferma scrivendo **AZZERA**.
 
 ## 8. A cosa stare attento
 
@@ -165,7 +166,7 @@ Il repository è **pubblico**: niente chiavi segrete nel codice, nei commit o ne
 
 **Limiti del piano gratuito** (indicativi, controlla in **Organization → Usage** o nell'app in **Dati → Spazio sul server**): database 500 MB, Storage 1 GB. I file FIT sono la parte che cresce di più (vengono caricati compressi). Bastano per anni; cosa fare se si riempiono, a livelli e senza perdere dati: [docs/spazio-dati.md](spazio-dati.md).
 
-**Non fare:** cancellare righe da `items` a mano (per l'app sparirebbero senza traccia: meglio cancellare dall'app), disattivare la RLS, usare la chiave `service_role` nell'app.
+**Non fare:** cancellare righe da `items` o file dal bucket `fit` a mano (server e dispositivi si disallineano: per liberare spazio c'è **Libera spazio**, per ripartire **Ricomincia da zero**, per riallineare **Strumenti avanzati → Ricarica il server**; vedi [docs/spazio-dati.md](spazio-dati.md)), disattivare la RLS, usare la chiave `service_role` nell'app.
 
 ## 12. Vercel (il sito)
 
@@ -212,20 +213,22 @@ Se Garmin smette di arrivare: su intervals.icu controlla che la connessione con 
 
 ## 17. Se qualcosa si rompe
 
-| Sintomo                                          | Causa probabile                                                        | Cosa fare                                                                                |
-| ------------------------------------------------ | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| Icona "Sincronizzazione non riuscita"            | Progetto Supabase in pausa, o rete assente                             | Dashboard Supabase → **Restore project**; l'app intanto funziona offline                 |
-| "Aggiorna l'app per sincronizzare"               | APK più vecchio del sito                                               | Nuovo APK ([§14](#14-app-android-apk))                                                   |
-| "Sincronizzazione non configurata"               | Variabili mancanti su Vercel                                           | [§12](#12-vercel-il-sito): aggiungi le variabili e rifai il deploy                       |
-| L'email del login non arriva                     | Limite di Resend o di Supabase, spam, indirizzo diverso da Resend      | [§15](#15-resend-email-del-login); aspetta qualche minuto e riprova                      |
-| Il link del login apre l'app "non collegata"     | Link aperto in un altro browser                                        | Usa il **codice**, o apri il link nel browser da cui l'hai chiesto                       |
-| Le attività Garmin non compaiono                 | Chiave intervals.icu mancante su quel dispositivo, o Garmin scollegato | [§16](#16-intervalsicu-e-garmin)                                                         |
-| L'import delle attività non si sincronizza       | Bucket `fit` mancante                                                  | Riesegui `supabase/schema.sql` ([§11](#11-supabase))                                     |
-| Errore di permessi (`permission denied`) nei log | Schema non rieseguito dopo una modifica                                | Riesegui `supabase/schema.sql`                                                           |
-| Il workflow keep-alive è rosso                   | Segreti mancanti o progetto in pausa                                   | Controlla i segreti ([§13](#13-github)) e lo stato del progetto                          |
-| Notifica di recupero in ritardo                  | Risparmio energetico di Android                                        | Batteria → **Senza restrizioni**                                                         |
-| Dati spariti su un dispositivo                   | Dati del browser cancellati / altro browser                            | Accedi con l'account; senza account: **Dati** → ripristina un backup o importa un export |
-| Il sito nuovo è rotto                            | Ultimo deploy difettoso                                                | Vercel → deploy precedente → **Promote to Production**                                   |
+| Sintomo                                                                     | Causa probabile                                                        | Cosa fare                                                                                |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Icona "Sincronizzazione non riuscita"                                       | Progetto Supabase in pausa, o rete assente                             | Dashboard Supabase → **Restore project**; l'app intanto funziona offline                 |
+| "Aggiorna l'app per sincronizzare"                                          | APK più vecchio del sito                                               | Nuovo APK ([§14](#14-app-android-apk))                                                   |
+| "Sincronizzazione non configurata"                                          | Variabili mancanti su Vercel                                           | [§12](#12-vercel-il-sito): aggiungi le variabili e rifai il deploy                       |
+| L'email del login non arriva                                                | Limite di Resend o di Supabase, spam, indirizzo diverso da Resend      | [§15](#15-resend-email-del-login); aspetta qualche minuto e riprova                      |
+| Il link del login apre l'app "non collegata"                                | Link aperto in un altro browser                                        | Usa il **codice**, o apri il link nel browser da cui l'hai chiesto                       |
+| Le attività Garmin non compaiono                                            | Chiave intervals.icu mancante su quel dispositivo, o Garmin scollegato | [§16](#16-intervalsicu-e-garmin)                                                         |
+| L'import delle attività non si sincronizza                                  | Bucket `fit` mancante                                                  | Riesegui `supabase/schema.sql` ([§11](#11-supabase))                                     |
+| Errore di permessi (`permission denied`) nei log                            | Schema non rieseguito dopo una modifica                                | Riesegui `supabase/schema.sql`                                                           |
+| Il workflow keep-alive è rosso                                              | Segreti mancanti o progetto in pausa                                   | Controlla i segreti ([§13](#13-github)) e lo stato del progetto                          |
+| Notifica di recupero in ritardo                                             | Risparmio energetico di Android                                        | Batteria → **Senza restrizioni**                                                         |
+| Dati spariti su un dispositivo                                              | Dati del browser cancellati / altro browser                            | Accedi con l'account; senza account: **Dati** → ripristina un backup o importa un export |
+| Il sito nuovo è rotto                                                       | Ultimo deploy difettoso                                                | Vercel → deploy precedente → **Promote to Production**                                   |
+| "Manca il permesso" (Libera spazio, Ricomincia da zero, Ricarica il server) | Schema non rieseguito                                                  | Riesegui `supabase/schema.sql` ([§11](#11-supabase))                                     |
+| Server e dispositivi mostrano dati diversi                                  | Cancellazioni fatte a mano su Supabase                                 | Dal dispositivo giusto: **Dati → Strumenti avanzati → Ricarica il server**               |
 
 ## 18. Manutenzione: cosa fare e quando
 
@@ -263,14 +266,16 @@ Scegli un giorno fisso (es. il primo del mese) e segui l'ordine:
 
 ### Solo quando succede qualcosa
 
-| Quando                                                                                                          | Cosa fare                                                                                                           |
-| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Il riepilogo di una modifica dice che `supabase/schema.sql` è cambiato                                          | Rieseguilo: Supabase → **SQL Editor** → **New query** → incolla tutto il file → **Run** ([§11](#11-supabase))       |
-| Il riepilogo dice che è cambiata la versione dello schema dei dati, o l'app chiede "aggiorna per sincronizzare" | Nuovo APK sul telefono ([§14](#14-app-android-apk))                                                                 |
-| Arriva un'email di Supabase "project paused"                                                                    | Dashboard Supabase → progetto → **Restore project**; poi controlla l'anti-pausa (punto 2 del mese)                  |
-| Arriva un'email di GitHub su un workflow fallito o disattivato                                                  | Punto 2 del mese: riattivalo o guarda l'errore ([§13](#13-github))                                                  |
-| Cambi telefono o PC                                                                                             | Installa l'app, accedi con il **codice**, reinserisci la chiave di intervals.icu ([§16](#16-intervalsicu-e-garmin)) |
-| Qualcosa non funziona                                                                                           | Tabella [§17](#17-se-qualcosa-si-rompe)                                                                             |
+| Quando                                                                                                          | Cosa fare                                                                                                                      |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Il riepilogo di una modifica dice che `supabase/schema.sql` è cambiato                                          | Rieseguilo: Supabase → **SQL Editor** → **New query** → incolla tutto il file → **Run** ([§11](#11-supabase))                  |
+| Il riepilogo dice che è cambiata la versione dello schema dei dati, o l'app chiede "aggiorna per sincronizzare" | Nuovo APK sul telefono ([§14](#14-app-android-apk))                                                                            |
+| Arriva un'email di Supabase "project paused"                                                                    | Dashboard Supabase → progetto → **Restore project**; poi controlla l'anti-pausa (punto 2 del mese)                             |
+| Arriva un'email di GitHub su un workflow fallito o disattivato                                                  | Punto 2 del mese: riattivalo o guarda l'errore ([§13](#13-github))                                                             |
+| Cambi telefono o PC                                                                                             | Installa l'app, accedi con il **codice**, reinserisci la chiave di intervals.icu ([§16](#16-intervalsicu-e-garmin))            |
+| Lo Storage supera l'80 % (barra rossa in **Dati → Spazio sul server**)                                          | Dal PC: **Libera spazio** ([docs/spazio-dati.md](spazio-dati.md), livello 2)                                                   |
+| Vuoi ripartire da zero (es. inizio della preparazione)                                                          | Riesegui `supabase/schema.sql` se è cambiato → su un dispositivo **Dati → Ricomincia da zero** → gli altri si svuotano da soli |
+| Qualcosa non funziona                                                                                           | Tabella [§17](#17-se-qualcosa-si-rompe)                                                                                        |
 
 **Quando lo sviluppo si ferma** (dopo la versione 1): GitHub disattiva i workflow programmati se il repository resta **60 giorni senza commit**. Il controllo mensile (punto 2) lo intercetta; se vuoi evitarlo del tutto, fai un piccolo commit ogni mese o chiedi a Claude di farlo.
 

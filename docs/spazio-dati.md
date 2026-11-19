@@ -1,6 +1,6 @@
 # Spazio dei dati su Supabase
 
-Cosa fare se lo spazio sul server cresce. Oggi basta per anni: questo documento serve per non improvvisare quando (e se) succederà.
+Cosa fare se lo spazio sul server cresce, e come ripartire da zero. Oggi lo spazio basta per anni; gli strumenti sono già nell'app (**Dati**), questo documento dice quando usarli.
 
 ## Gli spazi e i limiti
 
@@ -13,67 +13,75 @@ Piano gratuito di Supabase, limiti **del progetto** (con più utenti si dividono
 
 Dove vederlo:
 
-- **Nell'app:** **Dati** → **Spazio sul server** (con l'account collegato). I dati sono una stima (il doppio del JSON di export); i file Garmin sono il valore vero del server.
+- **Nell'app:** **Dati** → **Spazio sul server** (con l'account collegato). I dati sono una stima (il doppio del JSON di export); i file Garmin sono il valore vero del server. Barre verdi sotto il 50 %, gialle fino all'80 %, rosse oltre.
 - **Su Supabase:** **Organization** → **Usage** (valori esatti di tutto il progetto). Il database parte già da qualche decina di MB occupati dalle tabelle interne di Supabase: è normale.
 
 ## Cosa non fare mai
 
-- **Cancellare righe dalla tabella `items`** dalla dashboard di Supabase: telefono e PC non se ne accorgono e non le rimandano; un dispositivo nuovo non le riceverà più. Server e dispositivi restano disallineati senza avvisi.
-- **Cancellare file dal bucket `fit`** a mano: la pagina Attività perde mappa e grafici e l'app non sa perché.
+- **Cancellare righe dalla tabella `items`** dalla dashboard di Supabase: telefono e PC non se ne accorgono e non le rimandano; un dispositivo nuovo non le riceverà più. Se è successo: [Recupero](#recupero).
+- **Cancellare file dal bucket `fit`** a mano: usa **Libera spazio** (livello 2), che prima ti fa scaricare lo .zip.
 - **Contare sul JSON di export per i file FIT:** l'export contiene tutti i dati ma **non** i FIT originali.
 
 Per avere una copia tua basta l'export mensile (**Dati** → **Esporta tutto (JSON)**), salvato fuori dal telefono.
 
 ## I livelli
 
-Si sale di livello solo quando serve. Ogni livello va realizzato nell'app **prima** di usarlo: chiedi a Claude di "realizzare il livello N di docs/spazio-dati.md".
+| Livello | Quando                | Cosa                                                   | Si perde qualcosa?                                | Stato                                                             |
+| ------- | --------------------- | ------------------------------------------------------ | ------------------------------------------------- | ----------------------------------------------------------------- |
+| 0       | Sempre                | Controllo mensile ed export; FIT caricati compressi    | No                                                | ✅ attivo                                                         |
+| 1       | —                     | Ricomprimere i FIT vecchi                              | No                                                | non serve: dopo la ripartenza del 2026 tutti i FIT sono compressi |
+| 2       | Storage oltre l'80 %  | **Libera spazio**: archivia i FIT più vecchi di N anni | Mappa e grafici di quelle attività (recuperabili) | ✅ in **Dati → Spazio sul server**                                |
+| 3a      | Sempre, da sola       | Pulizia delle voci cancellate da più di 90 giorni      | No                                                | ✅ automatica (una volta a settimana)                             |
+| 3b      | Database oltre l'80 % | Archiviare stagioni intere                             | Lo storico di quel periodo nelle analisi          | a mano, ultima risorsa                                            |
+| 4       | Nessun margine        | Più spazio: piano Pro o FIT altrove                    | No, ma un costo o un servizio in più              | —                                                                 |
 
-| Livello | Quando                | Cosa                                  | Si perde qualcosa?                                | Stato      |
-| ------- | --------------------- | ------------------------------------- | ------------------------------------------------- | ---------- |
-| 0       | Sempre                | Controllo mensile ed export           | No                                                | ✅ attivo  |
-| 1       | Storage oltre il 60 % | Ricomprimere i FIT vecchi             | No                                                | ⬜ da fare |
-| 2       | Storage oltre l'80 %  | Archiviare i FIT più vecchi di N anni | Mappa e grafici di quelle attività (recuperabili) | ⬜ da fare |
-| 3       | Database oltre l'80 % | Pulizia delle voci cancellate         | No (3a); storico nelle analisi (3b)               | ⬜ da fare |
-| 4       | Nessun margine        | Più spazio: piano Pro o FIT altrove   | No, ma un costo o un servizio in più              | —          |
+### Livello 0 – Controllo ed export
 
-### Livello 0 – Controllo ed export (attivo)
+Ogni mese (guida, §18): **Dati** → **Spazio sul server** ed export JSON. I FIT vengono caricati **compressi** (circa metà dello spazio, senza perdite) e sul dispositivo restano in chiaro.
 
-Ogni mese (guida, §18): **Dati** → **Spazio sul server** o Supabase → **Usage**, ed export JSON. Dal 19/11/2026 i nuovi FIT vengono caricati **compressi** (circa metà dello spazio, senza perdite).
+### Livello 2 – Libera spazio (archiviare i FIT più vecchi)
 
-### Livello 1 – Ricomprimere i FIT vecchi
+Da fare **dal PC** (nell'app sul telefono lo .zip non si può salvare):
 
-I FIT caricati prima del 19/11/2026 sono sul server non compressi. Un'azione in **Dati** li scarica uno alla volta, li comprime e li ricarica al loro posto.
+1. **Dati** → **Spazio sul server** → **Libera spazio**.
+2. Scegli l'età (1, 2 o 3 anni; predefinita 2): l'app dice quanti file ci sono.
+3. **Prepara l'archivio** → **Scarica l'archivio (.zip)**. Il file si chiama `my-masterpiece-fit-AAAA-MM-GG.zip` (la data limite); dentro, un file per attività (`data_sport_id.fit`). Salvalo su Drive o sul PC.
+4. **Ho salvato il file: libera spazio**: i file vengono tolti dal server e dalla cache; l'attività viene segnata come "archiviata" su tutti i dispositivi.
 
-- Nessuna perdita, nessun cambio per l'utente; si può interrompere e riprendere.
-- Guadagno atteso: circa metà dello spazio di quei file.
+Cosa resta: la seduta con riepilogo, giri, RPE e note; analisi e record non cambiano. Cosa si perde: mappa, grafici, zone e migliori prestazioni di quelle attività; la pagina Attività mostra "File archiviato". **Per riaverli:** apri la seduta → **Importa .FIT** → scegli il file dallo .zip: torna sul dispositivo e sul server, senza doppioni.
 
-### Livello 2 – Archiviare i FIT più vecchi
+### Livello 3a – Pulizia automatica del database
 
-1. **Dati** → **Libera spazio** → scegli l'età (predefinita: più vecchi di 2 anni).
-2. Anteprima: quanti file e quanti MB si liberano.
-3. **Scarica l'archivio**: uno `.zip` con quei FIT, da salvare sul PC o su Drive. Senza questo passaggio non si va avanti.
-4. **Conferma**: i file vengono tolti dal server e dalla cache del dispositivo.
+Quando cancelli qualcosa, sul server resta una riga vuota: serve agli altri dispositivi per sapere che va cancellata. Dopo una sincronizzazione riuscita, al massimo una volta a settimana, l'app chiede a Supabase di togliere quelle più vecchie di 90 giorni (funzione `purge_deleted_items` in `supabase/schema.sql`).
 
-Cosa resta: la seduta con riepilogo, giri, RPE e note; analisi e record non cambiano. Cosa si perde: mappa, grafici, zone e migliori prestazioni di quelle attività; la pagina Attività mostra "File archiviato". Per riaverli: **Importa .FIT** sulla stessa seduta con il file preso dallo `.zip` (l'app la riconosce, nessun doppione).
+Limite: un dispositivo rimasto spento o offline per più di 90 giorni non riceve quelle cancellazioni (tiene la sua copia, ma non la rimanda al server finché non la modifica).
 
-Da preparare quando lo si realizza: permesso di cancellazione sul bucket `fit` in `supabase/schema.sql` (oggi ci sono solo lettura, caricamento e sostituzione) da rieseguire su Supabase; segno "archiviato" sull'attività importata, compatibile con le versioni precedenti.
+### Livello 3b – Archiviare stagioni intere (ultima risorsa)
 
-### Livello 3 – Database
-
-Molto improbabile prima di decine di anni con un solo utente.
-
-- **3a – Pulizia delle voci cancellate.** Quando cancelli qualcosa, sul server resta una riga vuota (serve agli altri dispositivi per saperlo). Una funzione SQL elimina quelle più vecchie di 90 giorni. Nessuna perdita.
-- **3b – Archiviare stagioni intere** (ultima risorsa): export JSON delle sedute fino a una data, poi rimozione dall'app. L'Analisi non vede più quel periodo; il JSON si può reimportare in un'altra installazione per consultarlo.
+Molto improbabile prima di decine di anni con un solo utente. Export JSON completo, poi si cancellano dall'app le sedute fino a una data. L'Analisi non vede più quel periodo; il JSON si può reimportare in un'altra installazione per consultarlo. Non c'è un pulsante: chiedi a Claude di farlo con te.
 
 ### Livello 4 – Più spazio
 
 - **Supabase Pro**, circa 25 $/mese: 8 GB di database e 100 GB di Storage. Nessuna modifica all'app.
 - **FIT su un altro servizio** gratuito (es. Cloudflare R2, 10 GB): nessun costo, ma un servizio e una chiave in più da gestire, e una modifica all'app.
 
+## Ricominciare da zero
+
+**Dati** → **Ricomincia da zero** (in fondo, riquadro rosso): cancella **tutto** e riporta l'app come appena installata (con gli esercizi di base).
+
+- **Si cancellano:** sedute, attività Garmin e file FIT, esercizi, allenamenti, blocchi, fasi, data gara, obiettivo, impostazioni.
+- **Restano:** accesso all'account, collegamento a intervals.icu, preferenze del dispositivo, backup (prima del reset ne viene salvato uno: "Prima di Ricomincia da zero").
+- **Con l'account:** serve la connessione. Le cancellazioni vanno subito al server e i FIT vengono tolti dallo Storage; gli **altri dispositivi si svuotano da soli** alla prossima sincronizzazione (anche la loro cache dei FIT).
+- Conferma scrivendo **AZZERA**. Non si annulla, salvo ripristinare il backup su quel dispositivo.
+
+## Recupero
+
+Se server e dispositivi non coincidono (per esempio dopo cancellazioni fatte a mano su Supabase): sul dispositivo con i dati giusti **Dati** → **Strumenti avanzati** → **Ricarica il server**. Svuota le tue righe sul server e ricarica tutto da quel dispositivo, file Garmin compresi; gli altri dispositivi lo ricevono alla sincronizzazione.
+
 ## Con più utenti
 
-I limiti sono del progetto. Indicativamente, con 10 utenti attivi lo Storage arriva al livello 2 in 1–2 anni e il database resta lontano dal limite. Prima di aprire l'app ad altri conviene decidere tra livello 2 periodico e livello 4.
+I limiti sono del progetto. Indicativamente, con 10 utenti attivi lo Storage arriva al livello 2 in 2–3 anni e il database resta lontano dal limite. Prima di aprire l'app ad altri conviene decidere tra livello 2 periodico e livello 4.
 
-## Strumento di recupero (se server e dispositivi si disallineano)
+## Permessi su Supabase
 
-Se un giorno qualcuno cancellasse dati dal server a mano: "Ricarica il server da questo dispositivo" svuoterebbe le proprie righe sul server e rimetterebbe in coda tutti i dati del dispositivo scelto (prima con un backup). Non è realizzato: va fatto solo se serve.
+Tutto questo richiede `supabase/schema.sql` aggiornato (cancellazione sulle proprie righe di `items`, cancellazione dei propri file nel bucket `fit`, funzione `purge_deleted_items`). Se un'operazione dice "manca il permesso", riesegui lo schema: Supabase → **SQL Editor** → **New query** → incolla tutto il file → **Run**.

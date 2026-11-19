@@ -264,6 +264,10 @@ I filtri a chip: un tocco accende o spegne, \bt{tenendo premuto} isoli quel chip
     Fallo ogni tanto e salvalo fuori dal telefono (Drive, PC): è l'unica copia che non dipende
     da Supabase.
   \item \bt{Import}: \bt{Dati} \ra \bt{Importa} un file esportato (prima l'app salva un backup).
+  \item \bt{Ricomincia da zero}: \bt{Dati} \ra in fondo, riquadro rosso. Cancella tutto (sedute,
+    attività e file Garmin, Forger, data gara, obiettivo, impostazioni) qui e, con l'account, sul
+    server; gli altri dispositivi si svuotano da soli alla sincronizzazione. Restano account,
+    intervals.icu e un backup. Conferma scrivendo \bt{AZZERA}.
 \end{itemize}
 
 \section{A cosa stare attento}\label{sec:attento}
@@ -373,8 +377,10 @@ parte che cresce di più (vengono caricati compressi). Bastano per anni; cosa fa
 a livelli e senza perdere dati: \code{docs/spazio-dati.md}.
 
 \begin{attenzione}[Non fare]
-Cancellare righe da \code{items} a mano (per l'app sparirebbero senza traccia: meglio cancellare
-dall'app), disattivare la RLS, usare la chiave \code{service\_role} nell'app.
+Cancellare righe da \code{items} o file dal bucket \code{fit} a mano (server e dispositivi si
+disallineano: per liberare spazio c'è \bt{Libera spazio}, per ripartire \bt{Ricomincia da zero},
+per riallineare \bt{Strumenti avanzati \ra Ricarica il server}; vedi \code{docs/spazio-dati.md}),
+disattivare la RLS, usare la chiave \code{service\_role} nell'app.
 \end{attenzione}
 
 \section{Vercel (il sito)}\label{sec:vercel}
@@ -486,6 +492,10 @@ attiva; se hai rigenerato la chiave API, reinseriscila su ogni dispositivo.
     Accedi con l'account; senza account: \bt{Dati} \ra ripristina un backup o importa un export \\
   Il sito nuovo è rotto & Ultimo deploy difettoso &
     Vercel \ra deploy precedente \ra \bt{Promote to Production} \\
+  ``Manca il permesso'' (Libera spazio, Ricomincia da zero, Ricarica il server) &
+    Schema non rieseguito & Riesegui \code{supabase/schema.sql} (\sezione{sec:supabase}) \\
+  Server e dispositivi mostrano dati diversi & Cancellazioni fatte a mano su Supabase &
+    Dal dispositivo giusto: \bt{Dati \ra Strumenti avanzati \ra Ricarica il server} \\
 \bottomrule
 \end{tabularx}
 }
@@ -565,6 +575,11 @@ Scegli un giorno fisso (es.\ il primo del mese) e segui l'ordine.
     Punto 2 del mese: riattivalo o guarda l'errore (\sezione{sec:github}) \\
   Cambi telefono o PC & Installa l'app, accedi con il \bt{codice}, reinserisci la chiave di
     intervals.icu (\sezione{sec:intervals}) \\
+  Lo Storage supera l'80\,\% (barra rossa in \bt{Dati \ra Spazio sul server}) &
+    Dal PC: \bt{Libera spazio} (\code{docs/spazio-dati.md}, livello 2) \\
+  Vuoi ripartire da zero (es.\ inizio della preparazione) & Riesegui \code{supabase/schema.sql}
+    se è cambiato \ra su un dispositivo \bt{Dati \ra Ricomincia da zero} \ra gli altri si
+    svuotano da soli \\
   Qualcosa non funziona & Tabella in \sezione{sec:rotto} \\
 \bottomrule
 \end{tabularx}
