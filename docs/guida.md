@@ -24,7 +24,7 @@ Due parti: **Usare l'app** (per chi si allena) e **Amministrare** (per chi gesti
 15. [Resend (email del login)](#15-resend-email-del-login)
 16. [intervals.icu e Garmin](#16-intervalsicu-e-garmin)
 17. [Se qualcosa si rompe](#17-se-qualcosa-si-rompe)
-18. [Controlli periodici](#18-controlli-periodici)
+18. [Manutenzione: cosa fare e quando](#18-manutenzione-cosa-fare-e-quando)
 19. [Partire da zero (nuovo progetto)](#19-partire-da-zero-nuovo-progetto)
 
 ---
@@ -118,6 +118,8 @@ I filtri a chip: un tocco accende o spegne, **tenendo premuto** isoli quel chip.
 ---
 
 # Parte 2 – Amministrare
+
+> **Se leggi solo una cosa:** la manutenzione è un controllo da 10 minuti al mese, più poche azioni quando succede qualcosa. È tutto in [§18 Manutenzione](#18-manutenzione-cosa-fare-e-quando). Le altre sezioni servono come riferimento.
 
 ## 9. Mappa dei servizi
 
@@ -225,19 +227,52 @@ Se Garmin smette di arrivare: su intervals.icu controlla che la connessione con 
 | Dati spariti su un dispositivo                   | Dati del browser cancellati / altro browser                            | Accedi con l'account; senza account: **Dati** → ripristina un backup o importa un export |
 | Il sito nuovo è rotto                            | Ultimo deploy difettoso                                                | Vercel → deploy precedente → **Promote to Production**                                   |
 
-## 18. Controlli periodici
+## 18. Manutenzione: cosa fare e quando
 
-**Ogni mese (5 minuti):**
+In breve: **10 minuti al mese**, più qualche azione solo quando succede qualcosa. Il resto va da solo.
 
-- [ ] GitHub → Actions → **Supabase keep-alive** verde.
-- [ ] Supabase → **Organization → Usage**: database e Storage lontani dai limiti.
-- [ ] Nell'app: **Dati** → **Esporta** e salva il file fuori dal telefono.
-- [ ] L'icona di sincronizzazione è verde su telefono e PC.
+### Cosa va da solo (non devi fare niente)
 
-**Ogni tanto:**
+| Cosa                                          | Chi lo fa        | Ogni quanto                        |
+| --------------------------------------------- | ---------------- | ---------------------------------- |
+| Tenere sveglio Supabase (evita la pausa)      | GitHub Actions   | Ogni 3 giorni                      |
+| Pubblicare il sito dopo una modifica          | Vercel           | A ogni push su `main`              |
+| Backup dei dati sul dispositivo               | L'app            | Ogni 7 giorni (tiene gli ultimi 8) |
+| Sincronizzare telefono e PC                   | L'app + Supabase | A ogni modifica                    |
+| Portare le attività da Garmin a intervals.icu | intervals.icu    | A ogni allenamento                 |
 
-- [ ] Copia di sicurezza della chiave di firma Android ancora presente.
-- [ ] APK sul telefono aggiornato all'ultima release.
+### Ogni mese: il controllo da 10 minuti
+
+Scegli un giorno fisso (es. il primo del mese) e segui l'ordine:
+
+| #   | Cosa                                 | Come                                                                                                                                                                                                             | Se lo salti                                                                             |
+| --- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| 1   | **Export dei dati**                  | Nell'app: **Dati** → **Esporta tutto (JSON)** → salva il file su Drive o sul PC                                                                                                                                  | Se Supabase e il telefono si perdessero insieme, non avresti una copia                  |
+| 2   | **Anti-pausa attivo e verde**        | GitHub → [Actions → Supabase keep-alive](https://github.com/AleCovi04/My-Masterpiece/actions/workflows/supabase-keepalive.yml): le ultime esecuzioni sono verdi. Se c'è il pulsante **Enable workflow**, premilo | Supabase va in pausa dopo 7 giorni: la sincronizzazione si ferma finché non lo riattivi |
+| 3   | **Spazio su Supabase**               | Supabase → **Organization** → **Usage**: Database sotto 500 MB e Storage sotto 1 GB (bene se sotto metà)                                                                                                         | Superati i limiti, i nuovi dati e i file FIT non si salvano più sul server              |
+| 4   | **Sincronizzazione sui dispositivi** | Apri l'app sul telefono e sul PC: l'icona in alto è verde e vedi gli stessi allenamenti                                                                                                                          | Un dispositivo potrebbe lavorare da solo senza che te ne accorga                        |
+| 5   | **Garmin arriva ancora**             | L'ultima attività dell'orologio compare nell'app (finestra **Collega** o **Calendario → Sincronizza Garmin**)                                                                                                    | Garmin a volte scollega intervals.icu: le attività smettono di arrivare in silenzio     |
+
+### Ogni 6 mesi
+
+| Cosa                                    | Come                                                                                                                                                                                       |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Copia della chiave di firma Android** | Controlla che la cartella `Documenti\MyMasterpiece-chiave-android\` esista ancora **e** che ci sia una copia altrove (Drive). Senza, niente aggiornamenti dell'APK sopra quello installato |
+| **APK aggiornato**                      | Confronta la versione sul telefono con l'ultima [Release](https://github.com/AleCovi04/My-Masterpiece/releases/latest); se è più vecchia, installa la nuova ([§14](#14-app-android-apk))   |
+| **Prova di ripristino** (facoltativa)   | Su un browser dove non usi l'app: **Dati** → **Importa** l'ultimo export e controlla che i dati ci siano. Così sai che il backup funziona davvero                                          |
+
+### Solo quando succede qualcosa
+
+| Quando                                                                                                          | Cosa fare                                                                                                           |
+| --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Il riepilogo di una modifica dice che `supabase/schema.sql` è cambiato                                          | Rieseguilo: Supabase → **SQL Editor** → **New query** → incolla tutto il file → **Run** ([§11](#11-supabase))       |
+| Il riepilogo dice che è cambiata la versione dello schema dei dati, o l'app chiede "aggiorna per sincronizzare" | Nuovo APK sul telefono ([§14](#14-app-android-apk))                                                                 |
+| Arriva un'email di Supabase "project paused"                                                                    | Dashboard Supabase → progetto → **Restore project**; poi controlla l'anti-pausa (punto 2 del mese)                  |
+| Arriva un'email di GitHub su un workflow fallito o disattivato                                                  | Punto 2 del mese: riattivalo o guarda l'errore ([§13](#13-github))                                                  |
+| Cambi telefono o PC                                                                                             | Installa l'app, accedi con il **codice**, reinserisci la chiave di intervals.icu ([§16](#16-intervalsicu-e-garmin)) |
+| Qualcosa non funziona                                                                                           | Tabella [§17](#17-se-qualcosa-si-rompe)                                                                             |
+
+**Quando lo sviluppo si ferma** (dopo la versione 1): GitHub disattiva i workflow programmati se il repository resta **60 giorni senza commit**. Il controllo mensile (punto 2) lo intercetta; se vuoi evitarlo del tutto, fai un piccolo commit ogni mese o chiedi a Claude di farlo.
 
 ## 19. Partire da zero (nuovo progetto)
 
