@@ -19,6 +19,8 @@ import { useI18n } from '../../i18n/context'
 import Modal from '../../components/ui/Modal'
 import GarminCards from '../garmin/GarminCards'
 import AccountCard from './AccountCard'
+import AdvancedTools from './AdvancedTools'
+import ResetCard from './ResetCard'
 import SpaceCard from './SpaceCard'
 import './data.css'
 
@@ -267,6 +269,9 @@ export default function DataPage() {
           </ul>
         )}
       </section>
+
+      <ResetCard />
+      <AdvancedTools />
 
       <p className="dt-foot">
         {d.schemaVersion}: {SCHEMA_VERSION}

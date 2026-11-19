@@ -21,6 +21,7 @@ export default function GarminSyncButton() {
       s.imported && g.resImported.replace('{n}', String(s.imported)),
       s.created && g.resCreated.replace('{n}', String(s.created)),
       s.duplicate && g.resDuplicate.replace('{n}', String(s.duplicate)),
+      s.restored && g.resRestored.replace('{n}', String(s.restored)),
       s.invalid && g.resInvalid.replace('{n}', String(s.invalid)),
     ].filter(Boolean)
     text = parts.length ? parts.join(' ') : null

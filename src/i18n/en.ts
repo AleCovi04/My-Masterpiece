@@ -717,9 +717,71 @@ export const en: Dictionary = {
     filesNote: '{n} original FIT files (compressed). Free plan limit: 1 GB.',
     filesUnavailable:
       'Garmin file storage unavailable (a connection is needed).',
+    freeUp: 'Free up space',
     ok: 'All good: the space will last for years.',
     warn: 'Over half of the space used: keep an eye on it (guide, Maintenance and docs/spazio-dati.md).',
     high: 'Space almost full: follow the procedure in docs/spazio-dati.md before reaching the limit.',
+  },
+  archive: {
+    title: 'Free up space',
+    intro:
+      'Removes the oldest Garmin files from the server after downloading them into a .zip. Sessions keep their summary and laps; for those activities the map and charts are lost, and come back if you import the file again.',
+    useComputer:
+      'Do this from a computer (browser): the app on the phone cannot save the .zip.',
+    olderThan: 'Files older than',
+    years: '{n} years',
+    none: 'No files to archive.',
+    count: 'Files to archive: {n}.',
+    prepare: 'Prepare the archive',
+    preparing: 'Preparing: {done} of {total}…',
+    ready: 'Archive ready: {n} files, {size}.',
+    missing:
+      '{n} files not found (neither on the device nor on the server): left as they are.',
+    download: 'Download the archive (.zip)',
+    checkSaved:
+      'Check that the .zip was downloaded and save it to Drive or your computer. Then free up the space.',
+    free: 'I saved the file: free up space ({n} files)',
+    working: 'Removing the files from the server…',
+    done: 'Done: {n} files archived.',
+    nothingDownloaded:
+      'No files available to archive (a connection is needed).',
+    failed: 'Failed.',
+  },
+  reset: {
+    title: 'Start from scratch',
+    introAccount:
+      'Deletes all data on this device and on the server; other linked devices are emptied when they sync.',
+    introLocal: 'Deletes all data on this device.',
+    deleted:
+      'Deleted: sessions, Garmin activities and FIT files, exercises, workouts, blocks, phases, race date, goal and settings.',
+    kept: 'Kept: account sign-in, intervals.icu link, device preferences and backups (a backup is saved first).',
+    offline: 'A connection is needed to delete on the server too.',
+    button: 'Start from scratch',
+    confirmText:
+      'This cannot be undone (only the backup on this device remains). If you want a copy, use Export all (JSON) first.',
+    word: 'RESET',
+    typeWord: 'To confirm, type {word}',
+    confirmButton: 'Delete everything',
+    cancel: 'Cancel',
+    working: 'Deleting…',
+    doneAccount:
+      'Done: data deleted here and on the server. Other devices will follow at their next sync.',
+    doneLocal: 'Done: data deleted on this device.',
+    serverFailed:
+      'Device data deleted, but the server step failed ({error}). Try again with a connection; if it keeps failing, re-run supabase/schema.sql.',
+  },
+  advanced: {
+    title: 'Advanced tools',
+    rebuildTitle: 'Reload the server from this device',
+    rebuildText:
+      'Only if the server and devices do not match (for example after manual deletions on Supabase): empties your data on the server and uploads it again from this device, Garmin files included.',
+    rebuildConfirm:
+      'Your data on the server will be replaced with this device’s data. Other devices will receive it when they sync.',
+    rebuildButton: 'Reload the server',
+    working: 'Reloading…',
+    done: 'Done: the server now has this device’s data.',
+    failed:
+      'Failed ({error}). Check the connection; if it keeps failing, re-run supabase/schema.sql.',
   },
   sync: {
     title: 'Account and sync',
@@ -778,6 +840,7 @@ export const en: Dictionary = {
     resImported: 'Activities imported: {n}.',
     resCreated: 'Unplanned sessions created: {n}.',
     resDuplicate: 'Already imported (skipped): {n}.',
+    resRestored: 'Archived files restored: {n}.',
     resMismatch:
       'The activity is a different sport (or has different legs) from this session: not imported.',
     resIgnored: 'Not run, bike or swim (ignored): {n}.',
@@ -839,6 +902,8 @@ export const en: Dictionary = {
     activity: 'Activity',
     back: 'Back',
     loading: 'Loading the activity…',
+    archivedFile:
+      'File archived to free up space: summary and laps are kept. To see the map and charts again, import the .FIT from the archive .zip (Import .FIT in the session).',
     noFile:
       'The activity file is not on this device: sign in and go online to download it.',
     readError: 'The activity file cannot be read.',

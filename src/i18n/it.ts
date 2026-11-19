@@ -723,9 +723,71 @@ export const it = {
       '{n} file FIT originali (compressi). Limite del piano gratuito: 1 GB.',
     filesUnavailable:
       'Spazio dei file Garmin non disponibile (serve la connessione).',
+    freeUp: 'Libera spazio',
     ok: 'Tutto a posto: lo spazio basta per anni.',
     warn: 'Oltre metà dello spazio: tienilo d’occhio (guida, Manutenzione e docs/spazio-dati.md).',
     high: 'Spazio quasi pieno: segui la procedura in docs/spazio-dati.md prima di superare il limite.',
+  },
+  archive: {
+    title: 'Libera spazio',
+    intro:
+      'Toglie dal server i file Garmin più vecchi, dopo averli scaricati in uno .zip. Le sedute restano con riepilogo e giri; di quelle attività si perdono mappa e grafici, che tornano se reimporti il file.',
+    useComputer:
+      'Questa operazione si fa dal PC (browser): nell’app sul telefono lo .zip non si può salvare.',
+    olderThan: 'File più vecchi di',
+    years: '{n} anni',
+    none: 'Nessun file da archiviare.',
+    count: 'File da archiviare: {n}.',
+    prepare: 'Prepara l’archivio',
+    preparing: 'Preparazione: {done} di {total}…',
+    ready: 'Archivio pronto: {n} file, {size}.',
+    missing:
+      '{n} file non trovati (né sul dispositivo né sul server): restano come sono.',
+    download: 'Scarica l’archivio (.zip)',
+    checkSaved:
+      'Controlla che lo .zip sia stato scaricato e salvalo su Drive o sul PC. Poi libera lo spazio.',
+    free: 'Ho salvato il file: libera spazio ({n} file)',
+    working: 'Rimozione dei file dal server…',
+    done: 'Fatto: {n} file archiviati.',
+    nothingDownloaded:
+      'Nessun file disponibile da archiviare (serve la connessione).',
+    failed: 'Non riuscito.',
+  },
+  reset: {
+    title: 'Ricomincia da zero',
+    introAccount:
+      'Cancella tutti i dati su questo dispositivo e sul server; gli altri dispositivi collegati si svuotano alla sincronizzazione.',
+    introLocal: 'Cancella tutti i dati su questo dispositivo.',
+    deleted:
+      'Si cancellano: sedute, attività Garmin e file FIT, esercizi, allenamenti, blocchi, fasi, data gara, obiettivo e impostazioni.',
+    kept: 'Restano: accesso all’account, collegamento a intervals.icu, preferenze del dispositivo e backup (prima viene salvato un backup).',
+    offline: 'Serve la connessione per cancellare anche sul server.',
+    button: 'Ricomincia da zero',
+    confirmText:
+      'Non si può annullare (resta solo il backup su questo dispositivo). Se vuoi una copia, prima fai Esporta tutto (JSON).',
+    word: 'AZZERA',
+    typeWord: 'Per confermare scrivi {word}',
+    confirmButton: 'Cancella tutto',
+    cancel: 'Annulla',
+    working: 'Cancellazione in corso…',
+    doneAccount:
+      'Fatto: dati cancellati qui e sul server. Gli altri dispositivi si allineano alla prossima sincronizzazione.',
+    doneLocal: 'Fatto: dati cancellati su questo dispositivo.',
+    serverFailed:
+      'Dati del dispositivo cancellati, ma sul server non è riuscito ({error}). Riprova con la connessione; se continua, riesegui supabase/schema.sql.',
+  },
+  advanced: {
+    title: 'Strumenti avanzati',
+    rebuildTitle: 'Ricarica il server da questo dispositivo',
+    rebuildText:
+      'Da usare solo se server e dispositivi non coincidono (per esempio dopo cancellazioni fatte a mano su Supabase): svuota i tuoi dati sul server e li ricarica da questo dispositivo, file Garmin compresi.',
+    rebuildConfirm:
+      'I tuoi dati sul server verranno sostituiti con quelli di questo dispositivo. Gli altri dispositivi li riceveranno alla sincronizzazione.',
+    rebuildButton: 'Ricarica il server',
+    working: 'Ricaricamento in corso…',
+    done: 'Fatto: il server ora ha i dati di questo dispositivo.',
+    failed:
+      'Non riuscito ({error}). Controlla la connessione; se continua, riesegui supabase/schema.sql.',
   },
   sync: {
     title: 'Account e sincronizzazione',
@@ -785,6 +847,7 @@ export const it = {
     resImported: 'Attività importate: {n}.',
     resCreated: 'Sedute non pianificate create: {n}.',
     resDuplicate: 'Già importate (saltate): {n}.',
+    resRestored: 'File archiviati ripristinati: {n}.',
     resMismatch:
       'L’attività è di un altro sport (o con altre frazioni) rispetto a questa seduta: non importata.',
     resIgnored: 'Non di corsa, bici o nuoto (ignorate): {n}.',
@@ -846,6 +909,8 @@ export const it = {
     activity: 'Attività',
     back: 'Indietro',
     loading: 'Caricamento dell’attività…',
+    archivedFile:
+      'File archiviato per liberare spazio: riepilogo e giri restano. Per rivedere mappa e grafici, importa di nuovo il .FIT dallo .zip dell’archivio (Importa .FIT nella seduta).',
     noFile:
       'Il file dell’attività non è su questo dispositivo: accedi all’account e collegati a internet per scaricarlo.',
     readError: 'Il file dell’attività non si legge.',

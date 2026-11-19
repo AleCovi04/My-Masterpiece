@@ -24,6 +24,8 @@ type Fit =
   | { status: 'loading' }
   | { status: 'ok'; act: FitActivity }
   | { status: 'missing' }
+  /** Tolto dal server per liberare spazio (docs/spazio-dati.md). */
+  | { status: 'archived' }
   | { status: 'error' }
 
 type Endurance = EnduranceSession | BrickSession
@@ -65,7 +67,14 @@ export default function ActivityPage() {
     account
       .getFitFile(activityId)
       .then(async (bytes) => {
-        if (!bytes) return { status: 'missing' } as const
+        if (!bytes) {
+          const rec = (await dataStore.loadImports()).find(
+            (r) => r.id === activityId,
+          )
+          return rec?.archived
+            ? ({ status: 'archived' } as const)
+            : ({ status: 'missing' } as const)
+        }
         const act = await readFit(bytes)
         return act
           ? ({ status: 'ok', act } as const)
@@ -155,6 +164,7 @@ export default function ActivityPage() {
 
       {fit.status === 'loading' && <p className="gm-hint">{g.loading}</p>}
       {fit.status === 'missing' && <p className="gm-note">{g.noFile}</p>}
+      {fit.status === 'archived' && <p className="gm-note">{g.archivedFile}</p>}
       {fit.status === 'error' && <p className="gm-note">{g.readError}</p>}
 
       {act && fs ? (

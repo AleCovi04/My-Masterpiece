@@ -123,6 +123,9 @@ export function useGarminImport(onDone?: (results: ImportResult[]) => void) {
             {s.duplicate > 0 && (
               <li>{g.resDuplicate.replace('{n}', String(s.duplicate))}</li>
             )}
+            {s.restored > 0 && (
+              <li>{g.resRestored.replace('{n}', String(s.restored))}</li>
+            )}
             {s.mismatch > 0 && <li>{g.resMismatch}</li>}
             {s.ignored > 0 && (
               <li>{g.resIgnored.replace('{n}', String(s.ignored))}</li>

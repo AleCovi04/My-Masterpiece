@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { account, dataStore, useAccount, useDataRevision } from '../../data'
 import { useI18n } from '../../i18n/context'
+import ArchiveDialog from './ArchiveDialog'
 import {
   estimateDbBytes,
   formatBytes,
@@ -24,6 +25,7 @@ export default function SpaceCard() {
   const { email } = useAccount()
   const revision = useDataRevision()
   const [usage, setUsage] = useState<Usage | null>(null)
+  const [archiving, setArchiving] = useState(false)
 
   useEffect(() => {
     if (!email) return
@@ -84,6 +86,18 @@ export default function SpaceCard() {
         <p className="dt-meta">{s.filesUnavailable}</p>
       )}
       <p className="dt-meta">{advice}</p>
+      {usage.fit && usage.fit.count > 0 && (
+        <div className="dt-actions">
+          <button
+            type="button"
+            className="pl-btn"
+            onClick={() => setArchiving(true)}
+          >
+            {s.freeUp}
+          </button>
+        </div>
+      )}
+      {archiving && <ArchiveDialog onClose={() => setArchiving(false)} />}
     </section>
   )
 }

@@ -13,6 +13,8 @@ export type ImportResult =
   | { status: 'imported'; date: IsoDate; sessionId: Id; created: boolean }
   /** Già importata (anche se la seduta è stata cancellata). */
   | { status: 'duplicate'; date: IsoDate }
+  /** Già importata ma archiviata: il FIT torna sul dispositivo e sul server. */
+  | { status: 'restored'; date: IsoDate }
   /** Non è corsa, bici o nuoto. */
   | { status: 'ignored' }
   /** Non è un file FIT leggibile. */
@@ -79,7 +81,22 @@ export async function importFit(
     dataStore.loadSessions(),
     dataStore.loadImports(),
   ])
-  if (imports.some((r) => r.id === act.key)) {
+  const existing = imports.find((r) => r.id === act.key)
+  if (existing?.archived) {
+    // file archiviato (docs/spazio-dati.md, livello 2): torna, la seduta non cambia
+    await dataStore.putFitFile(act.key, bytes)
+    await dataStore.saveImports(
+      imports.map((r) => {
+        if (r.id !== act.key) return r
+        const back: ImportRecord = { ...r, updatedAt: nowIso() }
+        delete back.archived
+        return back
+      }),
+    )
+    void account.uploadFitFiles()
+    return { status: 'restored', date }
+  }
+  if (existing) {
     // stessa attività arrivata da intervals.icu: si ricorda anche il suo id
     if (options.intervalsId) {
       const next = imports.map((r) =>
@@ -145,7 +162,8 @@ export async function importFiles(
     if (fits.length === 0) results.push({ status: 'invalid' })
     for (const bytes of fits) results.push(await importFit(bytes, options))
   }
-  if (results.some((r) => r.status === 'imported')) refreshData()
+  if (results.some((r) => r.status === 'imported' || r.status === 'restored'))
+    refreshData()
   return results
 }
 
@@ -157,6 +175,7 @@ export function summarize(results: ImportResult[]) {
     imported: count('imported'),
     created: results.filter((r) => r.status === 'imported' && r.created).length,
     duplicate: count('duplicate'),
+    restored: count('restored'),
     ignored: count('ignored'),
     invalid: count('invalid'),
     mismatch: count('mismatch'),
