@@ -10,7 +10,7 @@ React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 ## Struttura
 
-- `docs/` roadmap, decisioni, modello dati, `guida.md` (uso dell'app e amministrazione dei servizi; da aggiornare quando cambia un flusso o un servizio), `archivio/`
+- `docs/` roadmap, decisioni, modello dati, `guida.md` e `guida.tex` (stessa guida: uso dell'app e amministrazione dei servizi; aggiornarle insieme quando cambia un flusso o un servizio; `guida.tex` si compila con pdflatex, non latexmk: sul PC manca Perl), `archivio/`
 - `src/app/` entry e cornice dell'app
 - `src/features/` moduli per funzionalità (il Forger è in `forger/`, Il Piano in `plan/`); una feature può usare i componenti di un'altra
 - `src/components/` UI riutilizzabile (`ui/` con `Modal`, `layout/`, `body/`)

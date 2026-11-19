@@ -1,0 +1,594 @@
+% !TEX program = pdflatex
+% Guida di My Masterpiece — versione impaginata della guida (stesso contenuto di guida.md).
+% Compilare con pdflatex (LaTeX Workshop: "Build LaTeX project"); la prima volta due
+% compilazioni, perché l'indice e i rimandi si completano al secondo passaggio.
+\documentclass[11pt,a4paper]{article}
+
+
+% ---------- lingua e caratteri ----------
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[italian]{babel}
+\usepackage{lmodern}
+\usepackage[scaled=0.95]{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{microtype}
+
+% ---------- pagina ----------
+\usepackage[a4paper,margin=2.2cm,headheight=14pt]{geometry}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlength{\emergencystretch}{3em}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage[most]{tcolorbox}
+\usepackage{hyperref}
+
+% ---------- colori (quelli dell'app) ----------
+\definecolor{accent}{HTML}{D50F25}
+\definecolor{accentsoft}{HTML}{FBE6E9}
+\definecolor{muted}{HTML}{6D6466}
+\definecolor{surface}{HTML}{F7F4F4}
+\definecolor{okgreen}{HTML}{1D8C4A}
+\definecolor{okgreensoft}{HTML}{E4F3EA}
+\definecolor{warn}{HTML}{E07A00}
+\definecolor{warnsoft}{HTML}{FDF0E0}
+
+\hypersetup{
+  colorlinks=true, linkcolor=accent, urlcolor=accent,
+  pdftitle={Guida di My Masterpiece}, pdfauthor={My Masterpiece}
+}
+
+% ---------- titoli ----------
+\titleformat{\part}[display]{\normalfont\bfseries\color{accent}}
+  {\large\MakeUppercase{Parte \thepart}}{4pt}{\Huge}[\vspace{2pt}{\color{accent}\titlerule[1.2pt]}]
+\titleformat{\section}{\normalfont\Large\bfseries}{\color{accent}\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries\color{muted}}{}{0em}{}
+\titlespacing*{\section}{0pt}{18pt}{8pt}
+\titlespacing*{\subsection}{0pt}{12pt}{6pt}
+\renewcommand{\thepart}{\arabic{part}}
+
+% ---------- intestazione ----------
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{muted}Guida di My Masterpiece}
+\fancyhead[R]{\small\color{muted}\leftmark}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\sectionmark}[1]{\markboth{\thesection.\ #1}{}}
+
+% ---------- elenchi e tabelle ----------
+\setlist{itemsep=3pt, topsep=4pt}
+\setlist[enumerate]{label=\textbf{\arabic*.}}
+\renewcommand{\arraystretch}{1.35}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcommand{\thead}[1]{\textbf{\color{accent}#1}}
+
+% ---------- comandi ----------
+\newcommand{\ra}{\unskip\nobreak\ $\rightarrow$\ \ignorespaces}            % percorso nei menu
+\newcommand{\bt}[1]{\textbf{#1}}               % pulsante o voce di menu
+\newcommand{\code}[1]{\texttt{#1}}             % nomi tecnici
+\newcommand{\sezione}[1]{\S\ref{#1}}           % rimando a una sezione
+\newcommand{\todo}{$\square$\enspace}          % casella da spuntare
+
+% ---------- riquadri ----------
+\newtcolorbox{consiglio}[1][Consiglio]{enhanced, breakable, colback=okgreensoft,
+  colframe=okgreen, boxrule=0pt, leftrule=3pt, arc=2pt, fonttitle=\bfseries,
+  coltitle=okgreen, colbacktitle=okgreensoft, title=#1, attach title to upper={\ }}
+\newtcolorbox{attenzione}[1][Attenzione]{enhanced, breakable, colback=warnsoft,
+  colframe=warn, boxrule=0pt, leftrule=3pt, arc=2pt, fonttitle=\bfseries,
+  coltitle=warn, colbacktitle=warnsoft, title=#1, attach title to upper={\ }}
+\newtcolorbox{importante}[1][Importante]{enhanced, breakable, colback=accentsoft,
+  colframe=accent, boxrule=0pt, leftrule=3pt, arc=2pt, fonttitle=\bfseries,
+  coltitle=accent, colbacktitle=accentsoft, title=#1, attach title to upper={\ }}
+
+\newcommand{\repo}{https://github.com/AleCovi04/My-Masterpiece}
+\newcommand{\sito}{https://my-masterpiece.vercel.app}
+
+\begin{document}
+
+% ======================================================================
+% FRONTESPIZIO
+% ======================================================================
+\begin{titlepage}
+  \centering
+  \vspace*{2.5cm}
+  \includegraphics[width=4.2cm]{../assets/logo.jpeg}\par
+  \vspace{1.5cm}
+  {\fontsize{40}{44}\selectfont\bfseries\color{accent} MY MASTERPIECE\par}
+  \vspace{0.4cm}
+  {\LARGE Guida all'uso e all'amministrazione\par}
+  \vspace{1.2cm}
+  {\color{accent}\rule{0.5\textwidth}{1.2pt}\par}
+  \vspace{1.2cm}
+  \begin{minipage}{0.75\textwidth}
+    \centering\large
+    \textbf{Parte 1 -- Usare l'app}: per chi si allena.\\[4pt]
+    \textbf{Parte 2 -- Amministrare}: per chi gestisce i servizi dietro l'app.
+  \end{minipage}
+  \vfill
+  {\color{muted}\small Nessuna chiave o password è scritta qui: la guida dice solo dove trovarle.\par}
+  \vspace{0.5cm}
+  {\color{muted}\small \href{\sito}{my-masterpiece.vercel.app}\par}
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+% ======================================================================
+\part{Usare l'app}
+% ======================================================================
+
+\section{Installare}\label{sec:installare}
+
+L'app è la stessa ovunque; cambia solo come la apri.
+
+\begin{tabularx}{\textwidth}{L{3.3cm}Y}
+  \toprule \thead{Dove} & \thead{Come} \\ \midrule
+  \bt{Telefono Android} & App (APK): dal telefono apri l'ultima release su GitHub
+    (\href{\repo/releases/latest}{Releases \ra ultima}), scarica \code{my-masterpiece.apk},
+    aprilo, consenti l'installazione \ra \bt{Installa}. \\
+  \bt{Telefono, PWA} & In Chrome apri \href{\sito}{my-masterpiece.vercel.app}
+    \ra menu \ra \bt{Aggiungi a schermata Home} / \bt{Installa app}. \\
+  \bt{PC} & Apri il sito nel browser (Chrome o Edge); facoltativo: icona ``Installa''
+    nella barra degli indirizzi. \\
+\bottomrule
+\end{tabularx}
+
+\begin{consiglio}
+Sul telefono usa l'\bt{APK} (notifica di fine recupero anche a schermo spento). La PWA va bene come riserva.
+\end{consiglio}
+
+\paragraph{Aggiornare l'APK.} L'app non si aggiorna da sola. Quando c'è una versione nuova
+scarica il nuovo APK dalla stessa pagina e installalo sopra il vecchio: i dati restano.
+Il sito e la PWA invece si aggiornano da soli alla riapertura.
+
+\section{Accedere e sincronizzare}\label{sec:accedere}
+
+L'app funziona anche \bt{senza account}, ma i dati restano solo su quel dispositivo.
+Con l'account si sincronizzano tra telefono e PC.
+
+\begin{enumerate}
+  \item \bt{Dati} \ra \bt{Account e sincronizzazione} \ra scrivi la tua email \ra
+        \bt{Inviami il link} (l'email contiene anche il codice).
+  \item Arriva un'email con un \bt{codice} e un \bt{link}:
+    \begin{itemize}
+      \item \bt{app Android:} digita il \bt{codice} (il link aprirebbe il browser, non l'app);
+      \item \bt{browser:} codice oppure link, ma il link va aperto \bt{nello stesso browser}
+            da cui l'hai chiesto.
+    \end{itemize}
+  \item La prima volta l'app salva un backup (``Prima del collegamento all'account'') e poi
+        unisce i dati con quelli del server.
+\end{enumerate}
+
+L'icona nell'intestazione mostra lo stato: sincronizzato, in corso, offline, errore. Senza rete
+l'app funziona lo stesso e manda le modifiche appena torna online. Se due dispositivi modificano
+la stessa voce, \bt{vince la modifica più recente}.
+
+\bt{Uscire} dall'account non cancella i dati dal dispositivo.
+
+\section{Il percorso: Forger \texorpdfstring{\ra}{→} Il Piano \texorpdfstring{\ra}{→} Calendario}\label{sec:percorso}
+
+\begin{description}[style=nextline, leftmargin=0pt, itemsep=6pt]
+  \item[Forger] La libreria: esercizi, allenamenti (forza, corsa/bici/nuoto, brick),
+    \bt{blocchi} (1--12 settimane tipo) e \bt{fasi} (sequenze di blocchi). Qui si crea,
+    non si mette niente in calendario.
+  \item[Il Piano] Mette fasi e blocchi in calendario da un lunedì (in coda alle sedute o
+    sostituendo le programmate). Mostra la cronologia, il completamento per fase, blocco e
+    settimana e il traguardo della gara. Da qui si può anche \bt{rimuovere} un'applicazione
+    (solo le sedute ancora programmate).
+  \item[Calendario] Viste Settimana, Mese e Anno. Il \bt{+} aggiunge una seduta (da un
+    allenamento o vuota); tenendo premuta una seduta la sposti. I colori nei giorni passati:
+    verde tutte svolte, arancione in parte, rosso nessuna.
+  \item[Panoramica] La settimana in corso, il carico e i giorni alla gara. Nel riquadro rosso
+    tocca \bt{Obiettivo} per scrivere il tuo (es. ``70.3'': l'app mostra ``Road to 70.3'' anche
+    sotto il logo) e \bt{Data gara} per scegliere la data. Valgono su tutti i dispositivi.
+    Sotto c'è la \bt{citazione del giorno}: cambia a mezzanotte ed è la stessa su telefono e PC.
+\end{description}
+
+\section{Allenarsi e registrare}\label{sec:allenarsi}
+
+\paragraph{Forza (live).} Apri la seduta \ra \bt{Inizia allenamento}. Per ogni serie inserisci
+kg $\times$ ripetizioni (in grigio i valori dell'ultima volta); il timer di recupero parte da solo
+e alla fine suona e vibra. Se chiudi l'app, alla riapertura riprendi da dove eri. Alla fine:
+\bt{RPE} (1--10, obbligatorio), note e riepilogo con i record.
+
+\paragraph{Corsa, bici, nuoto, brick.} Il telefono non registra l'allenamento, lo fa l'orologio. Dopo:
+\begin{itemize}
+  \item con Garmin collegato i dati arrivano da soli (vedi \sezione{sec:garmin}), poi aggiungi l'\bt{RPE};
+  \item oppure a mano: apri la seduta \ra \bt{Registra eseguito} (tempo obbligatorio, distanza,
+        FC, dislivello, RPE, note; sui brick per frazione).
+\end{itemize}
+
+\paragraph{Allenamento non previsto.} Calendario \ra \bt{+} \ra seduta vuota \ra
+\bt{Registra eseguito} (o lascia che Garmin la crei).
+
+\section{Garmin}\label{sec:garmin}
+
+Tre modi, dal più comodo:
+
+\begin{enumerate}
+  \item \bt{Finestra ``Collega''} (con intervals.icu collegato, vedi \sezione{sec:intervals}):
+    all'apertura l'app propone le attività degli ultimi 14 giorni che cadono nello stesso giorno
+    e sport di una seduta programmata. Lascia la spunta su quelle giuste \ra \bt{Collega}.
+    \bt{Più tardi} la ripropone, \bt{\texttimes} non la propone più.
+  \item \bt{Calendario \ra Sincronizza Garmin}: le attività degli ultimi 30 giorni senza seduta
+    (per esempio una corsa in un giorno di riposo); spunta quelle da aggiungere.
+  \item \bt{File a mano}: su Garmin Connect (sito) apri l'attività \ra ingranaggio \ra
+    \bt{Esporta originale} (\code{.zip}). Nell'app: dettaglio della seduta \ra \bt{Importa .FIT},
+    oppure \bt{Dati} \ra \bt{Importa file Garmin} (anche più file insieme).
+\end{enumerate}
+
+Le sedute importate hanno la pagina \bt{Attività}: mappa, grafici, parziali, giri, vasche, zone e
+migliori prestazioni. Solo corsa, bici, nuoto e multisport (sui brick); la forza dell'orologio viene
+ignorata. Un'attività già importata non torna, nemmeno se cancelli la seduta.
+
+\paragraph{Zone.} \bt{Dati} \ra \bt{Soglie per le zone} (FC massima, FC a riposo, FTP).
+Senza, l'app usa le zone dell'orologio.
+
+\section{Analisi}\label{sec:analisi}
+
+Filtro del periodo in alto (ultime N settimane/mesi/anni, Tutto, Piano, Personalizzato; le frecce
+spostano il periodo), poi tre schede:
+
+\begin{description}[leftmargin=0pt]
+  \item[Volumi] ore per disciplina e distanze, svolto contro pianificato.
+  \item[Carico] basato sull'RPE: barra del rapporto acuto/cronico con una frase che dice se stai
+    progredendo in sicurezza, Freschezza a parole, andamento della Forma.
+  \item[Forza] mappa dei muscoli (Recupero o Volume), ultimi record, record e grafici per esercizio.
+\end{description}
+
+\begin{attenzione}
+Senza RPE il carico non si calcola: aggiungilo sempre.
+\end{attenzione}
+
+I filtri a chip: un tocco accende o spegne, \bt{tenendo premuto} isoli quel chip.
+
+\section{Backup ed export}\label{sec:backup}
+
+\begin{itemize}
+  \item \bt{Backup automatici} sul dispositivo: uno alla settimana e prima delle operazioni
+    rischiose (import, ripristino, primo collegamento). Se ne tengono gli ultimi 8.
+    \bt{Dati} \ra elenco dei backup \ra \bt{Ripristina}.
+  \item \bt{Export}: \bt{Dati} \ra \bt{Esporta} scarica un file \code{.json} con tutti i dati.
+    Fallo ogni tanto e salvalo fuori dal telefono (Drive, PC): è l'unica copia che non dipende
+    da Supabase.
+  \item \bt{Import}: \bt{Dati} \ra \bt{Importa} un file esportato (prima l'app salva un backup).
+\end{itemize}
+
+\section{A cosa stare attento}\label{sec:attento}
+
+\begin{itemize}
+  \item \bt{Il link del login va aperto nello stesso browser.} Il browser interno di VS Code,
+    Chrome e l'app Android sono tre ``dispositivi'' diversi, ognuno con i suoi dati e il suo login.
+  \item \bt{Nell'app Android usa il codice}, non il link.
+  \item \bt{La chiave di intervals.icu va inserita su ogni dispositivo}: non viene sincronizzata, apposta.
+  \item \bt{Aggiorna l'APK} quando l'app chiede di aggiornare per sincronizzare: significa che il
+    sito ha una versione dei dati più nuova.
+  \item \bt{Notifica di fine recupero in ritardo?} Android \ra Impostazioni \ra App \ra
+    My Masterpiece \ra Batteria \ra \bt{Senza restrizioni}.
+  \item \bt{Cancellare i dati del browser} (o disinstallare l'app senza account) cancella i dati
+    di quel dispositivo: con l'account tornano dal server; senza, solo da un export.
+  \item \bt{RPE sempre}: senza, le analisi del carico sono incomplete.
+\end{itemize}
+
+% ======================================================================
+\part{Amministrare}
+% ======================================================================
+
+\begin{importante}[Se leggi solo una cosa]
+La manutenzione è un controllo da 10 minuti al mese, più poche azioni quando succede qualcosa.
+È tutto in \sezione{sec:manutenzione} -- \nameref{sec:manutenzione}. Le altre sezioni servono come riferimento.
+\end{importante}
+
+\section{Mappa dei servizi}\label{sec:servizi}
+
+\begin{tabularx}{\textwidth}{L{2.9cm}YL{4.1cm}L{2.5cm}}
+  \toprule \thead{Servizio} & \thead{A cosa serve} & \thead{Dove} & \thead{Costo} \\ \midrule
+  \bt{Supabase} & Login, database dei dati sincronizzati, spazio per i file FIT &
+    \href{https://supabase.com/dashboard}{supabase.com/dashboard} & Piano gratuito \\
+  \bt{Vercel} & Pubblica il sito a ogni push su \code{main} &
+    \href{https://vercel.com/dashboard}{vercel.com/dashboard} & Piano Hobby (gratuito) \\
+  \bt{GitHub} & Codice, costruzione dell'APK, Release, ping anti-pausa di Supabase &
+    \href{\repo}{AleCovi04/My-Masterpiece} & Gratuito \\
+  \bt{Resend} & Invia le email del login (con il codice) &
+    \href{https://resend.com}{resend.com} & Piano gratuito \\
+  \bt{intervals.icu} & Ponte con Garmin Connect & \href{https://intervals.icu}{intervals.icu} & Gratuito \\
+  \bt{OpenStreetMap} & Tessere della mappa nella pagina Attività & -- &
+    Gratuito, con attribuzione \\
+\bottomrule
+\end{tabularx}
+
+\paragraph{Come si parlano.} Il \bt{telefono/PC} usa l'app (dal sito Vercel o dall'APK) \ra l'app
+legge e scrive su \bt{Supabase} \ra Supabase manda le email tramite \bt{Resend}. \bt{GitHub}
+costruisce l'APK e ogni 3 giorni ``sveglia'' Supabase. \bt{intervals.icu} riceve le attività da
+Garmin e l'app le chiede direttamente dal dispositivo.
+
+\section{Chiavi: cosa è pubblico e cosa no}\label{sec:chiavi}
+
+\begin{tabularx}{\textwidth}{L{4.4cm}L{4.4cm}Y}
+  \toprule \thead{Chiave} & \thead{Dove sta} & \thead{Si può condividere?} \\ \midrule
+  URL del progetto Supabase & Vercel, \code{.env.local}, segreti GitHub & Sì: finisce nell'app \\
+  Chiave \bt{publishable} di Supabase (\code{sb\_publishable\_\dots}) &
+    Vercel, \code{.env.local}, segreti GitHub &
+    Sì: finisce nell'app. I dati li protegge la Row Level Security (ognuno vede solo i suoi) \\
+  Chiave \bt{secret / service\_role} di Supabase & Solo nella dashboard di Supabase &
+    \textcolor{accent}{\bt{Mai.}} Non metterla nell'app, né su GitHub, né in chat \\
+  Password del database Supabase & Solo tua (gestore di password) &
+    \textcolor{accent}{\bt{Mai.}} L'app non la usa \\
+  Chiave API di Resend (\code{re\_\dots}) & Solo in Supabase \ra SMTP & \textcolor{accent}{\bt{Mai}} \\
+  Chiave di firma Android + password &
+    \code{Documenti\textbackslash\allowbreak MyMasterpiece-\allowbreak chiave-android\textbackslash} e segreti GitHub &
+    \textcolor{accent}{\bt{Mai.}} Tienine una copia di sicurezza (es.\ Drive): senza, gli
+    aggiornamenti richiedono di disinstallare l'app \\
+  Chiave API di intervals.icu & Solo sul dispositivo (Dati \ra Garmin) & \textcolor{accent}{\bt{Mai}} \\
+\bottomrule
+\end{tabularx}
+
+\begin{attenzione}[Repository pubblico]
+Niente chiavi segrete nel codice, nei commit o nelle issue. \code{.env.local} non va su git (è già escluso).
+\end{attenzione}
+
+\section{Supabase}\label{sec:supabase}
+
+\paragraph{Cosa c'è.} La tabella \code{items} (tutti i dati sincronizzati, una riga per voce), la
+funzione \code{push\_items}, il bucket privato \code{fit} per i file FIT, le regole di sicurezza
+(RLS) e i permessi (\code{grant}). Tutto è descritto in \code{supabase/schema.sql}.
+
+\paragraph{Quando rieseguire lo schema.} Ogni volta che \code{supabase/schema.sql} cambia (lo dice il
+riepilogo della modifica). Supabase \ra \bt{SQL Editor} \ra \bt{New query} \ra incolla tutto il file
+\ra \bt{Run}. Si può rieseguire senza perdere dati.
+
+\paragraph{Impostazioni da conoscere.}
+\begin{itemize}
+  \item \bt{Authentication \ra URL Configuration}: \emph{Site URL} = \url{\sito};
+    \emph{Redirect URLs} = il sito e \code{http://localhost:5173}. Se cambi indirizzo del sito,
+    aggiornali o il link del login non funziona.
+  \item \bt{Authentication \ra Emails \ra SMTP Settings}: SMTP di Resend (vedi \sezione{sec:resend}).
+    Nei modelli \bt{Magic Link} e \bt{Confirm signup} c'è la riga con \code{\{\{ .Token \}\}}:
+    è il codice. Non toglierla.
+  \item \bt{Authentication \ra Rate Limits}: limite di email all'ora (alzalo se servono più login ravvicinati).
+  \item \bt{Storage}: deve esserci il bucket \code{fit}, privato.
+\end{itemize}
+
+\paragraph{Pausa del piano gratuito.} Dopo 7 giorni senza attività Supabase mette in pausa il
+progetto. Il workflow \code{Supabase keep-alive} lo evita con una lettura ogni 3 giorni. Se va
+comunque in pausa: arriva un'email, l'app mostra ``Sincronizzazione non riuscita'' ma funziona
+offline. Dashboard \ra progetto \ra \bt{Restore project}; dopo qualche minuto la sincronizzazione
+riparte da sola.
+
+\paragraph{Limiti del piano gratuito} (indicativi, controlla in \bt{Organization \ra Usage}):
+database 500\,MB, Storage 1\,GB. I file FIT sono la parte che cresce di più (circa 0,1--1\,MB l'uno).
+
+\begin{attenzione}[Non fare]
+Cancellare righe da \code{items} a mano (per l'app sparirebbero senza traccia: meglio cancellare
+dall'app), disattivare la RLS, usare la chiave \code{service\_role} nell'app.
+\end{attenzione}
+
+\section{Vercel (il sito)}\label{sec:vercel}
+
+\begin{itemize}
+  \item Ogni \bt{push su \code{main}} pubblica il sito in un paio di minuti. Stato: dashboard \ra
+    progetto \ra \bt{Deployments}.
+  \item Variabili: \bt{Settings \ra Environment Variables}: \code{VITE\_SUPABASE\_URL} e
+    \code{VITE\_SUPABASE\_\allowbreak PUBLISHABLE\_KEY}. \bt{Una variabile cambiata vale solo dopo un nuovo
+    deploy}: Deployments \ra ultimo \ra menu \ra \bt{Redeploy}.
+  \item Se il sito mostra ``Sincronizzazione non configurata'', mancano le due variabili nel deploy.
+  \item Tornare indietro: Deployments \ra un deploy precedente funzionante \ra menu \ra
+    \bt{Promote to Production}.
+\end{itemize}
+
+\section{GitHub}\label{sec:github}
+
+\begin{itemize}
+  \item \bt{Segreti} (\href{\repo/settings/secrets/actions}{Settings \ra Secrets \ra Actions}):
+    \code{SUPABASE\_URL}, \code{SUPABASE\_PUBLISHABLE\_KEY} (anti-pausa e APK),
+    \code{ANDROID\_KEYSTORE\_BASE64}, \code{ANDROID\_KEYSTORE\_PASSWORD} (firma dell'APK).
+  \item \bt{Workflow} (\href{\repo/actions}{Actions}):
+    \begin{itemize}
+      \item \bt{Supabase keep-alive} -- ogni 3 giorni, da solo. Deve essere verde. Se è rosso
+        controlla i segreti o se il progetto è in pausa.
+      \item \bt{Android APK} -- costruisce l'APK e lo pubblica nelle Release (avvio a mano o con
+        un tag \code{v*}).
+    \end{itemize}
+  \item GitHub disattiva i workflow programmati dopo \bt{60 giorni senza commit} nel repository:
+    arriva un'email; riattivalo da Actions \ra Supabase keep-alive \ra \bt{Enable workflow}.
+\end{itemize}
+
+\section{App Android (APK)}\label{sec:apk}
+
+\paragraph{Costruire una nuova versione.} GitHub \ra
+\href{\repo/actions/workflows/android-apk.yml}{Actions \ra Android APK} \ra \bt{Run workflow}
+(5--10 minuti) \ra dal telefono \href{\repo/releases/latest}{Releases \ra ultima} \ra scarica e
+installa sopra la vecchia.
+
+\paragraph{Quando serve.} Dopo modifiche all'app che vuoi sul telefono, e \bt{sempre} quando cambia
+la versione dello schema dei dati (altrimenti l'APK vecchio smette di sincronizzare e chiede di aggiornare).
+
+\paragraph{Chiave di firma.} È in \code{Documenti\textbackslash\allowbreak MyMasterpiece-\allowbreak chiave-android\textbackslash},
+mai su git. Se la perdi, il nuovo APK non si installa sopra il vecchio: va disinstallata l'app (i dati
+tornano dal server dopo il login) e serve una chiave nuova nei segreti GitHub.
+
+\paragraph{Dettagli tecnici.} L'app è la stessa del sito impacchettata con Capacitor (cartella
+\code{android/}); icone da \code{python scripts/make-icons.py}; Java e Android SDK non servono sul PC,
+costruisce tutto GitHub.
+
+\section{Resend (email del login)}\label{sec:resend}
+
+Supabase invia le email del login tramite l'SMTP di Resend: mittente \code{onboarding@resend.dev},
+host \code{smtp.resend.com}, porta \code{465}, utente \code{resend}, password = chiave API di Resend.
+
+\begin{importante}[Limite importante]
+Senza un dominio verificato Resend invia \bt{solo all'indirizzo dell'account Resend}. Va bene finché
+l'utente sei solo tu. Per altri utenti serve un dominio tuo: Resend \ra \bt{Domains} \ra
+\bt{Add domain} \ra aggiungi i record DNS indicati \ra poi in Supabase cambia il mittente in un
+indirizzo di quel dominio.
+\end{importante}
+
+Piano gratuito: circa 100 email al giorno e 3.000 al mese.
+
+Se le email non arrivano: controlla lo spam, poi Resend \ra \bt{Emails} (log degli invii), poi
+Supabase \ra \bt{Authentication \ra Logs}.
+
+\section{intervals.icu e Garmin}\label{sec:intervals}
+
+\begin{enumerate}
+  \item Crea un account su \href{https://intervals.icu}{intervals.icu} \ra \bt{Settings} \ra
+    \bt{Connections} \ra \bt{Garmin Connect} \ra \bt{Connect}. Da allora le attività
+    dell'orologio arrivano lì da sole.
+  \item \bt{Settings} \ra in fondo \bt{Developer Settings}: copia l'\bt{Athlete ID} (inizia con
+    \code{i}) e genera la \bt{API Key}.
+  \item Nell'app, su \bt{ogni dispositivo}: \bt{Dati} \ra \bt{Garmin tramite intervals.icu} \ra
+    ID e chiave \ra \bt{Collega}.
+\end{enumerate}
+
+Se Garmin smette di arrivare: su intervals.icu controlla che la connessione con Garmin sia ancora
+attiva; se hai rigenerato la chiave API, reinseriscila su ogni dispositivo.
+
+\section{Se qualcosa si rompe}\label{sec:rotto}
+
+{\small
+\begin{tabularx}{\textwidth}{L{4.2cm}L{4.4cm}Y}
+  \toprule \thead{Sintomo} & \thead{Causa probabile} & \thead{Cosa fare} \\ \midrule
+  Icona ``Sincronizzazione non riuscita'' & Progetto Supabase in pausa, o rete assente &
+    Dashboard Supabase \ra \bt{Restore project}; l'app intanto funziona offline \\
+  ``Aggiorna l'app per sincronizzare'' & APK più vecchio del sito &
+    Nuovo APK (\sezione{sec:apk}) \\
+  ``Sincronizzazione non configurata'' & Variabili mancanti su Vercel &
+    \sezione{sec:vercel}: aggiungi le variabili e rifai il deploy \\
+  L'email del login non arriva & Limite di Resend o di Supabase, spam,
+    indirizzo diverso da Resend & \sezione{sec:resend}; aspetta qualche minuto e riprova \\
+  Il link del login apre l'app ``non collegata'' & Link aperto in un altro browser &
+    Usa il \bt{codice}, o apri il link nel browser da cui l'hai chiesto \\
+  Le attività Garmin non compaiono & Chiave intervals.icu mancante su quel
+    dispositivo, o Garmin scollegato & \sezione{sec:intervals} \\
+  L'import delle attività non si sincronizza & Bucket \code{fit} mancante &
+    Riesegui \code{supabase/schema.sql} (\sezione{sec:supabase}) \\
+  Errore di permessi (\code{permission denied}) nei log &
+    Schema non rieseguito dopo una modifica & Riesegui \code{supabase/schema.sql} \\
+  Il workflow keep-alive è rosso & Segreti mancanti o progetto in pausa &
+    Controlla i segreti (\sezione{sec:github}) e lo stato del progetto \\
+  Notifica di recupero in ritardo & Risparmio energetico di Android &
+    Batteria \ra \bt{Senza restrizioni} \\
+  Dati spariti su un dispositivo & Dati del browser cancellati / altro browser &
+    Accedi con l'account; senza account: \bt{Dati} \ra ripristina un backup o importa un export \\
+  Il sito nuovo è rotto & Ultimo deploy difettoso &
+    Vercel \ra deploy precedente \ra \bt{Promote to Production} \\
+\bottomrule
+\end{tabularx}
+}
+
+\section{Manutenzione: cosa fare e quando}\label{sec:manutenzione}
+
+\begin{consiglio}[In breve]
+\bt{10 minuti al mese}, più qualche azione solo quando succede qualcosa. Il resto va da solo.
+\end{consiglio}
+
+\subsection*{Cosa va da solo (non devi fare niente)}
+
+\begin{tabularx}{\textwidth}{YL{3.4cm}L{4.6cm}}
+  \toprule \thead{Cosa} & \thead{Chi lo fa} & \thead{Ogni quanto} \\ \midrule
+  Tenere sveglio Supabase (evita la pausa) & GitHub Actions & Ogni 3 giorni \\
+  Pubblicare il sito dopo una modifica & Vercel & A ogni push su \code{main} \\
+  Backup dei dati sul dispositivo & L'app & Ogni 7 giorni (tiene gli ultimi 8) \\
+  Sincronizzare telefono e PC & L'app + Supabase & A ogni modifica \\
+  Portare le attività da Garmin a intervals.icu & intervals.icu & A ogni allenamento \\
+\bottomrule
+\end{tabularx}
+
+\subsection*{Ogni mese: il controllo da 10 minuti}
+
+Scegli un giorno fisso (es.\ il primo del mese) e segui l'ordine.
+
+{\small
+\begin{tabularx}{\textwidth}{L{0.5cm}L{3.2cm}YL{4.0cm}}
+  \toprule \thead{} & \thead{Cosa} & \thead{Come} & \thead{Se lo salti} \\ \midrule
+  \todo & \bt{1. Export dei dati} & Nell'app: \bt{Dati} \ra \bt{Esporta tutto (JSON)} \ra salva
+    il file su Drive o sul PC & Se Supabase e il telefono si perdessero insieme, non avresti una copia \\
+  \todo & \bt{2. Anti-pausa attivo e verde} & GitHub \ra
+    \href{\repo/actions/workflows/supabase-keepalive.yml}{Actions \ra Supabase keep-alive}: le ultime
+    esecuzioni sono verdi. Se c'è il pulsante \bt{Enable workflow}, premilo &
+    Supabase va in pausa dopo 7 giorni: la sincronizzazione si ferma finché non lo riattivi \\
+  \todo & \bt{3. Spazio su Supabase} & Supabase \ra \bt{Organization} \ra \bt{Usage}: Database sotto
+    500\,MB e Storage sotto 1\,GB (bene se sotto metà) &
+    Superati i limiti, i nuovi dati e i file FIT non si salvano più sul server \\
+  \todo & \bt{4. Sincronizzazione sui dispositivi} & Apri l'app sul telefono e sul
+    PC: l'icona in alto è verde e vedi gli stessi allenamenti &
+    Un dispositivo potrebbe lavorare da solo senza che te ne accorga \\
+  \todo & \bt{5. Garmin arriva ancora} & L'ultima attività dell'orologio compare nell'app (finestra
+    \bt{Collega} o \bt{Calendario \ra Sincronizza Garmin}) &
+    Garmin a volte scollega intervals.icu: le attività smettono di arrivare in silenzio \\
+\bottomrule
+\end{tabularx}
+}
+
+\subsection*{Ogni 6 mesi}
+
+\begin{tabularx}{\textwidth}{L{4.4cm}Y}
+  \toprule \thead{Cosa} & \thead{Come} \\ \midrule
+  \bt{Copia della chiave di firma Android} & Controlla che la cartella
+    \code{Documenti\textbackslash\allowbreak MyMasterpiece-\allowbreak chiave-android\textbackslash} esista ancora \bt{e}
+    che ci sia una copia altrove (Drive). Senza, niente aggiornamenti dell'APK sopra quello installato \\
+  \bt{APK aggiornato} & Confronta la versione sul telefono con l'ultima
+    \href{\repo/releases/latest}{Release}; se è più vecchia, installa la nuova (\sezione{sec:apk}) \\
+  \bt{Prova di ripristino} (facoltativa) & Su un browser dove non usi l'app: \bt{Dati} \ra
+    \bt{Importa} l'ultimo export e controlla che i dati ci siano. Così sai che il backup funziona davvero \\
+\bottomrule
+\end{tabularx}
+
+\subsection*{Solo quando succede qualcosa}
+
+{\small
+\begin{tabularx}{\textwidth}{L{6.4cm}Y}
+  \toprule \thead{Quando} & \thead{Cosa fare} \\ \midrule
+  Il riepilogo di una modifica dice che \code{supabase/schema.sql} è cambiato &
+    Rieseguilo: Supabase \ra \bt{SQL Editor} \ra \bt{New query} \ra incolla tutto il file \ra
+    \bt{Run} (\sezione{sec:supabase}) \\
+  Il riepilogo dice che è cambiata la versione dello schema dei dati, o l'app
+    chiede ``aggiorna per sincronizzare'' & Nuovo APK sul telefono (\sezione{sec:apk}) \\
+  Arriva un'email di Supabase ``project paused'' & Dashboard Supabase \ra progetto \ra
+    \bt{Restore project}; poi controlla l'anti-pausa (punto 2 del mese) \\
+  Arriva un'email di GitHub su un workflow fallito o disattivato &
+    Punto 2 del mese: riattivalo o guarda l'errore (\sezione{sec:github}) \\
+  Cambi telefono o PC & Installa l'app, accedi con il \bt{codice}, reinserisci la chiave di
+    intervals.icu (\sezione{sec:intervals}) \\
+  Qualcosa non funziona & Tabella in \sezione{sec:rotto} \\
+\bottomrule
+\end{tabularx}
+}
+
+\begin{attenzione}[Quando lo sviluppo si ferma]
+Dopo la versione 1, GitHub disattiva i workflow programmati se il repository resta \bt{60 giorni
+senza commit}. Il controllo mensile (punto 2) lo intercetta; se vuoi evitarlo del tutto, fai un
+piccolo commit ogni mese o chiedi a Claude di farlo.
+\end{attenzione}
+
+\section{Partire da zero (nuovo progetto)}\label{sec:zero}
+
+Serve solo se ricrei tutto (nuovo progetto Supabase, nuovo account).
+
+\begin{enumerate}
+  \item \bt{Supabase:} \bt{New project} (piano gratuito, regione europea). \bt{SQL Editor} \ra
+    incolla \code{supabase/schema.sql} \ra \bt{Run}. \bt{Authentication \ra URL Configuration}
+    come in \sezione{sec:supabase}.
+  \item \bt{Chiavi:} \bt{Project Settings \ra API Keys} \ra copia la \emph{Publishable key};
+    \bt{Project Settings \ra Data API} \ra copia il \emph{Project URL}. Mettile in
+    \code{.env.local} (copia di \code{.env.example}), su Vercel e nei segreti GitHub.
+  \item \bt{Resend:} account con la tua email \ra \bt{API Keys} \ra \bt{Create API Key} \ra
+    Supabase \ra \bt{Authentication \ra Emails \ra SMTP Settings} con i dati di \sezione{sec:resend}.
+    Nei modelli \bt{Magic Link} e \bt{Confirm signup} aggiungi
+    \code{<p>Codice: <strong>\{\{ .Token \}\}</strong></p>}.
+  \item \bt{GitHub:} segreti di \sezione{sec:github}; lancia \bt{Supabase keep-alive} a mano per provarlo.
+  \item \bt{Vercel:} importa il repository, aggiungi le due variabili, deploy.
+  \item \bt{App:} accedi dal dispositivo con i dati veri per primo (i suoi dati vanno sul server),
+    poi dagli altri.
+\end{enumerate}
+
+\end{document}
