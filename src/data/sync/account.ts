@@ -3,6 +3,7 @@
 // ogni salvataggio. Senza chiavi in `.env` la sincronizzazione resta spenta.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createSyncEngine, type SyncState } from './engine'
+import { createFitStorage, type FitCache } from './fitStorage'
 import { createSupabaseRemote } from './supabaseRemote'
 import type { SyncLocal } from './types'
 
@@ -26,6 +27,13 @@ export interface Account {
   /** Esce: i dati restano sul dispositivo. */
   signOut(): Promise<void>
   syncNow(): Promise<void>
+  /**
+   * File FIT di un'attività: dalla cache del dispositivo, altrimenti dal
+   * server (se collegati); `null` = non disponibile.
+   */
+  getFitFile(id: string): Promise<Uint8Array | null>
+  /** Carica sul server i file FIT nuovi (si fa anche dopo ogni sincronizzazione). */
+  uploadFitFiles(): Promise<void>
 }
 
 function makeClient(): SupabaseClient | null {
@@ -43,7 +51,7 @@ function makeClient(): SupabaseClient | null {
   }
 }
 
-export function createAccount(local: SyncLocal): Account {
+export function createAccount(local: SyncLocal & FitCache): Account {
   const client = makeClient()
   const online = () =>
     typeof navigator === 'undefined' ? true : navigator.onLine !== false
@@ -61,6 +69,16 @@ export function createAccount(local: SyncLocal): Account {
     listeners.forEach((fn) => fn())
   }
   engine.subscribe(refresh)
+  const files = client ? createFitStorage(client, local) : null
+  const uploadFitFiles = async () => {
+    if (files && userId && online()) await files.uploadPending(userId)
+  }
+  let lastStatus = state.status
+  engine.subscribe(() => {
+    const status = engine.getState().status
+    if (status === 'idle' && lastStatus === 'syncing') void uploadFitFiles()
+    lastStatus = status
+  })
 
   if (client) {
     const remote = createSupabaseRemote(client)
@@ -138,5 +156,12 @@ export function createAccount(local: SyncLocal): Account {
       if (error) throw error
     },
     syncNow: () => engine.syncNow(),
+    async getFitFile(id) {
+      const cached = await local.getFitFile(id)
+      if (cached) return cached
+      if (!files || !userId || !online()) return null
+      return files.download(userId, id)
+    },
+    uploadFitFiles,
   }
 }

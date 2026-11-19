@@ -6,9 +6,7 @@
 -- oppure `meta`: data gara e impostazioni), per utente.
 create table if not exists public.items (
   user_id uuid not null default auth.uid() references auth.users on delete cascade,
-  kind text not null check (kind in (
-    'exercises', 'templates', 'sessions', 'blocks', 'phases', 'applications', 'meta'
-  )),
+  kind text not null,
   id text not null,
   pos integer not null default 0,
   item jsonb,
@@ -20,6 +18,13 @@ create table if not exists public.items (
   schema_version integer not null,
   primary key (user_id, kind, id)
 );
+
+-- Tipi di voce ammessi (aggiornato a ogni nuovo elenco: `imports` dalla v10).
+alter table public.items drop constraint if exists items_kind_check;
+alter table public.items add constraint items_kind_check check (kind in (
+  'exercises', 'templates', 'sessions', 'blocks', 'phases', 'applications',
+  'imports', 'meta'
+));
 
 create index if not exists items_user_server_at on public.items (user_id, server_at);
 
@@ -74,3 +79,24 @@ $$;
 
 revoke all on function public.push_items(jsonb) from public, anon;
 grant execute on function public.push_items(jsonb) to authenticated;
+
+-- File FIT originali delle attività Garmin: bucket privato `fit`, un file per
+-- attività in una cartella per utente (`<user id>/<attività>.fit`).
+insert into storage.buckets (id, name, public)
+values ('fit', 'fit', false)
+on conflict (id) do nothing;
+
+drop policy if exists "fit: leggere i propri" on storage.objects;
+create policy "fit: leggere i propri" on storage.objects
+  for select to authenticated
+  using (bucket_id = 'fit' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "fit: caricare i propri" on storage.objects;
+create policy "fit: caricare i propri" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'fit' and (storage.foldername(name))[1] = (select auth.uid())::text);
+
+drop policy if exists "fit: sostituire i propri" on storage.objects;
+create policy "fit: sostituire i propri" on storage.objects
+  for update to authenticated
+  using (bucket_id = 'fit' and (storage.foldername(name))[1] = (select auth.uid())::text);

@@ -9,6 +9,7 @@ export type SyncKind =
   | 'blocks'
   | 'phases'
   | 'applications'
+  | 'imports'
   | 'meta'
 
 export const LIST_KINDS = [
@@ -18,6 +19,7 @@ export const LIST_KINDS = [
   'blocks',
   'phases',
   'applications',
+  'imports',
 ] as const
 
 export type ListKind = (typeof LIST_KINDS)[number]

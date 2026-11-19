@@ -8,6 +8,7 @@ import type {
   TrainingBlock,
   DataCounts,
   Exercise,
+  ImportRecord,
   IsoDate,
   IsoDateTime,
   LiveWorkout,
@@ -36,6 +37,14 @@ export interface BackupInfo {
   counts: DataCounts
 }
 
+/** Collegamento a intervals.icu: resta solo sul dispositivo, mai sul server. */
+export interface IntervalsLink {
+  athleteId: string
+  apiKey: string
+  /** Ultimo controllo delle attività nuove. */
+  lastCheckAt?: IsoDateTime
+}
+
 export interface DataStore {
   /** Solo sedute reali: all'inizio l'elenco è vuoto. */
   loadSessions(): Promise<Session[]>
@@ -58,6 +67,24 @@ export interface DataStore {
     sessions: Session[],
     applications: BlockApplication[],
   ): Promise<void>
+  /** Attività Garmin già importate. */
+  loadImports(): Promise<ImportRecord[]>
+  saveImports(imports: ImportRecord[]): Promise<void>
+  /** Sedute e attività importate insieme, in una sola transazione (import Garmin). */
+  saveImport(sessions: Session[], imports: ImportRecord[]): Promise<void>
+
+  /** File FIT originali (cache del dispositivo; i file stanno nello Storage del server). */
+  putFitFile(id: string, bytes: Uint8Array): Promise<void>
+  getFitFile(id: string): Promise<Uint8Array | null>
+  /** File non ancora caricati sul server. */
+  pendingFitUploads(): Promise<string[]>
+  /** Segna il file come presente sul server (con `bytes`, salva anche una copia scaricata). */
+  markFitUploaded(id: string, bytes?: Uint8Array): Promise<void>
+
+  /** Collegamento a intervals.icu di questo dispositivo; `null` = non collegato. */
+  loadIntervals(): Promise<IntervalsLink | null>
+  saveIntervals(link: IntervalsLink | null): Promise<void>
+
   /** `null` = "Nel futuro" (data non ancora scelta). */
   loadRaceDate(): Promise<IsoDate | null>
   saveRaceDate(date: IsoDate | null): Promise<void>

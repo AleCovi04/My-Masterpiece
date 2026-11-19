@@ -345,6 +345,41 @@ describe('store IndexedDB', () => {
     })
   })
 
+  it('import Garmin: attività e file FIT, collegamento intervals.icu solo locale', async () => {
+    const b = browser()
+    const store = b.open()
+    const rec = {
+      id: '42-1',
+      createdAt: t0.toISOString(),
+      updatedAt: t0.toISOString(),
+      source: 'file' as const,
+      startedAt: t0.toISOString(),
+      sessionId: 's1',
+    }
+    await store.saveImport([], [rec])
+    expect(await store.loadImports()).toEqual([rec])
+    expect((await store.pendingChanges()).map((c) => c.kind)).toContain(
+      'imports',
+    )
+    expect((await store.exportAll()).data.imports).toEqual([rec])
+
+    const bytes = new Uint8Array([1, 2, 3])
+    await store.putFitFile('42-1', bytes)
+    expect(await store.pendingFitUploads()).toEqual(['42-1'])
+    await store.markFitUploaded('42-1')
+    expect(await store.pendingFitUploads()).toEqual([])
+    expect(Array.from((await store.getFitFile('42-1'))!)).toEqual([1, 2, 3])
+
+    await store.saveIntervals({ athleteId: 'i1', apiKey: 'k' })
+    expect(await b.open().loadIntervals()).toEqual({
+      athleteId: 'i1',
+      apiKey: 'k',
+    })
+    expect(
+      (await store.pendingChanges()).some((c) => c.id === 'intervals'),
+    ).toBe(false)
+  })
+
   it('senza IndexedDB l’app parte lo stesso, con i dati in memoria', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     const store = createDexieStore({

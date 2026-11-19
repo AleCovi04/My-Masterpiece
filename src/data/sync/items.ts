@@ -10,6 +10,7 @@ const emptyRaw = (): RawData => ({
   blocks: [],
   phases: [],
   applications: [],
+  imports: [],
   raceDate: null,
 })
 

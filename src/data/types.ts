@@ -203,11 +203,17 @@ export interface StrengthActual {
   rpe?: number
 }
 
-/** Giro (dall'import Garmin, ultimo punto della roadmap). */
+/** Giro (dall'import Garmin). */
 export interface Lap {
   distanceM: number
   durationS: number
   avgHr?: number
+  maxHr?: number
+  /** m/s */
+  avgSpeed?: number
+  avgCadence?: number
+  avgPowerW?: number
+  elevationGainM?: number
 }
 
 export type EnduranceSource = 'manual' | 'garmin_fit'
@@ -224,6 +230,33 @@ export interface EnduranceMetrics {
   maxHr?: number
   /** Dislivello positivo in metri (solo corsa e bici). */
   elevationGainM?: number
+  // --- solo dall'import Garmin (schema v10) ---
+  /** Tempo totale, pause comprese. */
+  elapsedS?: number
+  movingS?: number
+  calories?: number
+  /** Passi al minuto (corsa), giri al minuto (bici), bracciate al minuto (nuoto). */
+  avgCadence?: number
+  maxCadence?: number
+  avgPowerW?: number
+  maxPowerW?: number
+  normPowerW?: number
+  /** m/s */
+  maxSpeed?: number
+  avgTempC?: number
+  totalStrokes?: number
+  poolLengthM?: number
+  avgSwolf?: number
+}
+
+/** Attività Garmin da cui viene l'eseguito (schema v10). */
+export interface GarminRef {
+  /** Chiave del file FIT (numero di serie + ora): è anche l'id di `ImportRecord`. */
+  activityId: string
+  /** Inizio dell'attività. */
+  startedAt: IsoDateTime
+  /** Il FIT ha la traccia GPS. */
+  hasTrack: boolean
 }
 
 export interface EnduranceActual extends EnduranceMetrics {
@@ -234,6 +267,8 @@ export interface EnduranceActual extends EnduranceMetrics {
   notes?: string
   /** Vuoto per l'inserimento manuale. */
   laps: Lap[]
+  /** Presente se importato da Garmin. */
+  garmin?: GarminRef
 }
 
 /** Una frazione eseguita: lo sport è copiato, così l'eseguito resta leggibile anche se il piano cambia. */
@@ -251,6 +286,8 @@ export interface BrickActual {
   legs: BrickLegActual[]
   rpe?: number
   notes?: string
+  /** Presente se importato da Garmin (un FIT multisport). */
+  garmin?: GarminRef
 }
 
 export type Actual = StrengthActual | EnduranceActual | BrickActual
@@ -437,11 +474,36 @@ export interface Settings {
     /** Eccezioni per singolo muscolo. */
     muscles: Partial<Record<MuscleId, SetRange>>
   }
+  /** Zone di FC e potenza delle attività Garmin (schema v10). */
+  thresholds: Thresholds
+}
+
+/** Soglie per le zone (FC in bpm, FTP in watt); assenti = non impostate. */
+export interface Thresholds {
+  maxHr?: number
+  restHr?: number
+  ftp?: number
 }
 
 export const defaultSettings = (): Settings => ({
   muscleVolume: { default: { ...DEFAULT_MUSCLE_VOLUME }, muscles: {} },
+  thresholds: {},
 })
+
+// ---------- Attività importate (schema v10) ----------
+
+/**
+ * Un'attività Garmin già importata (`id` = chiave del FIT): non si importa
+ * una seconda volta, nemmeno se la seduta è stata cancellata.
+ */
+export interface ImportRecord extends Entity {
+  source: 'file' | 'intervals'
+  /** Id dell'attività su intervals.icu, se viene da lì. */
+  intervalsId?: string
+  startedAt: IsoDateTime
+  /** Seduta in cui è finita (può non esistere più). */
+  sessionId?: Id
+}
 
 // ---------- Insieme dei dati (salvataggio, export, backup) ----------
 
@@ -455,6 +517,8 @@ export interface AppData {
   /** `null` = "Nel futuro" (data non ancora scelta). */
   raceDate: IsoDate | null
   settings: Settings
+  /** Attività Garmin importate (schema v10). */
+  imports: ImportRecord[]
 }
 
 export interface DataCounts {

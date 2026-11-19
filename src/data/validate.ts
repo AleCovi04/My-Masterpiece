@@ -14,6 +14,7 @@ import type {
   BlockApplication,
   DataCounts,
   Exercise,
+  ImportRecord,
   LiveWorkout,
   Phase,
   Session,
@@ -149,6 +150,17 @@ export function isApplication(v: unknown): v is BlockApplication {
   )
 }
 
+export function isImport(v: unknown): v is ImportRecord {
+  return (
+    isObj(v) &&
+    typeof v.id === 'string' &&
+    (v.source === 'file' || v.source === 'intervals') &&
+    typeof v.startedAt === 'string' &&
+    (v.intervalsId === undefined || typeof v.intervalsId === 'string') &&
+    (v.sessionId === undefined || typeof v.sessionId === 'string')
+  )
+}
+
 /** Bozza dell'allenamento in corso con la forma attesa (altrimenti si ignora). */
 export function isLiveWorkout(v: unknown): v is LiveWorkout {
   return (
@@ -192,10 +204,27 @@ export const isSetRange = (v: unknown): v is SetRange =>
   v.min >= 0 &&
   v.min <= v.max
 
+/** Soglia valida: intero nell'intervallo, altrimenti assente. */
+const threshold = (v: unknown, min: number, max: number) =>
+  typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max
+    ? v
+    : undefined
+
 /** Impostazioni valide: i campi non validi tornano ai valori predefiniti. */
 export function sanitizeSettings(raw: unknown): Settings {
   const out = defaultSettings()
   if (!raw || typeof raw !== 'object') return out
+  const th = (raw as { thresholds?: unknown }).thresholds
+  if (isObj(th)) {
+    const maxHr = threshold(th.maxHr, 100, 230)
+    const restHr = threshold(th.restHr, 30, 120)
+    const ftp = threshold(th.ftp, 50, 600)
+    out.thresholds = {
+      ...(maxHr && { maxHr }),
+      ...(restHr && (!maxHr || restHr < maxHr) && { restHr }),
+      ...(ftp && { ftp }),
+    }
+  }
   const mv = (raw as { muscleVolume?: unknown }).muscleVolume
   if (!mv || typeof mv !== 'object') return out
   const { default: def, muscles } = mv as {
@@ -242,6 +271,7 @@ export function sanitize(raw: RawData): { data: AppData; dropped: number } {
       applications: keep(raw.applications ?? [], isApplication),
       raceDate: isIsoDate(raw.raceDate) ? raw.raceDate : null,
       settings: sanitizeSettings(raw.settings),
+      imports: keep(raw.imports ?? [], isImport),
     },
     dropped,
   }

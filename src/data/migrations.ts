@@ -18,6 +18,8 @@ export interface RawData {
   raceDate: unknown
   /** Dalla versione 9 (assenti nei dati più vecchi). */
   settings?: unknown
+  /** Dalla versione 10. */
+  imports?: unknown[]
 }
 
 export interface Migration {
@@ -200,6 +202,21 @@ export const MIGRATIONS: Migration[] = [
     migrate: (d) => ({
       ...d,
       settings: isObj(d.settings) ? d.settings : defaultSettings(),
+    }),
+  },
+  {
+    to: 10,
+    description:
+      'Import Garmin: attività importate (`imports`, vuoto), metriche estese e `garmin` nell’eseguito endurance, soglie per le zone nelle impostazioni (vuote)',
+    migrate: (d) => ({
+      ...d,
+      imports: Array.isArray(d.imports) ? d.imports : [],
+      ...(isObj(d.settings) && {
+        settings: {
+          ...d.settings,
+          thresholds: isObj(d.settings.thresholds) ? d.settings.thresholds : {},
+        },
+      }),
     }),
   },
 ]

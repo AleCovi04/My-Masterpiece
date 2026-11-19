@@ -8,7 +8,12 @@ import {
 } from './legacyLocalStorage'
 import { migrate, SCHEMA_VERSION, type RawData } from './migrations'
 import { generateSampleExercises } from './sampleData'
-import type { BackupInfo, BackupReason, DataStore } from './store'
+import type {
+  BackupInfo,
+  BackupReason,
+  DataStore,
+  IntervalsLink,
+} from './store'
 import { normalizeListItem, normalizeMeta } from './sync/items'
 import {
   EPOCH,
@@ -65,6 +70,8 @@ interface MetaRow {
     | 'pristine'
     /** Ultima sincronizzazione (`SyncMeta`). */
     | 'sync'
+    /** Collegamento a intervals.icu (solo su questo dispositivo). */
+    | 'intervals'
   value: unknown
   /** Solo per `raceDate` e `settings`: ora dell'ultima modifica. */
   updatedAt?: IsoDateTime
@@ -78,6 +85,13 @@ interface ChangeRow {
   id: string
   updatedAt: IsoDateTime
   deleted: boolean
+}
+
+/** File FIT originale (cache locale; `uploaded` = già nello Storage del server). */
+interface FitFileRow {
+  id: string
+  bytes: Uint8Array
+  uploaded: 0 | 1
 }
 
 interface BackupRow {
@@ -104,6 +118,8 @@ class MmDb extends Dexie {
   meta!: Table<MetaRow, string>
   backups!: Table<BackupRow, number>
   changes!: Table<ChangeRow, string>
+  imports!: Table<Row, string>
+  fitFiles!: Table<FitFileRow, string>
 
   constructor(name: string, options?: DexieOptions) {
     super(name, options)
@@ -125,6 +141,11 @@ class MmDb extends Dexie {
     // v3: coda delle modifiche da sincronizzare
     this.version(3).stores({
       changes: 'key',
+    })
+    // v4: attività Garmin importate e file FIT
+    this.version(4).stores({
+      imports: 'id, pos',
+      fitFiles: 'id, uploaded',
     })
   }
 }
@@ -157,6 +178,7 @@ export function createDexieStore(
     db.blocks,
     db.phases,
     db.applications,
+    db.imports,
   ]
   const all = [...lists, db.meta, db.backups, db.changes]
 
@@ -185,6 +207,7 @@ export function createDexieStore(
     applications: [],
     raceDate: DEFAULT_RACE_DATE,
     settings: defaultSettings(),
+    imports: [],
   })
 
   /** Dai dati del vecchio salvataggio a quelli attuali; senza catalogo si parte dagli esercizi di base. */
@@ -208,6 +231,7 @@ export function createDexieStore(
       blocks,
       phases,
       applications,
+      imports,
       race,
       settings,
     ] = await Promise.all([
@@ -217,6 +241,7 @@ export function createDexieStore(
       readList('blocks'),
       readList('phases'),
       readList('applications'),
+      readList('imports'),
       db.meta.get('raceDate'),
       db.meta.get('settings'),
     ])
@@ -227,6 +252,7 @@ export function createDexieStore(
       blocks,
       phases,
       applications,
+      imports,
       raceDate: race?.value ?? null,
       ...(settings && { settings: settings.value }),
     }
@@ -573,6 +599,65 @@ export function createDexieStore(
     savePhases: (phases) => save('phases', phases),
     loadApplications: () =>
       load('applications') as Promise<AppData['applications']>,
+    loadImports: () => load('imports') as Promise<AppData['imports']>,
+    async saveImport(sessions, imports) {
+      await init()
+      if (mem) {
+        mem = { ...mem, sessions, imports }
+        return
+      }
+      await tracked('import', [db.sessions, db.imports], async () => {
+        await writeList('sessions', sessions)
+        await writeList('imports', imports)
+      })
+    },
+    async saveImports(imports) {
+      await save('imports', imports)
+    },
+
+    async putFitFile(id, bytes) {
+      await init()
+      if (mem) return
+      try {
+        const prev = await db.fitFiles.get(id)
+        await db.fitFiles.put({ id, bytes, uploaded: prev?.uploaded ?? 0 })
+      } catch (error) {
+        console.error('Salvataggio non riuscito (file FIT)', error)
+      }
+    },
+    async getFitFile(id) {
+      await init()
+      if (mem) return null
+      return (await db.fitFiles.get(id))?.bytes ?? null
+    },
+    async pendingFitUploads() {
+      await init()
+      if (mem) return []
+      return db.fitFiles.where('uploaded').equals(0).primaryKeys()
+    },
+    async markFitUploaded(id, bytes) {
+      await init()
+      if (mem) return
+      const row = await db.fitFiles.get(id)
+      await db.fitFiles.put({
+        id,
+        bytes: bytes ?? row?.bytes ?? new Uint8Array(),
+        uploaded: 1,
+      })
+    },
+
+    async loadIntervals() {
+      await init()
+      if (mem) return null
+      const v = (await db.meta.get('intervals'))?.value
+      return isIntervalsLink(v) ? v : null
+    },
+    async saveIntervals(link) {
+      await init()
+      if (mem) return
+      if (link) await db.meta.put({ key: 'intervals', value: link })
+      else await db.meta.delete('intervals')
+    },
     async saveSessionsAndApplications(sessions, applications) {
       await init()
       if (mem) {
@@ -695,6 +780,16 @@ function latest(a?: IsoDateTime, b?: IsoDateTime): IsoDateTime {
   const x = a ?? ''
   const y = b ?? ''
   return x > y ? x : y
+}
+
+function isIntervalsLink(v: unknown): v is IntervalsLink {
+  if (!v || typeof v !== 'object') return false
+  const m = v as Record<string, unknown>
+  return (
+    typeof m.athleteId === 'string' &&
+    typeof m.apiKey === 'string' &&
+    (m.lastCheckAt === undefined || typeof m.lastCheckAt === 'string')
+  )
 }
 
 function isSyncMeta(v: unknown): v is SyncMeta {

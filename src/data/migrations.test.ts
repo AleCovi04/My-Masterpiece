@@ -266,6 +266,7 @@ describe('migrazioni', () => {
       applications: [],
       raceDate: null,
       settings: defaultSettings(),
+      imports: [],
     })
   })
 
@@ -379,13 +380,40 @@ describe('import/export', () => {
     }
     const kept = MIGRATIONS[8].migrate({ ...d, settings: mine })
     expect(kept.settings).toBe(mine)
-    expect(SCHEMA_VERSION).toBe(9)
     // fascia non valida (minimo sopra il massimo) scartata
     expect(sanitize(kept).data.settings).toEqual({
       muscleVolume: {
         default: { min: 8, max: 16 },
         muscles: { calves: { min: 4, max: 10 } },
       },
+      thresholds: {},
     })
+  })
+
+  it('v9 → v10: attività importate vuote, soglie vuote; soglie non valide scartate', () => {
+    expect(SCHEMA_VERSION).toBe(10)
+    const d = migrate(v0(), 0)
+    expect(d.imports).toEqual([])
+    expect(d.settings).toEqual(defaultSettings())
+    const v9 = MIGRATIONS[9].migrate({
+      ...d,
+      imports: undefined,
+      settings: { muscleVolume: { default: { min: 8, max: 16 }, muscles: {} } },
+    })
+    expect(v9.imports).toEqual([])
+    expect(v9.settings).toMatchObject({ thresholds: {} })
+    const data = sanitize({
+      ...v9,
+      settings: {
+        ...(v9.settings as object),
+        thresholds: { maxHr: 190, restHr: 200, ftp: 'x' },
+      },
+      imports: [
+        { id: '42-1', source: 'file', startedAt: '2026-11-10T07:00:00Z' },
+        { id: '43-1', source: 'altro', startedAt: '2026-11-10T07:00:00Z' },
+      ],
+    }).data
+    expect(data.settings.thresholds).toEqual({ maxHr: 190 })
+    expect(data.imports.map((i) => i.id)).toEqual(['42-1'])
   })
 })
