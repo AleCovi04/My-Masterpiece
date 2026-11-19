@@ -1,16 +1,28 @@
-# Roadmap — versione 1
+# Roadmap
 
-Obiettivo: app completa entro **gennaio 2027**, uso reale da **febbraio 2027**, per circa 2 anni (preparazione Ironman 70.3, agosto 2028). **Nessuna versione intermedia**: si rilascia solo la versione 1 completa.
+Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono chiusi**. Dettagli di ogni punto (dove, cosa può succedere, soluzione) in [review-v1.1.md](review-v1.1.md).
 
-- ✅ **Fondamenta** — Panoramica, Calendario (settimana/mese/anno), Planner (esercizi e allenamenti), sessioni del calendario create dai template, giorni di Mese e Anno colorati per esito (svolto, parziale, saltato), storage robusto (IndexedDB, migrazioni versionate, pagina Dati con export/import/backup).
-- ✅ **Registrazione live della forza** — schermata a schermo intero dal dettaglio della sessione: kg × reps per serie con i valori in grigio dell'ultima volta, timer di recupero (anche superserie), modifiche al volo, ripresa dopo la chiusura, riepilogo con record.
-- ✅ **Registrazione endurance e brick** — brick (più frazioni endurance di fila con transizioni) nel Planner e nel Calendario; inserimento manuale dell'eseguito dal dettaglio della seduta (anche per frazione sui brick), con scostamento dal piano.
-- ✅ **Blocchi e Fasi nel Forger** — blocchi di settimane tipo (1–12, editor a griglia), fasi come sequenze di blocchi, applicazione al calendario da un lunedì (in coda o sostituendo le programmate) con etichette nella settimana e rimozione.
-- ✅ **Forger e Il Piano** — il Planner diventa Forger (solo libreria: esercizi, allenamenti, blocchi, fasi); nuova sezione Il Piano con la cronologia di fasi e blocchi in calendario, completamento per fase, blocco e settimana, traguardo gara.
-- ✅ **Analisi** — sezione Analisi con filtro periodo (ultime N settimane, mesi o anni fino a oggi, Tutto, Piano, Personalizzato; frecce che spostano della stessa durata; fase o blocco dalla cronologia del Piano; colonne per Giorno o Settimana; scelte ricordate sul dispositivo; grafici grandi uno sotto l'altro con dettaglio al tocco) e tre schede: Volumi (ore per disciplina e distanza, eseguito contro pianificato), Carico (RPE obbligatorio a fine seduta e aggiungibile dopo; rapporto acuto/cronico a zone, Freschezza a parole, carico e ore per settimana, tendenza della Forma), Forza (mappa muscolare Recupero / Volume con fascia per muscolo e lista ordinata, che filtra gli esercizi; ultimi 5 record; esercizio scelto da una finestra con ricerca, filtro per muscolo e 🏆; sotto, record per esercizio con la data e grafici di carichi e volume con i nuovi record); filtri a chip uguali in tutta l'app (clic accende/spegne, tenere premuto isola).
-- ✅ **Supabase** — login con link via email, sincronizzazione tra dispositivi voce per voce (vince la modifica più recente), offline-first, icona di stato nell'intestazione, ping anti-pausa. Provato su PC e telefono.
-- ✅ **Capacitor** — app Android (APK firmato costruito da GitHub Actions e pubblicato nelle Release), nuova icona da `assets/logo.jpeg`, notifica con vibrazione a fine recupero, login con codice via SMTP (Resend). Provato sul telefono: installazione, login con codice, sincronizzazione e notifica a schermo spento.
-- ✅ **Revisione e pulizia** — file condivisi al loro posto (`components/ui`, `hooks/`, `lib/`, `styles/ui.css`), `planner/` → `forger/`, codice e CSS morti tolti, file grandi divisi, colori solo dal tema, niente data gara predefinita, guida unica `docs/guida.md` (uso e amministrazione), README del progetto.
-- ✅ **Spazio dei dati e ripartenza** — procedura in `docs/spazio-dati.md`: FIT compressi sul server, scheda Spazio sul server, Libera spazio (archivio .zip dei FIT vecchi), pulizia automatica delle voci cancellate, Ricarica il server, **Ricomincia da zero**.
-- ⬜ **Rifinitura** — rifinitura grafica, test su telefono reale.
-- ✅ **Import Garmin e sincronizzazione** — import dei file `.FIT`/`.zip` (dettaglio della seduta o Dati, multisport sui brick), finestra "Collega" all'apertura tramite intervals.icu (attività → seduta dello stesso giorno e sport, con conferma) e "Sincronizza Garmin" per le altre, pagina Attività con mappa, grafici, parziali, zone e migliori prestazioni, soglie per le zone, file originali nello Storage di Supabase.
+## v1.1 — prima versione ufficiale
+
+- ⬜ **B1** Elenchi vecchi che sovrascrivono dati più nuovi (live, Collega, più schede, import Garmin): lettura-modifica-scrittura in una sola transazione.
+- ⬜ **B2** Cambi di sola posizione che riscrivono intere sedute (sovrascrittura di modifiche fatte offline, traffico).
+- ⬜ **B3** Avvio "solo in memoria" silenzioso ed errori di salvataggio nascosti: avviso, sincronizzazione e strumenti del server bloccati.
+- ⬜ **B4** Migrazioni e sincronizzazione: migrazione senza nuove ore né cancellazioni, guardia per dati di una versione più recente.
+- ⬜ **B5** Pulizia automatica delle cancellazioni dopo 90 giorni: da togliere.
+- ⬜ **B6** Download dal server a pagine con offset: paginazione a chiave.
+- ⬜ **B7** Iscrizioni aperte su Supabase: chiuse, con messaggio chiaro nell'app.
+- ⬜ **B8** "Esporta tutto" nell'APK che non salva nulla: export dal PC.
+- ⬜ **B9** Error Boundary: niente più schermo bianco.
+- ⬜ Versione 1.1.0 nell'app (pagina Dati), `CHANGELOG.md`, `docs/release-checklist.md`, guida aggiornata.
+- ⬜ Verifica finale su telefono e PC (checklist di release).
+
+## v1.2 — miglioramenti
+
+- ⬜ **Dati e sincronizzazione:** ora del dispositivo sbagliata (limite lato server); impostazioni in voci separate; confronto per riferimento nei salvataggi; backup più leggeri e limiti separati; cache FIT compressa o con limite; testi di Importa/Ripristina e ricaricamento delle pagine; Ricarica il server e riconciliazione completa dei dispositivi fermi; cambio di account; aggiornamento tra schede; validazione più profonda delle voci sincronizzate.
+- ⬜ **Garmin:** errori per singola attività su intervals.icu; id deterministico delle sedute importate; giorno dall'ora locale dell'attività; FIT troncati; lettura del FIT in un Web Worker; timeout delle richieste.
+- ⬜ **Allenamento live:** durata di un allenamento dimenticato aperto; valori "ultima volta" calcolati una volta; avviso per notifiche negate; tasto Indietro di Android con le finestre aperte.
+- ⬜ **Export dal telefono** (file e condivisione di Android).
+- ⬜ **Android e PWA:** aggiornamento della PWA con avviso; font nel progetto; caricamento delle pagine su richiesta; barre di sistema (bordo a bordo); `allowBackup`; workflow APK più sicuro (SHA fissati, keystore cancellato, lint e test prima della build); `.gitignore` dei keystore; `theme-color` del tema scuro.
+- ⬜ **Sicurezza:** dipendenze di sviluppo con vulnerabilità moderate; CSP e header su Vercel.
+- ⬜ **UI e codice:** testi di accesso per l'APK; esercizi di base in inglese; focus trap nelle modali; avviso "aggiorna l'app" visibile ovunque; modulo delle soglie che non si azzera; test di `account`, `supabaseRemote`, `fitStorage`, hook di salvataggio, FIT troncati e nuoto in vasca; prestazioni delle viste Mese e Anno.
+- ⬜ **Rifinitura grafica** e **confronto con il periodo precedente** in Analisi.
