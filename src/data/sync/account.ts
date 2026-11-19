@@ -3,7 +3,7 @@
 // ogni salvataggio. Senza chiavi in `.env` la sincronizzazione resta spenta.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { createSyncEngine, type SyncState } from './engine'
-import { createFitStorage, type FitCache } from './fitStorage'
+import { createFitStorage, type FitCache, type FitUsage } from './fitStorage'
 import { createSupabaseRemote } from './supabaseRemote'
 import type { SyncLocal } from './types'
 
@@ -34,6 +34,8 @@ interface Account {
   getFitFile(id: string): Promise<Uint8Array | null>
   /** Carica sul server i file FIT nuovi (si fa anche dopo ogni sincronizzazione). */
   uploadFitFiles(): Promise<void>
+  /** Spazio dei FIT dell'utente sul server; `null` se non collegati o offline. */
+  fitUsage(): Promise<FitUsage | null>
 }
 
 function makeClient(): SupabaseClient | null {
@@ -163,5 +165,9 @@ export function createAccount(local: SyncLocal & FitCache): Account {
       return files.download(userId, id)
     },
     uploadFitFiles,
+    async fitUsage() {
+      if (!files || !userId || !online()) return null
+      return files.usage(userId)
+    },
   }
 }

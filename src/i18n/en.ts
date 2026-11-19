@@ -707,6 +707,19 @@ export const en: Dictionary = {
     restored: 'Backup restored.',
     schemaVersion: 'Data schema version',
   },
+  space: {
+    title: 'Server storage',
+    data: 'Data (estimate)',
+    dataNote:
+      'Workouts, sessions, exercises and settings. Free plan limit: 500 MB.',
+    files: 'Garmin files',
+    filesNote: '{n} original FIT files (compressed). Free plan limit: 1 GB.',
+    filesUnavailable:
+      'Garmin file storage unavailable (a connection is needed).',
+    ok: 'All good: the space will last for years.',
+    warn: 'Over half of the space used: keep an eye on it (guide, Maintenance and docs/spazio-dati.md).',
+    high: 'Space almost full: follow the procedure in docs/spazio-dati.md before reaching the limit.',
+  },
   sync: {
     title: 'Account and sync',
     intro:

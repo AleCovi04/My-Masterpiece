@@ -712,6 +712,20 @@ export const it = {
     restored: 'Backup ripristinato.',
     schemaVersion: 'Versione dello schema dei dati',
   },
+  space: {
+    title: 'Spazio sul server',
+    data: 'Dati (stima)',
+    dataNote:
+      'Allenamenti, sedute, esercizi e impostazioni. Limite del piano gratuito: 500 MB.',
+    files: 'File Garmin',
+    filesNote:
+      '{n} file FIT originali (compressi). Limite del piano gratuito: 1 GB.',
+    filesUnavailable:
+      'Spazio dei file Garmin non disponibile (serve la connessione).',
+    ok: 'Tutto a posto: lo spazio basta per anni.',
+    warn: 'Oltre metà dello spazio: tienilo d’occhio (guida, Manutenzione e docs/spazio-dati.md).',
+    high: 'Spazio quasi pieno: segui la procedura in docs/spazio-dati.md prima di superare il limite.',
+  },
   sync: {
     title: 'Account e sincronizzazione',
     intro:

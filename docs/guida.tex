@@ -367,8 +367,10 @@ comunque in pausa: arriva un'email, l'app mostra ``Sincronizzazione non riuscita
 offline. Dashboard \ra progetto \ra \bt{Restore project}; dopo qualche minuto la sincronizzazione
 riparte da sola.
 
-\paragraph{Limiti del piano gratuito} (indicativi, controlla in \bt{Organization \ra Usage}):
-database 500\,MB, Storage 1\,GB. I file FIT sono la parte che cresce di più (circa 0,1--1\,MB l'uno).
+\paragraph{Limiti del piano gratuito} (indicativi, controlla in \bt{Organization \ra Usage} o
+nell'app in \bt{Dati \ra Spazio sul server}): database 500\,MB, Storage 1\,GB. I file FIT sono la
+parte che cresce di più (vengono caricati compressi). Bastano per anni; cosa fare se si riempiono,
+a livelli e senza perdere dati: \code{docs/spazio-dati.md}.
 
 \begin{attenzione}[Non fare]
 Cancellare righe da \code{items} a mano (per l'app sparirebbero senza traccia: meglio cancellare
@@ -519,8 +521,9 @@ Scegli un giorno fisso (es.\ il primo del mese) e segui l'ordine.
     \href{\repo/actions/workflows/supabase-keepalive.yml}{Actions \ra Supabase keep-alive}: le ultime
     esecuzioni sono verdi. Se c'è il pulsante \bt{Enable workflow}, premilo &
     Supabase va in pausa dopo 7 giorni: la sincronizzazione si ferma finché non lo riattivi \\
-  \todo & \bt{3. Spazio su Supabase} & Supabase \ra \bt{Organization} \ra \bt{Usage}: Database sotto
-    500\,MB e Storage sotto 1\,GB (bene se sotto metà) &
+  \todo & \bt{3. Spazio su Supabase} & Nell'app \bt{Dati} \ra \bt{Spazio sul server} (o Supabase \ra
+    \bt{Organization} \ra \bt{Usage}): barre verdi = tutto bene; gialle o rosse =
+    \code{docs/spazio-dati.md} &
     Superati i limiti, i nuovi dati e i file FIT non si salvano più sul server \\
   \todo & \bt{4. Sincronizzazione sui dispositivi} & Apri l'app sul telefono e sul
     PC: l'icona in alto è verde e vedi gli stessi allenamenti &

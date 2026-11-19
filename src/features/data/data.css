@@ -182,3 +182,43 @@
 .dt-card .dt-sync.is-error {
   border-color: var(--accent);
 }
+
+/* spazio sul server */
+.dt-space {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  --bar: var(--ok);
+}
+.dt-space.warn {
+  --bar: var(--warn);
+}
+.dt-space.high {
+  --bar: var(--miss);
+}
+.dt-space-h {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 14px;
+}
+.dt-space-h b {
+  font-variant-numeric: tabular-nums;
+}
+.dt-space-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.dt-space-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--bar);
+}
+.dt-space small {
+  color: var(--muted);
+  font-size: 13px;
+}

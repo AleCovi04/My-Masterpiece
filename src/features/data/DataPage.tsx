@@ -19,6 +19,7 @@ import { useI18n } from '../../i18n/context'
 import Modal from '../../components/ui/Modal'
 import GarminCards from '../garmin/GarminCards'
 import AccountCard from './AccountCard'
+import SpaceCard from './SpaceCard'
 import './data.css'
 
 /** Promemoria se l'ultimo export manuale ha più di questi giorni. */
@@ -170,6 +171,7 @@ export default function DataPage() {
       )}
 
       <AccountCard dateTime={dateTime} />
+      <SpaceCard />
 
       <Grid cols={2}>
         <section className="dt-card">
