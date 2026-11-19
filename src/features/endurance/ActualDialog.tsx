@@ -18,7 +18,7 @@ import {
 } from '../../lib/enduranceActual'
 import { formatClock, parseClock } from '../../lib/enduranceTemplate'
 import RpeScale from '../../components/ui/RpeScale'
-import Modal from '../planner/Modal'
+import Modal from '../../components/ui/Modal'
 import MetricsFields from './MetricsFields'
 import './endurance.css'
 

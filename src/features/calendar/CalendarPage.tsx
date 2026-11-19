@@ -18,7 +18,7 @@ import {
   shiftAnchor,
   weekDates,
   type CalendarView,
-} from './period'
+} from '../../lib/period'
 import { useCalendarSessions } from './useCalendarSessions'
 import './calendar.css'
 

@@ -3,8 +3,8 @@ import type { Id, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { formatClock, formatDist } from '../../lib/enduranceTemplate'
 import type { LinkProposal } from '../../lib/garminLink'
-import Modal from '../planner/Modal'
-import '../planner/planner.css'
+import Modal from '../../components/ui/Modal'
+import '../forger/planner.css'
 import './garmin.css'
 import {
   checkGarmin,

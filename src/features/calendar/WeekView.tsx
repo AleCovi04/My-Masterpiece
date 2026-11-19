@@ -8,8 +8,8 @@ import { formatHm } from '../../lib/format'
 import { sessionsOn } from '../../lib/reorder'
 import { sessionDurationSec } from '../../lib/sessions'
 import { actualSeconds } from '../../lib/weekStats'
-import { weekDates, weekdayShortNames } from './period'
-import { useMediaQuery } from './useMediaQuery'
+import { weekDates, weekdayShortNames } from '../../lib/period'
+import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useReorder } from './useReorder'
 
 interface Props {

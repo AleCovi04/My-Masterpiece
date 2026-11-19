@@ -23,7 +23,6 @@ import StrengthTab from './StrengthTab'
 import { INITIAL_STRENGTH_UI, type StrengthUi } from './strengthUi'
 import VolumeTab from './VolumeTab'
 import '../overview/overview.css'
-import '../planner/planner.css'
 import './analysis.css'
 
 type Tab = 'volumes' | 'load' | 'strength'

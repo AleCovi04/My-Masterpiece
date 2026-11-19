@@ -10,7 +10,7 @@ import {
   setText,
 } from '../../i18n/records'
 import RpeScale from '../../components/ui/RpeScale'
-import Modal from '../planner/Modal'
+import Modal from '../../components/ui/Modal'
 import '../endurance/endurance.css'
 
 interface Props {

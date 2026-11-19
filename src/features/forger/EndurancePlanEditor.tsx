@@ -32,7 +32,7 @@ import {
   type Fields,
   type PlanDraft,
 } from './endurancePlanDraft'
-import { useDragSort } from './useSortable'
+import { useDragSort } from '../../hooks/useSortable'
 
 const STEP_TYPES: StepType[] = ['warmup', 'work', 'recovery', 'cooldown']
 

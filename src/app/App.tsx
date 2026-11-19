@@ -4,7 +4,7 @@ import { I18nProvider } from '../i18n/I18nProvider'
 import AnalysisPage from '../features/analysis/AnalysisPage'
 import CalendarPage from '../features/calendar/CalendarPage'
 import DataPage from '../features/data/DataPage'
-import PlannerPage from '../features/planner/PlannerPage'
+import ForgerPage from '../features/forger/ForgerPage'
 import OverviewPage from '../features/overview/OverviewPage'
 import PlanPage from '../features/plan/PlanPage'
 import AppShell from './AppShell'
@@ -25,7 +25,7 @@ function App() {
               <Route index element={<OverviewPage />} />
               <Route path="calendario" element={<CalendarPage />} />
               <Route path="piano" element={<PlanPage />} />
-              <Route path="forger" element={<PlannerPage />} />
+              <Route path="forger" element={<ForgerPage />} />
               {/* vecchio indirizzo del Forger */}
               <Route
                 path="planner"

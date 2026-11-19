@@ -14,7 +14,7 @@ import { newId } from '../../lib/ids'
 import ActionMenu, { type MenuAction } from './ActionMenu'
 import DurationField from './DurationField'
 import EndurancePlanEditor from './EndurancePlanEditor'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 import TemplateFooter from './TemplateFooter'
 import {
   cloneDraft,
@@ -22,7 +22,7 @@ import {
   evalDraft,
   type PlanDraft,
 } from './endurancePlanDraft'
-import { useSortable } from './useSortable'
+import { useSortable } from '../../hooks/useSortable'
 
 const SPORTS: EnduranceDiscipline[] = ['swim', 'bike', 'run']
 

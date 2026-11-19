@@ -1,7 +1,7 @@
 import { useId, useState, type PointerEvent } from 'react'
 import { axisScale } from '../../lib/analysis'
 import ChartTip from './ChartTip'
-import { chartHeight, useChartWidth } from './useChartWidth'
+import { chartHeight, useChartWidth } from '../../hooks/useChartWidth'
 
 export interface LineSeries {
   key: string

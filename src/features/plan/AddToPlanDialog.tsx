@@ -2,8 +2,8 @@ import { useState } from 'react'
 import type { Phase, TrainingBlock } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { phaseWeeks } from '../../lib/blocks'
-import { Seg } from '../planner/EndurancePlanEditor'
-import Modal from '../planner/Modal'
+import { Seg } from '../forger/EndurancePlanEditor'
+import Modal from '../../components/ui/Modal'
 
 interface Props {
   phases: Phase[]

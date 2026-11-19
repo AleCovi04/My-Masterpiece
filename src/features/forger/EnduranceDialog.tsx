@@ -6,7 +6,7 @@ import { formatClock, parseClock } from '../../lib/enduranceTemplate'
 import { newId } from '../../lib/ids'
 import DurationField from './DurationField'
 import EndurancePlanEditor from './EndurancePlanEditor'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 import TemplateFooter from './TemplateFooter'
 import { draftFromPlan, evalDraft, type PlanDraft } from './endurancePlanDraft'
 

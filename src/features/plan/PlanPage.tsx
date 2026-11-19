@@ -14,11 +14,11 @@ import {
   type Progress,
   type Timing,
 } from '../../lib/plan'
-import Modal from '../planner/Modal'
-import { usePlanning } from '../planner/usePlanning'
+import Modal from '../../components/ui/Modal'
+import { usePlanning } from '../forger/usePlanning'
 import AddToPlanDialog from './AddToPlanDialog'
 import ApplyDialog from './ApplyDialog'
-import '../planner/planner.css'
+import '../forger/planner.css'
 import './plan.css'
 
 type Pick =

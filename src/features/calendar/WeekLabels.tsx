@@ -4,7 +4,7 @@ import { useI18n } from '../../i18n/context'
 import { applicationLabel, weekLabels } from '../../lib/blocks'
 import { addDays, parseIsoDate, toIsoDate } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
-import Modal from '../planner/Modal'
+import Modal from '../../components/ui/Modal'
 
 interface Props {
   /** Lunedì della settimana mostrata. */

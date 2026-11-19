@@ -14,7 +14,7 @@ import {
 } from '../../lib/analysis'
 import { isIsoDate } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
-import Modal from '../planner/Modal'
+import Modal from '../../components/ui/Modal'
 
 interface Props {
   choice: PeriodChoice

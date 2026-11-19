@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { BodyMap } from '../../components/body'
 import type { MuscleId } from '../../data/types'
 import { useI18n } from '../../i18n/context'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 
 interface Props {
   selected: MuscleId[]

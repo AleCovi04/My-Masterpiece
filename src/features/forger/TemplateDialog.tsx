@@ -28,9 +28,9 @@ import {
 } from '../../lib/templates'
 import ActionMenu, { type MenuAction } from './ActionMenu'
 import ExercisePicker from './ExercisePicker'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 import TemplateFooter from './TemplateFooter'
-import { useSortable } from './useSortable'
+import { useSortable } from '../../hooks/useSortable'
 
 // ---------- bozza del modulo: i numeri restano stringhe finché si digita ----------
 

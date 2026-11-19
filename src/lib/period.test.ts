@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { it as itDict } from '../../i18n/it'
+import { it as itDict } from '../i18n/it'
 import {
   periodLabel,
   shiftAnchor,

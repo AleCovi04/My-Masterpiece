@@ -11,7 +11,7 @@ import {
   normalizeName,
   sortedMuscles,
 } from '../../lib/exercises'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 import MuscleFilterDialog from './MuscleFilterDialog'
 
 interface Props {

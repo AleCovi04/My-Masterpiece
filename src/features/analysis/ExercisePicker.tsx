@@ -5,8 +5,8 @@ import { useI18n } from '../../i18n/context'
 import { daysBetween, parseIsoDate } from '../../lib/dates'
 import { filterByMuscles, normalizeName } from '../../lib/exercises'
 import type { ExerciseSummary } from '../../lib/strengthRecords'
-import Modal from '../planner/Modal'
-import MuscleFilterDialog from '../planner/MuscleFilterDialog'
+import Modal from '../../components/ui/Modal'
+import MuscleFilterDialog from '../forger/MuscleFilterDialog'
 import type { ListFilters } from './strengthUi'
 
 /** 🏆 se l'ultimo record è di questi giorni (oggi compreso). */

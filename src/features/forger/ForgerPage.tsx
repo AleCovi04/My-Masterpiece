@@ -17,7 +17,7 @@ function initialTab(): Tab {
   return TABS.find((t) => t === v) ?? 'exercises'
 }
 
-export default function PlannerPage() {
+export default function ForgerPage() {
   const { t } = useI18n()
   const [tab, setTab] = useState<Tab>(initialTab)
 

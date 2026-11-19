@@ -1,6 +1,6 @@
 import { useId, type PointerEvent } from 'react'
 import type { SeriesPoint } from '../../lib/fit/analysis'
-import { useChartWidth } from '../analysis/useChartWidth'
+import { useChartWidth } from '../../hooks/useChartWidth'
 
 interface Props {
   label: string

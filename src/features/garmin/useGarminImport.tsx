@@ -4,8 +4,8 @@ import { useI18n } from '../../i18n/context'
 import type { FitActivity } from '../../lib/fit/types'
 import { formatClock, formatDist } from '../../lib/enduranceTemplate'
 import { sessionDurationSec } from '../../lib/sessions'
-import Modal from '../planner/Modal'
-import '../planner/planner.css'
+import Modal from '../../components/ui/Modal'
+import '../forger/planner.css'
 import './garmin.css'
 import {
   importFiles,

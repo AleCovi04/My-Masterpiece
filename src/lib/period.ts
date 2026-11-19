@@ -1,6 +1,6 @@
-import type { IsoDate } from '../../data/types'
-import type { Dictionary } from '../../i18n/it'
-import { addDays, mondayOf, parseIsoDate, toIsoDate } from '../../lib/dates'
+import type { IsoDate } from '../data/types'
+import type { Dictionary } from '../i18n/it'
+import { addDays, mondayOf, parseIsoDate, toIsoDate } from './dates'
 
 export type CalendarView = 'week' | 'month' | 'year'
 

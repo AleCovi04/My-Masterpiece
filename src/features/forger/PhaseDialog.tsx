@@ -11,9 +11,9 @@ import { phaseWeeks, weekTotals } from '../../lib/blocks'
 import { formatDuration } from '../../lib/format'
 import { newId } from '../../lib/ids'
 import ActionMenu from './ActionMenu'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 import TemplateFooter from './TemplateFooter'
-import { useSortable } from './useSortable'
+import { useSortable } from '../../hooks/useSortable'
 import './blocks.css'
 
 /** Una riga della fase: il blocco, con una chiave propria (lo stesso blocco può ripetersi). */

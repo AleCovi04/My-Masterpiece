@@ -9,7 +9,7 @@ import {
 } from '../../lib/dates'
 import { dayStatus } from '../../lib/dayStatus'
 import { sessionsOn } from '../../lib/reorder'
-import { weekdayShortNames } from './period'
+import { weekdayShortNames } from '../../lib/period'
 
 interface Props {
   anchor: IsoDate

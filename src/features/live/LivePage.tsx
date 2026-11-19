@@ -20,14 +20,13 @@ import {
   toggleSkip,
   uncompleteSet,
 } from '../../lib/liveWorkout'
-import ExercisePicker from '../planner/ExercisePicker'
-import Modal from '../planner/Modal'
-import { useSortable } from '../planner/useSortable'
+import ExercisePicker from '../forger/ExercisePicker'
+import Modal from '../../components/ui/Modal'
+import { useSortable } from '../../hooks/useSortable'
 import FinishDialog from './FinishDialog'
 import LiveExerciseCard, { type SetErrors } from './LiveExerciseCard'
 import RestBar from './RestBar'
 import { useLiveWorkout, useNow, useRestAlert, useWakeLock } from './hooks'
-import '../planner/planner.css'
 import './live.css'
 
 const pad = (n: number) => String(n).padStart(2, '0')

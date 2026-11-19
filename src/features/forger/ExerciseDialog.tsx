@@ -14,7 +14,7 @@ import {
   type ExerciseUsage,
 } from '../../lib/exercises'
 import { newId } from '../../lib/ids'
-import Modal from './Modal'
+import Modal from '../../components/ui/Modal'
 
 interface Props {
   /** `null` = nuovo esercizio. */

@@ -9,10 +9,10 @@ import type {
 } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { normalizeName } from '../../lib/exercises'
-import Modal from '../planner/Modal'
-import TemplateCardBody from '../planner/TemplateCardBody'
-import { fullDateLabel } from './period'
-import '../planner/planner.css'
+import Modal from '../../components/ui/Modal'
+import TemplateCardBody from '../forger/TemplateCardBody'
+import { fullDateLabel } from '../../lib/period'
+import '../forger/planner.css'
 
 const DISCIPLINES: Discipline[] = ['strength', 'run', 'bike', 'swim', 'brick']
 

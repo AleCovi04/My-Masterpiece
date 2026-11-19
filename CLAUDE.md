@@ -12,11 +12,12 @@ React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 - `docs/` roadmap, decisioni, modello dati
 - `src/app/` entry e cornice dell'app
-- `src/features/` moduli per funzionalità (il Forger è in `planner/`, Il Piano in `plan/`)
-- `src/components/` UI riutilizzabile (`ui/`, `layout/`, `body/`)
-- `src/lib/` calcoli puri e helper
+- `src/features/` moduli per funzionalità (il Forger è in `forger/`, Il Piano in `plan/`); una feature può usare i componenti di un'altra
+- `src/components/` UI riutilizzabile (`ui/` con `Modal`, `layout/`, `body/`)
+- `src/hooks/` hook React generici (media query, larghezza dei grafici, trascinamento)
+- `src/lib/` calcoli puri e helper (date, periodi, statistiche…)
 - `src/data/` tipi, `dataStore`, migrazioni
-- `src/i18n/` traduzioni IT/EN; `src/styles/` stili e tema
+- `src/i18n/` traduzioni IT/EN; `src/styles/` tema e stili condivisi (`ui.css`: campi, bottoni, liste, finestre)
 
 ## Regole
 
