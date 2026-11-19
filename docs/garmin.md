@@ -18,7 +18,9 @@ I file FIT originali vanno in un bucket privato `fit`. Lo crea lo schema, che va
 4. Nell'app: **Dati** → **Garmin tramite intervals.icu** → incolla ID e chiave → **Collega**.
    ID e chiave restano solo su quel dispositivo: ripeti il passo sul telefono e sul PC.
 
-Poi: **Calendario** → **Sincronizza Garmin**. L'app controlla da sola anche all'apertura (al massimo una volta all'ora). La prima volta prende gli ultimi 30 giorni.
+Poi, all'apertura dell'app, se un'attività dell'orologio (ultimi 14 giorni) è nello stesso giorno e sport di una seduta programmata compare la finestra **Collega**: a sinistra l'attività Garmin, a destra la seduta in cui andrà. Lascia la spunta su quelle giuste → **Collega**. **Più tardi** la ripropone al prossimo avvio; **✕** non la propone più.
+
+Per le attività senza seduta (ad esempio una corsa in un giorno di riposo): **Calendario** → **Sincronizza Garmin** mostra gli ultimi 30 giorni; spunta quelle da aggiungere come seduta nuova.
 
 ## 3. Importare i file a mano
 
