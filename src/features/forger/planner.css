@@ -518,29 +518,6 @@
   gap: 10px;
   font-size: 16px;
 }
-.en-seg {
-  display: inline-flex;
-  align-self: flex-start;
-  max-width: 100%;
-  border: 1.5px solid var(--line);
-  border-radius: 999px;
-  background: var(--surface);
-  padding: 3px;
-  gap: 2px;
-}
-.en-seg button {
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 999px;
-  padding: 7px 14px;
-  font: 600 14px var(--f-body);
-  cursor: pointer;
-}
-.en-seg button[aria-pressed='true'] {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
 .en-summary {
   position: sticky;
   top: -22px;

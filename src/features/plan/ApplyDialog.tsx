@@ -17,7 +17,7 @@ import {
   toIsoDate,
 } from '../../lib/dates'
 import { formatLongDate } from '../../lib/format'
-import { Seg } from '../forger/EndurancePlanEditor'
+import { Seg } from '../../components/ui/Seg'
 import Modal from '../../components/ui/Modal'
 import '../forger/blocks.css'
 

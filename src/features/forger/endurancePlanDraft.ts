@@ -73,6 +73,9 @@ export const blankFields = (
   notes: '',
 })
 
+/** Tipi di passo nell'ordine dei menu. */
+export const STEP_TYPES: StepType[] = ['warmup', 'work', 'recovery', 'cooldown']
+
 export const newStep = (type: StepType): EnduranceStep => ({
   kind: 'step',
   id: newId(),
