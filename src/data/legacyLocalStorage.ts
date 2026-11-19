@@ -16,8 +16,6 @@ const KEYS = {
 /** Dopo la migrazione `mm.sessions` diventa `mm.sessions.backup-idb`, e così le altre. */
 const LEGACY_BACKUP_SUFFIX = '.backup-idb'
 
-const DEFAULT_RACE_DATE = '2028-08-20'
-
 interface LegacyData {
   raw: RawData
   /** Versione dello schema dei dati trovati: 0 o 1. */
@@ -56,7 +54,7 @@ export function readLegacy(storage: LegacyStorage): LegacyData | null {
   if (Object.values(texts).every((t) => t === null)) return null
 
   const exercises = list(texts.exercises)
-  let raceDate: unknown = DEFAULT_RACE_DATE
+  let raceDate: unknown = null
   if (texts.raceDate !== null) {
     try {
       raceDate = JSON.parse(texts.raceDate)

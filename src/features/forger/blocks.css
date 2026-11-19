@@ -186,9 +186,6 @@
   font-size: 20px;
   cursor: pointer;
 }
-.bl-apply {
-  align-self: flex-start;
-}
 .bl-preview {
   margin: 0;
   padding: 10px 14px 10px 30px;

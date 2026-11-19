@@ -65,7 +65,7 @@
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-  border-top: 1px solid rgba(255, 255, 255, 0.28);
+  border-top: 1px solid color-mix(in srgb, var(--hero-text) 28%, transparent);
   padding-top: 16px;
 }
 .race .lbl {
@@ -76,8 +76,8 @@
   color: var(--hero-muted);
 }
 .date-btn {
-  border: 1px solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid color-mix(in srgb, var(--hero-text) 45%, transparent);
+  background: color-mix(in srgb, var(--hero-text) 12%, transparent);
   color: var(--hero-text);
   border-radius: 999px;
   padding: 8px 16px;
@@ -86,7 +86,7 @@
   font-variant-numeric: tabular-nums;
 }
 .date-btn:hover {
-  background: rgba(255, 255, 255, 0.22);
+  background: color-mix(in srgb, var(--hero-text) 22%, transparent);
 }
 .date-btn:focus-visible {
   outline-color: var(--hero-text);
@@ -104,7 +104,7 @@
   border: 1px solid var(--line);
   border-radius: 16px;
   padding: 14px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 18px 40px var(--shadow);
 }
 .pop-head {
   display: flex;
@@ -281,13 +281,13 @@
 }
 .stat.main .k,
 .stat.main .v small {
-  color: rgba(255, 255, 255, 0.82);
+  color: color-mix(in srgb, var(--accent-ink) 82%, transparent);
 }
 .stat.main .bar {
-  background: rgba(255, 255, 255, 0.3);
+  background: color-mix(in srgb, var(--accent-ink) 30%, transparent);
 }
 .stat.main .bar b {
-  background: #fff;
+  background: var(--accent-ink);
 }
 .note {
   font-size: 13px;

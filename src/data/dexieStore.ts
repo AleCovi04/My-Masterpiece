@@ -28,7 +28,6 @@ import {
 import {
   defaultSettings,
   type AppData,
-  type IsoDate,
   type IsoDateTime,
   type LiveWorkout,
 } from './types'
@@ -41,7 +40,6 @@ import {
 import { type Row, type ListKey, changeKey, MmDb } from './db'
 
 export const DB_NAME = 'my-masterpiece'
-export const DEFAULT_RACE_DATE: IsoDate = '2028-08-20'
 /** Backup automatico se l'ultimo ha più di questi giorni. */
 const AUTO_BACKUP_DAYS = 7
 /** Quanti backup si tengono (i più recenti). */
@@ -107,7 +105,7 @@ export function createDexieStore(
     blocks: [],
     phases: [],
     applications: [],
-    raceDate: DEFAULT_RACE_DATE,
+    raceDate: null, // la data gara la sceglie l'utente
     settings: defaultSettings(),
     imports: [],
   })

@@ -25,6 +25,13 @@
   --brick: #7c4dff;
   /* quanto colore nello sfondo delle card */
   --card-tint: 20%;
+  /* mappa muscolare */
+  --heat-lo: #f9cdd5;
+  --heat-hi: #c40d24;
+  --bm-neutral: #e6dcdd;
+  --bm-joint: #f1ebeb;
+  --bm-muscle: #d9cfd1;
+  --bm-line: rgba(70, 20, 28, 0.5);
   color-scheme: light;
 }
 
@@ -51,10 +58,23 @@
   --strength: #ff3d68;
   --brick: #9d7bff;
   --card-tint: 26%;
+  --heat-lo: #7a3440;
+  --heat-hi: #ff3048;
+  --bm-neutral: #3a3133;
+  --bm-joint: #2a2426;
+  --bm-muscle: #4a4245;
+  --bm-line: rgba(0, 0, 0, 0.65);
   color-scheme: dark;
 }
 
 :root {
+  /* velo dietro le finestre e ombre */
+  --overlay: rgba(10, 6, 7, 0.55);
+  --shadow: rgba(0, 0, 0, 0.22);
+  /* passi degli allenamenti endurance (il lavoro usa l'accento) */
+  --step-warmup: #14a89a;
+  --step-recovery: #4d86e8;
+  --step-cooldown: #8b5cf6;
   /* fasi: un colore neutro per tutte */
   --phase: var(--text);
   --f-display: 'Barlow Condensed', 'Arial Narrow', Arial, sans-serif;

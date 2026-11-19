@@ -1,22 +1,3 @@
-/* Colori della mappa: chiaro e scuro (stessi selettori di styles/theme.css). */
-:root,
-:root[data-theme='light'] {
-  --heat-lo: #f9cdd5;
-  --heat-hi: #c40d24;
-  --bm-neutral: #e6dcdd;
-  --bm-joint: #f1ebeb;
-  --bm-muscle: #d9cfd1;
-  --bm-line: rgba(70, 20, 28, 0.5);
-}
-:root[data-theme='dark'] {
-  --heat-lo: #7a3440;
-  --heat-hi: #ff3048;
-  --bm-neutral: #3a3133;
-  --bm-joint: #2a2426;
-  --bm-muscle: #4a4245;
-  --bm-line: rgba(0, 0, 0, 0.65);
-}
-
 .bm {
   position: relative;
   display: flex;
@@ -155,7 +136,7 @@
   padding: 5px 9px;
   border-radius: 8px;
   max-width: 260px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 14px var(--shadow);
 }
 
 /* interruttore fronte/retro: solo su telefono */

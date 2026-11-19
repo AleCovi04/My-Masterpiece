@@ -156,7 +156,7 @@
   position: relative;
   z-index: 4;
   transform: scale(1.03);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 26px var(--shadow);
 }
 
 /* cerchi "+": sovrapposti, non spostano nulla; visibili solo nel giorno selezionato */
@@ -174,7 +174,7 @@
   padding: 0;
   cursor: pointer;
   z-index: 3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 2px 8px var(--shadow);
   display: none;
 }
 .cal-day.sel .cal-ins {
@@ -371,89 +371,6 @@
 }
 .cal-ym-g .td[class*='st-'] {
   box-shadow: inset 0 0 0 2px var(--accent);
-}
-
-/* ---------- finestra ---------- */
-.cal-mod {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  padding: 20px max(16px, env(safe-area-inset-right, 0px)) 20px
-    max(16px, env(safe-area-inset-left, 0px));
-  background: rgba(10, 6, 7, 0.55);
-}
-.cal-box {
-  box-sizing: border-box;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  padding: 22px;
-  width: min(520px, 100%);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.cal-box-h {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 12px;
-}
-.cal-box-h h3 {
-  margin: 0;
-  font-family: var(--f-display);
-  font-size: 28px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  line-height: 1.05;
-}
-.cal-box-h p {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 14px;
-}
-.cal-x {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  color: var(--text);
-  cursor: pointer;
-  font-size: 20px;
-  line-height: 1;
-  flex: none;
-}
-.cal-pick {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.cal-pick button {
-  border: 1.5px solid var(--c);
-  background: color-mix(in srgb, var(--c) 12%, var(--bg));
-  color: var(--text);
-  border-radius: 16px;
-  padding: 22px 12px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  font: 700 18px var(--f-body);
-}
-.cal-pick button:hover {
-  background: color-mix(in srgb, var(--c) 22%, var(--bg));
-}
-.cal-pick svg {
-  width: 40px;
-  height: 40px;
-  color: var(--c);
 }
 
 /* ---------- telefono ---------- */

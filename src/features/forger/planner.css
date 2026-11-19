@@ -602,16 +602,16 @@
   border-left: 5px solid var(--st);
 }
 .en-step[data-type='warmup'] {
-  --st: #14a89a;
+  --st: var(--step-warmup);
 }
 .en-step[data-type='work'] {
   --st: var(--accent);
 }
 .en-step[data-type='recovery'] {
-  --st: #4d86e8;
+  --st: var(--step-recovery);
 }
 .en-step[data-type='cooldown'] {
-  --st: #8b5cf6;
+  --st: var(--step-cooldown);
 }
 .en-step.lifting,
 .en-repeat.lifting {

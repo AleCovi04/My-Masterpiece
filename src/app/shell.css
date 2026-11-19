@@ -107,7 +107,7 @@
 .scrim {
   position: fixed;
   inset: 0;
-  background: rgba(10, 6, 7, 0.48);
+  background: var(--overlay);
   z-index: 40;
   opacity: 0;
   pointer-events: none;
@@ -142,7 +142,7 @@
 .drawer.on {
   transform: none;
   visibility: visible;
-  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.18);
+  box-shadow: 12px 0 40px var(--shadow);
 }
 .drawer .lead {
   margin-bottom: 22px;
@@ -169,15 +169,6 @@
   width: 20px;
   height: 20px;
   flex: none;
-}
-
-.placeholder-title {
-  font-family: var(--f-display);
-  font-weight: 800;
-  font-size: clamp(36px, 5vw, 52px);
-  text-transform: uppercase;
-  margin: 0;
-  line-height: 1;
 }
 .ph {
   border: 1px dashed var(--line);

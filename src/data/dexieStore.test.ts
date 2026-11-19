@@ -4,7 +4,6 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   createDexieStore,
   DB_NAME,
-  DEFAULT_RACE_DATE,
   MAX_BACKUPS,
   type DexieStoreOptions,
 } from './dexieStore'
@@ -84,7 +83,7 @@ describe('store IndexedDB', () => {
     ])
     expect(await store.loadTemplates()).toEqual([])
     expect(await store.loadSessions()).toEqual([])
-    expect(await store.loadRaceDate()).toBe(DEFAULT_RACE_DATE)
+    expect(await store.loadRaceDate()).toBeNull()
     expect(b.persistRequests()).toBe(1)
   })
 
