@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { DisciplineIcon, LegIcons } from '../../components/ui/Icons'
 import RpeScale from '../../components/ui/RpeScale'
 import { brickSports } from '../../lib/brick'
@@ -18,6 +19,8 @@ import { sessionRpe } from '../../lib/load'
 import { sessionAsTemplate, sessionDurationSec } from '../../lib/sessions'
 import ActualDialog from '../endurance/ActualDialog'
 import ActualView from '../endurance/ActualView'
+import FitFileButton from '../garmin/FitFileButton'
+import { useGarminImport } from '../garmin/useGarminImport'
 import BrickDialog from '../planner/BrickDialog'
 import EnduranceDialog from '../planner/EnduranceDialog'
 import Modal from '../planner/Modal'
@@ -79,6 +82,18 @@ export default function SessionDetail({
   // `null` = riga "Sposta data" chiusa
   const [newDate, setNewDate] = useState<string | null>(null)
   const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const navigate = useNavigate()
+  const garmin = useGarminImport()
+  const g = t.garmin
+  const fromGarmin = s.discipline !== 'strength' && !!s.actual?.garmin
+  const importButton = (
+    <FitFileButton
+      label={g.importFit}
+      busyLabel={g.importing}
+      busy={garmin.busy}
+      onFiles={(files) => void garmin.run(files, s.id)}
+    />
+  )
 
   const name = s.name ?? t.discipline[s.discipline]
   const seconds = sessionDurationSec(s)
@@ -151,16 +166,34 @@ export default function SessionDetail({
           {s.discipline !== 'strength' ? (
             s.actual ? (
               <section className="sd-sec">
-                <h4>{e.section}</h4>
+                <h4>
+                  {e.section}
+                  {fromGarmin && (
+                    <small className="sd-src"> · {g.fromGarmin}</small>
+                  )}
+                </h4>
                 <ActualView session={s} />
                 <div className="pl-actions">
-                  <button
-                    type="button"
-                    className="pl-btn"
-                    onClick={() => setRecording(true)}
-                  >
-                    {e.edit}
-                  </button>
+                  {fromGarmin ? (
+                    <button
+                      type="button"
+                      className="pl-btn acc"
+                      onClick={() => navigate(`/attivita/${s.id}`)}
+                    >
+                      {g.openActivity}
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="pl-btn"
+                        onClick={() => setRecording(true)}
+                      >
+                        {e.edit}
+                      </button>
+                      {importButton}
+                    </>
+                  )}
                   {confirmingClear ? (
                     <span className="pl-confirm">
                       <small>{e.confirmRemove}</small>
@@ -194,14 +227,17 @@ export default function SessionDetail({
                 </div>
               </section>
             ) : (
-              <button
-                type="button"
-                className="pl-btn acc sd-start"
-                disabled={s.status === 'skipped'}
-                onClick={() => setRecording(true)}
-              >
-                {e.record}
-              </button>
+              <div className="sd-record">
+                <button
+                  type="button"
+                  className="pl-btn acc sd-start"
+                  disabled={s.status === 'skipped'}
+                  onClick={() => setRecording(true)}
+                >
+                  {e.record}
+                </button>
+                {s.status !== 'skipped' && importButton}
+              </div>
             )
           ) : s.status === 'in_progress' ? (
             <button
@@ -329,6 +365,8 @@ export default function SessionDetail({
           </div>
         </div>
       </Modal>
+
+      {garmin.element}
 
       {recording && s.discipline !== 'strength' && (
         <ActualDialog

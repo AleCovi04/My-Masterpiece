@@ -18,6 +18,7 @@ import type { DataCounts, IsoDateTime } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import Modal from '../planner/Modal'
 import '../planner/planner.css'
+import GarminCards from '../garmin/GarminCards'
 import AccountCard from './AccountCard'
 import './data.css'
 
@@ -214,6 +215,8 @@ export default function DataPage() {
           </div>
         </section>
       </Grid>
+
+      <GarminCards dateTime={dateTime} />
 
       <section className="dt-card">
         <h2>{d.backupsTitle}</h2>

@@ -1,0 +1,77 @@
+/* Import Garmin e pagina Attività. */
+.gm-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.gm-choices {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.gm-choice {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+}
+.gm-choice small {
+  color: var(--muted);
+  font-weight: 400;
+}
+.gm-result {
+  margin: 0 0 12px;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.gm-result .gm-hint {
+  list-style: none;
+  margin-left: -18px;
+}
+.gm-sync {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin: 0 0 12px;
+}
+.gm-sync small {
+  color: var(--muted);
+}
+.gm-err {
+  margin: 0;
+  color: var(--miss);
+  font-size: 13px;
+}
+.gm-sync small.gm-err {
+  color: var(--miss);
+}
+.gm-ok {
+  margin: 0;
+  color: var(--ok);
+  font-size: 13px;
+}
+.gm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+@media (min-width: 640px) {
+  .gm-th {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: end;
+  }
+  .gm-th .gm-err,
+  .gm-th .gm-ok,
+  .gm-th .dt-actions {
+    grid-column: 1 / -1;
+  }
+}

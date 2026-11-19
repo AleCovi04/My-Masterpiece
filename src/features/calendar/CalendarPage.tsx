@@ -5,6 +5,7 @@ import { useI18n } from '../../i18n/context'
 import { isIsoDate, todayIso } from '../../lib/dates'
 import { liveSessions } from '../../lib/liveWorkout'
 import { emptySession, sessionFromTemplate } from '../../lib/sessions'
+import GarminSyncButton from '../garmin/GarminSyncButton'
 import { LIVE_PATH } from '../live/hooks'
 import MonthView from './MonthView'
 import SessionDetail from './SessionDetail'
@@ -90,6 +91,8 @@ export default function CalendarPage() {
           {c.thisWeek}
         </button>
       </div>
+
+      <GarminSyncButton />
 
       {sessions && view === 'week' && (
         <WeekLabels

@@ -26,11 +26,27 @@ export function useAccount(): AccountState {
 }
 
 let revision = 0
+const localListeners = new Set<() => void>()
 dataStore.subscribe(() => {
   revision += 1
 })
 
-/** Cambia quando arrivano dati da un altro dispositivo: da mettere nelle dipendenze dei caricamenti. */
+/** Fa ricaricare le pagine dopo una scrittura fatta fuori da loro (es. import Garmin). */
+export function refreshData(): void {
+  revision += 1
+  localListeners.forEach((fn) => fn())
+}
+
+const subscribeRevision = (fn: () => void) => {
+  const off = dataStore.subscribe(fn)
+  localListeners.add(fn)
+  return () => {
+    off()
+    localListeners.delete(fn)
+  }
+}
+
+/** Cambia quando arrivano dati da un altro dispositivo (o con `refreshData`): da mettere nelle dipendenze dei caricamenti. */
 export function useDataRevision(): number {
-  return useSyncExternalStore(dataStore.subscribe, () => revision)
+  return useSyncExternalStore(subscribeRevision, () => revision)
 }

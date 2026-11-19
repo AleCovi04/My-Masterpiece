@@ -814,3 +814,18 @@
   color: var(--muted);
   font-size: 13px;
 }
+
+/* Registra eseguito + Importa .FIT */
+.sd-record {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sd-src {
+  font-family: var(--f-body);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
+}
