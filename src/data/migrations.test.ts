@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildExportFile, parseImportFile } from './exportFile'
+import { buildExportFile, exportFileName, parseImportFile } from './exportFile'
 import { migrate, MIGRATIONS, SCHEMA_VERSION, type RawData } from './migrations'
 import { defaultSettings } from './types'
 import { sanitize } from './validate'
@@ -415,5 +415,14 @@ describe('import/export', () => {
     }).data
     expect(data.settings.thresholds).toEqual({ maxHr: 190 })
     expect(data.imports.map((i) => i.id)).toEqual(['42-1'])
+  })
+})
+
+describe('exportFileName', () => {
+  it('usa la data locale anche subito dopo mezzanotte', () => {
+    // 00:30 ora locale: in UTC può essere ancora il giorno prima
+    expect(exportFileName(new Date(2026, 10, 16, 0, 30))).toBe(
+      'my-masterpiece-2026-11-16.json',
+    )
   })
 })

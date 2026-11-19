@@ -1,4 +1,5 @@
 // File di export/import: tutti i dati in un JSON con versione dello schema e data.
+import { toIsoDate } from '../lib/dates'
 import { migrate, SCHEMA_VERSION } from './migrations'
 import type { AppData, DataCounts, IsoDateTime } from './types'
 import { countData, isRawData, sanitize } from './validate'
@@ -21,9 +22,9 @@ export function buildExportFile(data: AppData, now: Date): ExportFile {
   }
 }
 
-/** "my-masterpiece-2026-11-16.json" */
+/** "my-masterpiece-2026-11-16.json", con la data locale (non UTC). */
 export function exportFileName(now: Date): string {
-  return `${EXPORT_APP_ID}-${now.toISOString().slice(0, 10)}.json`
+  return `${EXPORT_APP_ID}-${toIsoDate(now)}.json`
 }
 
 export type ImportError =
