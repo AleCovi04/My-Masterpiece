@@ -722,7 +722,7 @@ export const en: Dictionary = {
       'Garmin file storage unavailable (a connection is needed).',
     freeUp: 'Free up space',
     ok: 'All good: the space will last for years.',
-    warn: 'Over half of the space used: keep an eye on it (guide, Maintenance and docs/spazio-dati.md).',
+    warn: 'Over half of the space used: keep an eye on it (docs/spazio-dati.md).',
     high: 'Space almost full: follow the procedure in docs/spazio-dati.md before reaching the limit.',
   },
   archive: {
@@ -812,7 +812,7 @@ export const en: Dictionary = {
     intro:
       'With an account your data syncs across your devices. Without one, it stays on this device only.',
     unavailable:
-      'Sync is not configured: the Supabase keys are missing (see docs/guida.md).',
+      'Sync is not configured: the Supabase keys are missing.',
     email: 'Email',
     sendCode: 'Send me the link',
     codeSent:

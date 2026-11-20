@@ -728,7 +728,7 @@ export const it = {
       'Spazio dei file Garmin non disponibile (serve la connessione).',
     freeUp: 'Libera spazio',
     ok: 'Tutto a posto: lo spazio basta per anni.',
-    warn: 'Oltre metà dello spazio: tienilo d’occhio (guida, Manutenzione e docs/spazio-dati.md).',
+    warn: 'Oltre metà dello spazio: tienilo d’occhio (docs/spazio-dati.md).',
     high: 'Spazio quasi pieno: segui la procedura in docs/spazio-dati.md prima di superare il limite.',
   },
   archive: {
@@ -818,7 +818,7 @@ export const it = {
     intro:
       'Con un account i dati si sincronizzano tra i tuoi dispositivi. Senza, restano solo su questo.',
     unavailable:
-      'Sincronizzazione non configurata: mancano le chiavi di Supabase (vedi docs/guida.md).',
+      'Sincronizzazione non configurata: mancano le chiavi di Supabase.',
     email: 'Email',
     sendCode: 'Inviami il link',
     codeSent:

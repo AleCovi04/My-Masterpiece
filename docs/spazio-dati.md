@@ -37,7 +37,7 @@ Per avere una copia tua basta l'export mensile (**Dati** → **Esporta tutto (JS
 
 ### Livello 0 – Controllo ed export
 
-Ogni mese (guida, §18): **Dati** → **Spazio sul server** ed export JSON. I FIT vengono caricati **compressi** (circa metà dello spazio, senza perdite) e sul dispositivo restano in chiaro.
+Ogni mese: **Dati** → **Spazio sul server** ed export JSON. I FIT vengono caricati **compressi** (circa metà dello spazio, senza perdite) e sul dispositivo restano in chiaro.
 
 ### Livello 2 – Libera spazio (archiviare i FIT più vecchi)
 

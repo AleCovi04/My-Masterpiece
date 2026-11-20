@@ -78,4 +78,4 @@ Per iniziare l'uso reale con dati puliti (decisione del 2026-11-19): **dopo l'ex
 - **Sito:** Vercel → **Deployments** → l'ultimo deploy funzionante → ⋯ → **Promote to Production**. Lo schema dei dati non è cambiato (10), quindi tornare a una versione precedente non crea problemi ai dati.
 - **APK:** Android non permette di installare una build più vecchia sopra una più nuova. Si corregge e si pubblica una build nuova (passo F con un tag nuovo, es. `v1.1.1`, oppure **Run workflow** su `main`).
 - **Dati:** ogni dispositivo ha i suoi backup (**Dati** → elenco dei backup → **Ripristina**); in ultima istanza **Dati** → **Importa** l'export del passo A1.
-- **Avviso rosso in alto** ("Salvataggio non disponibile" o "Salvataggio non riuscito"): non usare gli strumenti del server; chiudi e riapri l'app e controlla lo spazio libero del dispositivo. Vedi la guida, §17.
+- **Avviso rosso in alto** ("Salvataggio non disponibile" o "Salvataggio non riuscito"): non usare gli strumenti del server; chiudi e riapri l'app e controlla lo spazio libero del dispositivo.

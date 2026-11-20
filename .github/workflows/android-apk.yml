@@ -1,7 +1,7 @@
 # Costruisce l'APK Android firmato e lo pubblica nelle Release di GitHub.
 # Si avvia a mano (Actions → Android APK → Run workflow) o con un tag `v*`.
 # Segreti richiesti: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, ANDROID_KEYSTORE_BASE64,
-# ANDROID_KEYSTORE_PASSWORD (vedi docs/guida.md, §13-14).
+# ANDROID_KEYSTORE_PASSWORD.
 # Gli errori finiscono anche nelle annotazioni del run (leggibili senza accesso ai log).
 name: Android APK
 
@@ -36,7 +36,7 @@ jobs:
           SK: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: |
           for v in KS KP SU SK; do
-            if [ -z "${!v}" ]; then echo "::error::Segreto mancante ($v): vedi docs/guida.md"; exit 1; fi
+            if [ -z "${!v}" ]; then echo "::error::Segreto mancante ($v): aggiungilo nei segreti del repository"; exit 1; fi
           done
 
       - run: npm ci

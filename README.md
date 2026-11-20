@@ -4,7 +4,6 @@ App per preparare un triathlon (Ironman 70.3): libreria di allenamenti (Forger),
 
 - **Sito:** https://my-masterpiece.vercel.app (PWA)
 - **App Android:** APK nelle [Release](https://github.com/AleCovi04/My-Masterpiece/releases/latest)
-- **Guida all'uso e all'amministrazione:** [docs/guida.md](docs/guida.md)
 
 ## Stack
 
@@ -40,7 +39,7 @@ src/
   data/        tipi, dataStore (unico accesso ai dati), migrazioni, sync/
   i18n/        testi in italiano e inglese
   styles/      tema (colori) e stili condivisi
-docs/          guida, roadmap, decisioni, modello dati
+docs/          roadmap, decisioni, modello dati
 supabase/      schema del server
 android/       progetto Capacitor
 ```
