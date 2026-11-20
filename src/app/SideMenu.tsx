@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { NavLink } from 'react-router-dom'
 import { MenuIcon } from '../components/ui/Icons'
+import { useBackClose } from '../hooks/useBackClose'
 import { useGoal } from '../hooks/useGoal'
 import { useI18n } from '../i18n/context'
 import { NAV_ITEMS } from './navItems'
@@ -14,6 +15,7 @@ export default function SideMenu({ open, onClose }: Props) {
   const { t } = useI18n()
   const goal = useGoal()
   const closeRef = useRef<HTMLButtonElement>(null)
+  useBackClose(open, onClose)
 
   useEffect(() => {
     if (!open) return
