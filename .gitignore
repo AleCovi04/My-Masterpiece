@@ -22,13 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# LaTeX (docs/guida.tex): file di compilazione
-.tex-build/
-*.aux
-*.toc
-*.out
-*.synctex.gz
-*.fls
-*.fdb_latexmk
-docs/guida.pdf
