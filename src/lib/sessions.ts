@@ -96,21 +96,29 @@ export function emptySession(
       }
 }
 
-/** Mette `ordered` (le sedute di `date`, nell'ordine voluto) al posto di quelle del giorno, numerate da 0. */
+/**
+ * Mette `ordered` (le sedute di `date`, nell'ordine voluto) al posto di quelle
+ * del giorno, numerate da 0. Le sedute restano al loro posto nell'elenco (le
+ * nuove vanno in fondo) e cambiano solo quelle con un `order` diverso.
+ */
 function renumber(
   sessions: Session[],
   date: IsoDate,
   ordered: Session[],
   now: IsoDateTime,
 ): Session[] {
-  const ids = new Set(ordered.map((s) => s.id))
-  return [
-    ...sessions.filter((s) => !ids.has(s.id)),
-    ...ordered.map((s, i) =>
+  const next = new Map(
+    ordered.map((s, i) => [
+      s.id,
       s.date === date && s.order === i
         ? s
         : { ...s, date, order: i, updatedAt: now },
-    ),
+    ]),
+  )
+  const known = new Set(sessions.map((s) => s.id))
+  return [
+    ...sessions.map((s) => next.get(s.id) ?? s),
+    ...[...next.values()].filter((s) => !known.has(s.id)),
   ]
 }
 

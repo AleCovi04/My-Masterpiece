@@ -5,7 +5,7 @@ Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono ch
 ## v1.1 — prima versione ufficiale
 
 - ✅ **B1** Elenchi vecchi che sovrascrivono dati più nuovi (live, Collega, più schede, import Garmin): lettura-modifica-scrittura in una sola transazione.
-- ⬜ **B2** Cambi di sola posizione che riscrivono intere sedute (sovrascrittura di modifiche fatte offline, traffico).
+- ✅ **B2** Cambi di sola posizione che riscrivono intere sedute (sovrascrittura di modifiche fatte offline, traffico).
 - ⬜ **B3** Avvio "solo in memoria" silenzioso ed errori di salvataggio nascosti: avviso, sincronizzazione e strumenti del server bloccati.
 - ⬜ **B4** Migrazioni e sincronizzazione: migrazione senza nuove ore né cancellazioni, guardia per dati di una versione più recente.
 - ⬜ **B5** Pulizia automatica delle cancellazioni dopo 90 giorni: da togliere.

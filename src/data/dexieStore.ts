@@ -177,8 +177,11 @@ export function createDexieStore(
   }
 
   /**
-   * Scrive un elenco intero. Con `track` le voci nuove, cambiate (anche solo di
-   * posizione) o tolte vanno nella coda della sincronizzazione.
+   * Scrive un elenco intero. Con `track` le voci nuove, cambiate o tolte vanno
+   * nella coda della sincronizzazione. Una voce che cambia solo posizione
+   * nell'elenco si aggiorna sul dispositivo senza nuova ora e senza coda: la
+   * posizione non è un dato dell'utente, e riscriverla farebbe vincere questa
+   * copia su modifiche più recenti fatte altrove.
    */
   const writeList = async (
     key: ListKey,
@@ -195,12 +198,17 @@ export function createDexieStore(
     const old = new Map((await db[key].toArray()).map((r) => [r.id, r]))
     const stamp = now().toISOString()
     const changed: Row[] = []
+    const moved: Row[] = []
     items.forEach((item, pos) => {
       const prev = old.get(item.id)
       old.delete(item.id)
-      if (prev && prev.pos === pos && sameJson(prev.item, item)) return
+      if (prev && sameJson(prev.item, item)) {
+        if (prev.pos !== pos) moved.push({ ...prev, pos })
+        return
+      }
       changed.push({ id: item.id, pos, item, updatedAt: stamp })
     })
+    if (moved.length > 0) await db[key].bulkPut(moved)
     const removed = [...old.keys()]
     if (changed.length === 0 && removed.length === 0) return
     await db[key].bulkDelete(removed)

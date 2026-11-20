@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { createDexieStore } from '../dexieStore'
 import { SCHEMA_VERSION } from '../migrations'
 import type { Exercise, ImportRecord, Session } from '../types'
+import { insertSession, removeSession } from '../../lib/sessions'
 import { createSyncEngine } from './engine'
 import type { RemoteChange, SyncChange, SyncRemote } from './types'
 
@@ -345,6 +346,70 @@ describe('salvataggi su dati vecchi (B1)', () => {
       exercises: [{ id: 'x' }],
     })
     expect(await a.store.pendingChanges()).toEqual([])
+  })
+})
+
+describe('cambi di sola posizione (B2)', () => {
+  it('telefono offline registra, il PC elimina una seduta precedente: l’allenamento resta', async () => {
+    const server = fakeServer()
+    const pc = device(server)
+    const phone = device(server)
+    const day = '2026-11-18'
+    await pc.store.update(['sessions'], () => ({
+      sessions: [
+        session('s1', '2026-11-16'),
+        session('s2', day),
+        session('s3', day, 1),
+        session('s4', '2026-11-19'),
+      ],
+    }))
+    await pc.connect()
+    await pc.engine.syncNow()
+    await phone.store.init()
+    await phone.connect()
+    await phone.engine.syncNow()
+
+    // in palestra, senza rete
+    phone.later(60_000)
+    await phone.store.update(['sessions'], ({ sessions }) => ({
+      sessions: sessions.map((s) =>
+        s.id === 's3' ? { ...s, status: 'done' as const } : s,
+      ),
+    }))
+    // dopo, sul PC: si elimina una seduta che viene prima nell'elenco
+    pc.later(120_000)
+    await pc.store.update(['sessions'], ({ sessions }) => ({
+      sessions: removeSession(sessions, 's1', pc.clock.now.toISOString()),
+    }))
+    expect((await pc.store.pendingChanges()).map((c) => c.id)).toEqual(['s1'])
+    await pc.engine.syncNow()
+    await phone.engine.syncNow()
+    await pc.engine.syncNow()
+
+    for (const d of [pc, phone]) {
+      const s3 = (await d.store.loadSessions()).find((s) => s.id === 's3')
+      expect(s3?.status).toBe('done')
+    }
+  })
+
+  it('aggiungere una seduta mette in coda una sola voce', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    const day = '2026-11-18'
+    await a.store.update(['sessions'], () => ({
+      sessions: [
+        session('s1', day),
+        session('s2', day, 1),
+        session('s3', '2026-11-19'),
+      ],
+    }))
+    await a.connect()
+    await a.engine.syncNow()
+    a.later(60_000)
+    await a.store.update(['sessions'], ({ sessions }) => ({
+      sessions: insertSession(sessions, session('n', day), day, 2),
+    }))
+    expect((await a.store.pendingChanges()).map((c) => c.id)).toEqual(['n'])
   })
 })
 
