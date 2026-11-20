@@ -13,6 +13,9 @@ Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono ch
 - ✅ **B7** Iscrizioni aperte su Supabase: chiuse, con messaggio chiaro nell'app.
 - ✅ **B8** "Esporta tutto" nell'APK che non salva nulla: export dal PC.
 - ✅ **B9** Error Boundary: niente più schermo bianco.
+- ✅ **B10** `android/.gitignore`: keystore esclusi (`*.jks`, `*.keystore`, `*.p12`).
+- ⬜ **B11** Tasto Indietro di Android con una finestra aperta: chiude la finestra, non cambia pagina, i campi restano.
+- ⬜ **B12** `viewport-fit=cover` e margini safe-area per intestazione, barra del recupero e sidebar.
 - ⬜ Versione 1.1.0 nell'app (pagina Dati), `CHANGELOG.md`, `docs/release-checklist.md`, guida aggiornata.
 - ⬜ Verifica finale su telefono e PC (checklist di release).
 
@@ -20,9 +23,9 @@ Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono ch
 
 - ⬜ **Dati e sincronizzazione:** ora del dispositivo sbagliata (limite lato server); impostazioni in voci separate; confronto per riferimento nei salvataggi; backup più leggeri e limiti separati; cache FIT compressa o con limite; testi di Importa/Ripristina e ricaricamento delle pagine; Ricarica il server e riconciliazione completa dei dispositivi fermi; cambio di account; aggiornamento tra schede; validazione più profonda delle voci sincronizzate.
 - ⬜ **Garmin:** errori per singola attività su intervals.icu; id deterministico delle sedute importate; giorno dall'ora locale dell'attività; FIT troncati; lettura del FIT in un Web Worker; timeout delle richieste.
-- ⬜ **Allenamento live:** durata di un allenamento dimenticato aperto; valori "ultima volta" calcolati una volta; avviso per notifiche negate; tasto Indietro di Android con le finestre aperte.
+- ⬜ **Allenamento live:** durata di un allenamento dimenticato aperto; valori "ultima volta" calcolati una volta; avviso per notifiche negate.
 - ⬜ **Export dal telefono** (file e condivisione di Android).
-- ⬜ **Android e PWA:** aggiornamento della PWA con avviso; font nel progetto; caricamento delle pagine su richiesta; barre di sistema (bordo a bordo); `allowBackup`; workflow APK più sicuro (SHA fissati, keystore cancellato, lint e test prima della build); `.gitignore` dei keystore; `theme-color` del tema scuro.
+- ⬜ **Android e PWA:** aggiornamento della PWA con avviso; font nel progetto; caricamento delle pagine su richiesta; `allowBackup`; workflow APK più sicuro (SHA fissati, keystore cancellato, lint e test prima della build); `theme-color` del tema scuro.
 - ⬜ **Sicurezza:** dipendenze di sviluppo con vulnerabilità moderate; CSP e header su Vercel.
 - ⬜ **UI e codice:** testi di accesso per l'APK; esercizi di base in inglese; focus trap nelle modali; avviso "aggiorna l'app" visibile ovunque; modulo delle soglie che non si azzera; test di `account`, `supabaseRemote`, `fitStorage`, hook di salvataggio, FIT troncati e nuoto in vasca; prestazioni delle viste Mese e Anno.
 - ⬜ **Rifinitura grafica** e **confronto con il periodo precedente** in Analisi.
