@@ -49,17 +49,9 @@ interface Account {
   rebuildServer(): Promise<void>
 }
 
-/** Ogni quanto si puliscono sul server le voci cancellate. */
-const PURGE_EVERY_MS = 7 * 864e5
-/** Età delle voci cancellate da togliere dal server. */
-const PURGE_AFTER_DAYS = 90
-
 type Local = SyncLocal &
   FitCache &
-  Pick<
-    DataStore,
-    'deleteFitFiles' | 'requeueAll' | 'lastPurgeAt' | 'markPurged'
-  >
+  Pick<DataStore, 'deleteFitFiles' | 'requeueAll'>
 
 /** Il salvataggio del dispositivo non funziona: gli strumenti del server sono bloccati. */
 export class StoreUnavailableError extends Error {
@@ -116,24 +108,11 @@ export function createAccount(local: Local): Account {
   const uploadFitFiles = async () => {
     if (files && userId && online()) await files.uploadPending(userId)
   }
-  /** Pulizia delle voci cancellate da più di 90 giorni (al massimo una volta a settimana). */
-  const purgeDeleted = async () => {
-    if (!client || !userId || !online()) return
-    const last = await local.lastPurgeAt()
-    if (last && Date.now() - Date.parse(last) < PURGE_EVERY_MS) return
-    const { error } = await client.rpc('purge_deleted_items', {
-      min_age_days: PURGE_AFTER_DAYS,
-    })
-    // funzione assente (schema non rieseguito) o errore: si riprova la prossima volta
-    if (error) console.warn('Pulizia delle voci cancellate non riuscita', error)
-    else await local.markPurged()
-  }
   let lastStatus = state.status
   engine.subscribe(() => {
     const status = engine.getState().status
     if (status === 'idle' && lastStatus === 'syncing') {
       void uploadFitFiles()
-      void purgeDeleted()
     }
     lastStatus = status
   })

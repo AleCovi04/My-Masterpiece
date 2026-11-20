@@ -815,18 +815,6 @@ export function createDexieStore(
       })
       emit(localListeners)
     },
-    async lastPurgeAt() {
-      await init()
-      if (mem) return null
-      const v = (await db.meta.get('lastPurgeAt'))?.value
-      return typeof v === 'string' ? v : null
-    },
-    async markPurged() {
-      await init()
-      if (mem) return
-      await db.meta.put({ key: 'lastPurgeAt', value: now().toISOString() })
-    },
-
     async listBackups() {
       await init()
       if (mem) return []

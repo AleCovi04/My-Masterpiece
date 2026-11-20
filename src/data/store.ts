@@ -173,9 +173,6 @@ export interface DataStore {
   resetAll(): Promise<void>
   /** Rimette in coda tutte le voci e tutti i FIT (per ricaricare il server da questo dispositivo). */
   requeueAll(): Promise<void>
-  /** Ultima pulizia delle voci cancellate sul server (solo questo dispositivo). */
-  lastPurgeAt(): Promise<IsoDateTime | null>
-  markPurged(): Promise<void>
 
   /** Backup salvati, dal più recente. */
   listBackups(): Promise<BackupInfo[]>
