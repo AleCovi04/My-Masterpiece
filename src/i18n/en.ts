@@ -659,6 +659,8 @@ export const en: Dictionary = {
       'Storage is not guaranteed: the browser may delete the data when space runs low. Install the app or export often.',
     exportTitle: 'Export',
     exportAll: 'Export everything (JSON)',
+    exportFromPc:
+      'The Android app cannot save the file: export from the PC, in the browser (Data → Export everything (JSON)). Last export and reminder are the PC’s.',
     exportHint: 'One file with all the data, the schema version and the date.',
     lastExport: 'Last manual export',
     never: 'never',

@@ -664,6 +664,8 @@ export const it = {
       'Archiviazione non garantita: il browser potrebbe cancellare i dati se lo spazio scarseggia. Installa l’app o esporta spesso.',
     exportTitle: 'Esporta',
     exportAll: 'Esporta tutto (JSON)',
+    exportFromPc:
+      'Dall’app Android il file non si può salvare: fai l’export dal PC, nel browser (Dati → Esporta tutto (JSON)). Ultimo export e promemoria sono quelli del PC.',
     exportHint: 'Un file con tutti i dati, la versione dello schema e la data.',
     lastExport: 'Ultimo export manuale',
     never: 'mai',
