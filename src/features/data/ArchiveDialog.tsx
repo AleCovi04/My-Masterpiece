@@ -4,6 +4,7 @@ import Modal from '../../components/ui/Modal'
 import { account, dataStore, refreshData } from '../../data'
 import type { ImportRecord, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
+import { toolError } from './toolError'
 import {
   ARCHIVE_YEARS,
   archiveCandidates,
@@ -101,7 +102,7 @@ export default function ArchiveDialog({ onClose }: { onClose: () => void }) {
       console.error(e)
       setStep({
         kind: 'error',
-        message: e instanceof Error ? e.message : a.failed,
+        message: toolError(e, t) || a.failed,
       })
     }
   }

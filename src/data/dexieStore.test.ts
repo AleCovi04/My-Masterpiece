@@ -1,5 +1,5 @@
 import Dexie from 'dexie'
-import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
+import { IDBFactory, IDBKeyRange, IDBObjectStore } from 'fake-indexeddb'
 import { describe, expect, it, vi } from 'vitest'
 import {
   createDexieStore,
@@ -390,6 +390,50 @@ describe('store IndexedDB', () => {
     expect((await store.loadExercises()).map((e) => e.id)).toEqual(['a'])
     expect(await store.listBackups()).toEqual([])
     expect(error).toHaveBeenCalled()
+    expect(store.health().mode).toBe('memory')
+    error.mockRestore()
+  })
+
+  it('un backup automatico che fallisce non porta i dati in memoria (B3)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const add = vi
+      .spyOn(IDBObjectStore.prototype, 'add')
+      .mockImplementation(() => {
+        throw new DOMException('Spazio esaurito', 'QuotaExceededError')
+      })
+    const b = browser()
+    const store = b.open()
+    await store.init()
+    add.mockRestore()
+    expect(store.health()).toEqual({ mode: 'ok', writeFailed: false })
+    expect(await store.listBackups()).toEqual([])
+    await store.update(['exercises'], () => ({ exercises: [exercise('a')] }))
+    // riaprendo, i dati sono salvati davvero e il backup si riprova
+    const again = b.open()
+    expect((await again.loadExercises()).map((e) => e.id)).toEqual(['a'])
+    expect((await again.listBackups())[0].reason).toBe('auto')
+    expect(warn).toHaveBeenCalled()
+    warn.mockRestore()
+  })
+
+  it('un salvataggio non riuscito si vede nello stato (B3)', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const store = browser().open()
+    await store.init()
+    let notified = 0
+    store.onHealth(() => (notified += 1))
+    const put = vi
+      .spyOn(IDBObjectStore.prototype, 'put')
+      .mockImplementation(() => {
+        throw new DOMException('Spazio esaurito', 'QuotaExceededError')
+      })
+    const saved = await store.update(['exercises'], () => ({
+      exercises: [exercise('a')],
+    }))
+    put.mockRestore()
+    expect(saved).toBeNull()
+    expect(store.health().writeFailed).toBe(true)
+    expect(notified).toBe(1)
     error.mockRestore()
   })
 })

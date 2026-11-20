@@ -8,6 +8,7 @@ import AppUpdate from './AppUpdate'
 import Header from './Header'
 import Sidebar from './Sidebar'
 import SideMenu from './SideMenu'
+import StoreAlert from './StoreAlert'
 import './shell.css'
 
 const COLLAPSED_KEY = 'mm.sidebarCollapsed'
@@ -37,6 +38,7 @@ export default function AppShell() {
         <Header onMenu={() => setMenuOpen(true)} />
         <main>
           <PageContainer>
+            <StoreAlert />
             <LiveBanner />
             <Outlet />
           </PageContainer>

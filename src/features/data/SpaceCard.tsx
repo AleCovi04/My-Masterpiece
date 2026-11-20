@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react'
-import { account, dataStore, useAccount, useDataRevision } from '../../data'
+import {
+  account,
+  dataStore,
+  useAccount,
+  useDataRevision,
+  useStoreOk,
+} from '../../data'
 import { useI18n } from '../../i18n/context'
 import ArchiveDialog from './ArchiveDialog'
 import {
@@ -23,6 +29,7 @@ export default function SpaceCard() {
   const { t, lang } = useI18n()
   const s = t.space
   const { email } = useAccount()
+  const storeOk = useStoreOk()
   const revision = useDataRevision()
   const [usage, setUsage] = useState<Usage | null>(null)
   const [archiving, setArchiving] = useState(false)
@@ -91,10 +98,12 @@ export default function SpaceCard() {
           <button
             type="button"
             className="pl-btn"
+            disabled={!storeOk}
             onClick={() => setArchiving(true)}
           >
             {s.freeUp}
           </button>
+          {!storeOk && <small>{t.storage.toolsBlocked}</small>}
         </div>
       )}
       {archiving && <ArchiveDialog onClose={() => setArchiving(false)} />}

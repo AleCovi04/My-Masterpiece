@@ -15,6 +15,7 @@ import type {
   IntervalsLink,
   ListData,
   ListName,
+  StoreHealth,
 } from './store'
 import { normalizeListItem, normalizeMeta } from './sync/items'
 import {
@@ -92,7 +93,19 @@ export function createDexieStore(
   /** Salvataggi locali (per la sincronizzazione) e dati arrivati dal server (per le pagine). */
   const localListeners = new Set<() => void>()
   const remoteListeners = new Set<() => void>()
+  const healthListeners = new Set<() => void>()
   const emit = (set: Set<() => void>) => set.forEach((fn) => fn())
+
+  let health: StoreHealth = { mode: 'ok', writeFailed: false }
+  const setHealth = (next: Partial<StoreHealth>) => {
+    health = { ...health, ...next }
+    emit(healthListeners)
+  }
+  /** Un salvataggio non riuscito: si registra e l'app lo mostra (non solo in console). */
+  const writeFailed = (label: string, error: unknown) => {
+    console.error(`Salvataggio non riuscito (${label})`, error)
+    if (!health.writeFailed) setHealth({ writeFailed: true })
+  }
   const listen = (set: Set<() => void>, fn: () => void) => {
     set.add(fn)
     return () => {
@@ -289,15 +302,22 @@ export function createDexieStore(
       })
     }
 
-    await db.transaction('rw', all, async () => {
-      const last = (await db.backups.toArray())
-        .filter((b) => b.reason === 'auto')
-        .pop()
-      const age = last ? now().getTime() - Date.parse(last.createdAt) : Infinity
-      if (age > AUTO_BACKUP_DAYS * DAY_MS) {
-        await addBackup('auto', await readRaw(), SCHEMA_VERSION)
-      }
-    })
+    // backup automatico: se non riesce (es. memoria piena) l'app parte lo stesso, si riprova al prossimo avvio
+    try {
+      await db.transaction('rw', all, async () => {
+        const last = (await db.backups.toArray())
+          .filter((b) => b.reason === 'auto')
+          .pop()
+        const age = last
+          ? now().getTime() - Date.parse(last.createdAt)
+          : Infinity
+        if (age > AUTO_BACKUP_DAYS * DAY_MS) {
+          await addBackup('auto', await readRaw(), SCHEMA_VERSION)
+        }
+      })
+    } catch (error) {
+      console.warn('Backup automatico non riuscito', error)
+    }
 
     // senza attendere: alcuni browser mostrano una richiesta all'utente
     const persist =
@@ -311,6 +331,7 @@ export function createDexieStore(
       console.error('IndexedDB non disponibile: dati solo in memoria', error)
       const old = legacy ? readLegacy(legacy) : null
       mem = old ? fromLegacy(old) : freshData()
+      setHealth({ mode: 'memory' })
     })
     return ready
   }
@@ -331,7 +352,7 @@ export function createDexieStore(
       emit(localListeners)
       return true
     } catch (error) {
-      console.error(`Salvataggio non riuscito (${label})`, error)
+      writeFailed(label, error)
       return false
     }
   }
@@ -352,7 +373,7 @@ export function createDexieStore(
 
   // ---------- sincronizzazione (lato dispositivo) ----------
 
-  const sync: SyncLocal = {
+  const sync: Omit<SyncLocal, 'init' | 'health'> = {
     async pendingChanges() {
       await init()
       if (mem) return []
@@ -498,6 +519,8 @@ export function createDexieStore(
     ...sync,
     subscribe: (fn) => listen(remoteListeners, fn),
     init,
+    health: () => health,
+    onHealth: (fn) => listen(healthListeners, fn),
 
     async update<K extends ListName>(
       keys: K[],
@@ -574,7 +597,7 @@ export function createDexieStore(
         const prev = await db.fitFiles.get(id)
         await db.fitFiles.put({ id, bytes, uploaded: prev?.uploaded ?? 0 })
       } catch (error) {
-        console.error('Salvataggio non riuscito (file FIT)', error)
+        writeFailed('file FIT', error)
       }
     },
     async getFitFile(id) {
@@ -673,7 +696,7 @@ export function createDexieStore(
         if (workout) await db.meta.put({ key: 'liveWorkout', value: workout })
         else await db.meta.delete('liveWorkout')
       } catch (error) {
-        console.error('Salvataggio non riuscito (liveWorkout)', error)
+        writeFailed('liveWorkout', error)
       }
     },
 

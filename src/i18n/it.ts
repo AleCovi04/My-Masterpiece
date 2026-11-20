@@ -789,6 +789,19 @@ export const it = {
     failed:
       'Non riuscito ({error}). Controlla la connessione; se continua, riesegui supabase/schema.sql.',
   },
+  storage: {
+    memoryTitle: 'Salvataggio non disponibile',
+    memory:
+      'Il database del dispositivo non si è aperto: ciò che vedi è solo in memoria e sparirà alla chiusura. Sincronizzazione e strumenti del server sono bloccati per proteggere i dati sul server. Chiudi e riapri l’app; se continua, libera spazio sul dispositivo e riprova.',
+    writeTitle: 'Salvataggio non riuscito',
+    write:
+      'Un salvataggio non è riuscito: l’ultima modifica potrebbe non essere salvata. Ricarica per vedere i dati salvati; se succede ancora, controlla lo spazio libero sul dispositivo.',
+    reload: 'Ricarica',
+    toolsBlocked:
+      'Non disponibile: il salvataggio del dispositivo non funziona (vedi l’avviso in alto).',
+    syncFailed:
+      'L’invio al server non è riuscito: le modifiche restano in coda su questo dispositivo e partiranno alla prossima sincronizzazione. Riprova con la connessione.',
+  },
   sync: {
     title: 'Account e sincronizzazione',
     intro:
@@ -823,6 +836,8 @@ export const it = {
         'Sincronizzazione non riuscita. Se succede da giorni, il progetto Supabase potrebbe essere in pausa: riattivalo dalla dashboard (Restore).',
       newer:
         'Sul server ci sono dati di una versione più recente dell’app: aggiorna l’app per sincronizzare.',
+      paused:
+        'Sincronizzazione sospesa: il salvataggio del dispositivo non funziona (vedi l’avviso in alto).',
     },
     badge: 'Stato della sincronizzazione',
   },

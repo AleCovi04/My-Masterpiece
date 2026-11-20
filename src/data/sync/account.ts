@@ -2,7 +2,7 @@
 // avvio del motore all'avvio, al ritorno online, quando l'app torna visibile e dopo
 // ogni salvataggio. Senza chiavi in `.env` la sincronizzazione resta spenta.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { createSyncEngine, type SyncState } from './engine'
+import { createSyncEngine, type SyncState, type SyncStatus } from './engine'
 import type { DataStore } from '../store'
 import { createFitStorage, type FitCache, type FitUsage } from './fitStorage'
 import { createSupabaseRemote } from './supabaseRemote'
@@ -27,7 +27,8 @@ interface Account {
   verifyCode(email: string, code: string): Promise<void>
   /** Esce: i dati restano sul dispositivo. */
   signOut(): Promise<void>
-  syncNow(): Promise<void>
+  /** Sincronizza adesso; restituisce lo stato finale (`idle` = riuscita). */
+  syncNow(): Promise<SyncStatus>
   /**
    * File FIT di un'attività: dalla cache del dispositivo, altrimenti dal
    * server (se collegati); `null` = non disponibile.
@@ -59,6 +60,24 @@ type Local = SyncLocal &
     DataStore,
     'deleteFitFiles' | 'requeueAll' | 'lastPurgeAt' | 'markPurged'
   >
+
+/** Il salvataggio del dispositivo non funziona: gli strumenti del server sono bloccati. */
+export class StoreUnavailableError extends Error {
+  constructor() {
+    super('Salvataggio del dispositivo non disponibile')
+    this.name = 'StoreUnavailableError'
+  }
+}
+
+/** La sincronizzazione chiesta da uno strumento non è riuscita. */
+export class SyncFailedError extends Error {
+  readonly status: SyncStatus
+  constructor(status: SyncStatus) {
+    super(`Sincronizzazione non riuscita (${status})`)
+    this.name = 'SyncFailedError'
+    this.status = status
+  }
+}
 
 function makeClient(): SupabaseClient | null {
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -163,6 +182,17 @@ export function createAccount(local: Local): Account {
     return client
   }
 
+  /** Strumenti che cancellano dal server: solo con il salvataggio del dispositivo funzionante. */
+  const needStore = async () => {
+    await local.init()
+    if (local.health().mode !== 'ok') throw new StoreUnavailableError()
+  }
+  /** Sincronizza e fallisce se non è andata a buon fine. */
+  const syncOrThrow = async () => {
+    const status = await engine.syncNow()
+    if (status !== 'idle') throw new SyncFailedError(status)
+  }
+
   return {
     getState: () => state,
     subscribe(fn) {
@@ -209,25 +239,29 @@ export function createAccount(local: Local): Account {
     async archiveFitFiles(ids) {
       if (!files || !userId) throw new Error('Account non collegato')
       if (!online()) throw new Error('Serve la connessione')
+      await needStore()
       await files.remove(userId, ids)
       await local.deleteFitFiles(ids)
     },
     async resetServer() {
       if (!files || !userId) return
       if (!online()) throw new Error('Serve la connessione')
-      await engine.syncNow()
+      await needStore()
+      // i FIT si tolgono solo se le cancellazioni sono arrivate al server
+      await syncOrThrow()
       await files.removeAll(userId)
     },
     async rebuildServer() {
       if (!client || !userId) throw new Error('Account non collegato')
       if (!online()) throw new Error('Serve la connessione')
+      await needStore()
       const { error } = await client
         .from('items')
         .delete()
         .eq('user_id', userId)
       if (error) throw error
       await local.requeueAll()
-      await engine.syncNow()
+      await syncOrThrow()
       await uploadFitFiles()
     },
   }

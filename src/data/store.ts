@@ -47,6 +47,20 @@ export interface IntervalsLink {
   lastCheckAt?: IsoDateTime
 }
 
+/**
+ * Stato del salvataggio sul dispositivo.
+ * - `ok`: IndexedDB funziona.
+ * - `memory`: IndexedDB non si è aperto; i dati vivono solo in memoria fino
+ *   alla chiusura. Sincronizzazione e strumenti del server sono bloccati.
+ */
+export type StoreMode = 'ok' | 'memory'
+
+export interface StoreHealth {
+  mode: StoreMode
+  /** Un salvataggio non è riuscito in questa sessione (ciò che si vede può non essere salvato). */
+  writeFailed: boolean
+}
+
 /** Gli elenchi dei dati (una voce per entità, sincronizzati voce per voce). */
 export type ListData = Pick<
   AppData,
@@ -135,6 +149,10 @@ export interface DataStore {
 
   /** Apre il salvataggio: migrazioni, persistenza, backup automatico. Si può chiamare più volte. */
   init(): Promise<void>
+  /** Stato del salvataggio (valido dopo `init`). */
+  health(): StoreHealth
+  /** Avvisa quando lo stato del salvataggio cambia. */
+  onHealth(listener: () => void): () => void
   /** Il browser ha garantito di non cancellare i dati? */
   isPersistent(): Promise<boolean>
 

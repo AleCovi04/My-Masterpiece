@@ -1,5 +1,5 @@
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createDexieStore } from '../dexieStore'
 import { SCHEMA_VERSION } from '../migrations'
 import type { Exercise, ImportRecord, Session } from '../types'
@@ -346,6 +346,47 @@ describe('salvataggi su dati vecchi (B1)', () => {
       exercises: [{ id: 'x' }],
     })
     expect(await a.store.pendingChanges()).toEqual([])
+  })
+})
+
+describe('salvataggio non disponibile (B3)', () => {
+  it('con i dati solo in memoria la sincronizzazione non parte e lo dice', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const server = fakeServer()
+    await server.api.push([
+      {
+        kind: 'exercises',
+        id: 'x',
+        pos: 0,
+        item: exercise('x'),
+        updatedAt: t0.toISOString(),
+        deleted: false,
+        schemaVersion: SCHEMA_VERSION,
+      },
+    ])
+    const store = createDexieStore({
+      idb: { indexedDB: undefined, IDBKeyRange: undefined },
+      now: () => t0,
+    })
+    const engine = createSyncEngine({ local: store, now: () => t0 })
+    await engine.setRemote({ userId: 'u1', api: server.api })
+    expect(await engine.syncNow()).toBe('paused')
+    expect(engine.getState().status).toBe('paused')
+    expect([...server.rows.keys()]).toEqual(['exercises/x'])
+    error.mockRestore()
+  })
+
+  it('syncNow restituisce l’esito', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.connect()
+    expect(await a.engine.syncNow()).toBe('idle')
+    server.api.pull = async () => {
+      throw new Error('500')
+    }
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(await a.engine.syncNow()).toBe('error')
+    error.mockRestore()
   })
 })
 

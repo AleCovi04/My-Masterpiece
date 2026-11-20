@@ -179,7 +179,8 @@
 .dt-card .dt-sync.is-newer {
   border-color: var(--warn);
 }
-.dt-card .dt-sync.is-error {
+.dt-card .dt-sync.is-error,
+.dt-card .dt-sync.is-paused {
   border-color: var(--accent);
 }
 

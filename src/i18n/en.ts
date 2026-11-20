@@ -783,6 +783,19 @@ export const en: Dictionary = {
     failed:
       'Failed ({error}). Check the connection; if it keeps failing, re-run supabase/schema.sql.',
   },
+  storage: {
+    memoryTitle: 'Storage not available',
+    memory:
+      'This device’s database did not open: what you see is only in memory and will be lost when you close the app. Sync and server tools are blocked to protect the data on the server. Close and reopen the app; if it keeps happening, free up space on the device and try again.',
+    writeTitle: 'Save failed',
+    write:
+      'A save failed: your last change may not be saved. Reload to see the saved data; if it happens again, check the free space on the device.',
+    reload: 'Reload',
+    toolsBlocked:
+      'Not available: this device’s storage is not working (see the notice at the top).',
+    syncFailed:
+      'Sending to the server failed: the changes stay queued on this device and will go out with the next sync. Try again with a connection.',
+  },
   sync: {
     title: 'Account and sync',
     intro:
@@ -816,6 +829,8 @@ export const en: Dictionary = {
         'Sync failed. If this has been happening for days, the Supabase project may be paused: restore it from the dashboard.',
       newer:
         'The server has data from a newer version of the app: update the app to sync.',
+      paused:
+        'Sync paused: this device’s storage is not working (see the notice at the top).',
     },
     badge: 'Sync status',
   },

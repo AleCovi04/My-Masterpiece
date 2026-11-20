@@ -322,6 +322,29 @@
 .sync-badge.is-newer {
   color: var(--warn);
 }
-.sync-badge.is-error {
+.sync-badge.is-error,
+.sync-badge.is-paused {
+  color: var(--accent);
+}
+
+/* Avviso del salvataggio del dispositivo (StoreAlert) */
+.store-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+.store-alert p {
+  flex: 1 1 260px;
+  margin: 0;
+  line-height: 1.4;
+}
+.store-alert b {
   color: var(--accent);
 }
