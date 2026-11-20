@@ -713,6 +713,7 @@ export const it = {
     confirmRestore: 'Sostituire i dati attuali con questo backup?',
     restoreYes: 'Sì, ripristina',
     restored: 'Backup ripristinato.',
+    appVersion: 'Versione',
     schemaVersion: 'Versione dello schema dei dati',
   },
   space: {

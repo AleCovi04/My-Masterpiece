@@ -28,6 +28,8 @@ import './data.css'
 /** Promemoria se l'ultimo export manuale ha più di questi giorni. */
 const EXPORT_REMINDER_DAYS = 30
 const DAY_MS = 864e5
+/** Numero della build dell'APK (scritto dal workflow); vuoto nel sito. */
+const APP_BUILD = import.meta.env.VITE_APP_BUILD as string | undefined
 
 interface Info {
   backups: BackupInfo[]
@@ -286,7 +288,9 @@ export default function DataPage() {
       <AdvancedTools />
 
       <p className="dt-foot">
-        {d.schemaVersion}: {SCHEMA_VERSION}
+        {d.appVersion} {__APP_VERSION__}
+        {APP_BUILD ? ` (build ${APP_BUILD})` : ''} · {d.schemaVersion}:{' '}
+        {SCHEMA_VERSION}
       </p>
 
       {preview && (

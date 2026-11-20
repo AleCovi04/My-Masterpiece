@@ -708,6 +708,7 @@ export const en: Dictionary = {
     confirmRestore: 'Replace the current data with this backup?',
     restoreYes: 'Yes, restore',
     restored: 'Backup restored.',
+    appVersion: 'Version',
     schemaVersion: 'Data schema version',
   },
   space: {

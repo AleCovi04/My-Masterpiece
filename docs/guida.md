@@ -45,6 +45,8 @@ Consiglio: sul telefono usa l'**APK** (notifica di fine recupero anche a schermo
 
 **Aggiornare l'APK:** l'app non si installa gli aggiornamenti da sola, ma te lo dice: quando su GitHub c'è una versione nuova, all'apertura compare **Nuova versione disponibile**. **Aggiorna** scarica l'APK nel browser: al termine tocca il file → **Installa** (sopra il vecchio, i dati restano). **Più tardi** la ripropone dopo 24 ore. Serve internet; l'avviso c'è dalle versioni costruite dopo il 19/11/2026. Il sito e la PWA invece si aggiornano da soli alla riapertura.
 
+**Che versione ho?** In fondo alla pagina **Dati**: per esempio "Versione 1.1.0 (build 42)" nell'app Android, "Versione 1.1.0" nel sito. Le novità di ogni versione sono in [`CHANGELOG.md`](../CHANGELOG.md).
+
 ## 2. Accedere e sincronizzare
 
 L'app funziona anche **senza account**, ma i dati restano solo su quel dispositivo. Con l'account si sincronizzano tra telefono e PC.
@@ -54,6 +56,8 @@ L'app funziona anche **senza account**, ma i dati restano solo su quel dispositi
    - **app Android:** digita il **codice** (il link aprirebbe il browser, non l'app);
    - **browser:** codice oppure link, ma il link va aperto **nello stesso browser** da cui l'hai chiesto.
 3. La prima volta l'app salva un backup ("Prima del collegamento all'account") e poi unisce i dati con quelli del server.
+
+Le **iscrizioni sono chiuse**: si accede solo con un account già creato. Con un'email senza account l'app risponde "Questa email non ha un account" (controlla di averla scritta giusta).
 
 L'icona nell'intestazione mostra lo stato: sincronizzato, in corso, offline, errore. Senza rete l'app funziona lo stesso e manda le modifiche appena torna online. Se due dispositivi modificano la stessa voce, **vince la modifica più recente**.
 
@@ -102,7 +106,7 @@ I filtri a chip: un tocco accende o spegne, **tenendo premuto** isoli quel chip.
 ## 7. Backup ed export
 
 - **Backup automatici** sul dispositivo: uno alla settimana e prima delle operazioni rischiose (import, ripristino, primo collegamento). Se ne tengono gli ultimi 8. **Dati** → elenco dei backup → **Ripristina**.
-- **Export**: **Dati** → **Esporta** scarica un file `.json` con tutti i dati. Fallo ogni tanto e salvalo fuori dal telefono (Drive, PC): è l'unica copia che non dipende da Supabase.
+- **Export**: **dal PC**, nel browser: **Dati** → **Esporta tutto (JSON)** scarica un file `.json` con tutti i dati. Fallo ogni mese e salvalo su Drive: è l'unica copia che non dipende da Supabase. Nell'app Android il file non si può salvare: al posto del pulsante c'è la nota "fai l'export dal PC".
 - **Import**: **Dati** → **Importa** un file esportato (prima l'app salva un backup).
 - **Ricomincia da zero**: **Dati** → in fondo, riquadro rosso. Cancella tutto (sedute, attività e file Garmin, Forger, data gara, obiettivo, impostazioni) qui e, con l'account, sul server; gli altri dispositivi si svuotano da soli alla sincronizzazione. Restano account, intervals.icu e un backup. Conferma scrivendo **AZZERA**.
 
@@ -115,6 +119,12 @@ I filtri a chip: un tocco accende o spegne, **tenendo premuto** isoli quel chip.
 - **Notifica di fine recupero in ritardo?** Android → Impostazioni → App → My Masterpiece → Batteria → **Senza restrizioni**.
 - **Cancellare i dati del browser** (o disinstallare l'app senza account) cancella i dati di quel dispositivo: con l'account tornano dal server; senza, solo da un export.
 - **RPE sempre**: senza, le analisi del carico sono incomplete.
+- **Tasto Indietro** (app Android): con una finestra aperta (riepilogo dell'allenamento, eseguito, scelta di un esercizio) la chiude e resti nella pagina; senza finestre torna alla pagina precedente. L'allenamento in corso resta salvato.
+- **Avviso rosso in alto**:
+  - "Salvataggio non disponibile": il database del dispositivo non si è aperto e ciò che vedi è solo in memoria. Sincronizzazione e strumenti del server sono bloccati apposta. Chiudi e riapri l'app; se continua, libera spazio sul telefono.
+  - "Salvataggio non riuscito": l'ultima modifica potrebbe non essere salvata. **Ricarica** e controlla.
+  - "Aggiorna l'app": i dati del dispositivo sono di una versione più nuova; l'app resta in sola lettura finché non la aggiorni.
+- **"Qualcosa è andato storto"** al posto di una pagina: i dati non sono stati toccati. **Ricarica**, o vai ad altre pagine dal menu.
 
 ---
 
@@ -160,6 +170,7 @@ Il repository è **pubblico**: niente chiavi segrete nel codice, nei commit o ne
 - **Authentication → URL Configuration:** _Site URL_ = `https://my-masterpiece.vercel.app`; _Redirect URLs_ = il sito e `http://localhost:5173`. Se cambi indirizzo del sito, aggiornali o il link del login non funziona.
 - **Authentication → Emails → SMTP Settings:** SMTP di Resend (vedi [§15](#15-resend-email-del-login)). Nei modelli **Magic Link** e **Confirm signup** c'è la riga con `{{ .Token }}`: è il codice. Non toglierla.
 - **Authentication → Rate Limits:** limite di email all'ora (alzalo se servono più login ravvicinati).
+- **Authentication → Sign In / Providers → User Signups:** **Allow new users to sign up** disattivato (iscrizioni chiuse: URL e chiave del sito sono pubblici, chiunque potrebbe creare account e riempire lo spazio gratuito) e **Confirm email** attivo. Da riaprire solo quando l'app diventerà multi-utente.
 - **Storage:** deve esserci il bucket `fit`, privato.
 
 **Pausa del piano gratuito:** dopo 7 giorni senza attività Supabase mette in pausa il progetto. Il workflow `Supabase keep-alive` lo evita con una lettura ogni 3 giorni. Se va comunque in pausa: arriva un'email, l'app mostra "Sincronizzazione non riuscita" ma funziona offline. Dashboard → progetto → **Restore project**; dopo qualche minuto la sincronizzazione riparte da sola.
@@ -185,11 +196,13 @@ Il repository è **pubblico**: niente chiavi segrete nel codice, nei commit o ne
 
 ## 14. App Android (APK)
 
-**Costruire una nuova versione:** GitHub → [Actions → Android APK](https://github.com/AleCovi04/My-Masterpiece/actions/workflows/android-apk.yml) → **Run workflow** (5–10 minuti) → dal telefono [Releases → ultima](https://github.com/AleCovi04/My-Masterpiece/releases/latest) → scarica e installa sopra la vecchia.
+**Pubblicare una versione numerata** (1.1.0, 1.2.0…): segui [`docs/release-checklist.md`](release-checklist.md) (export, Supabase, merge, tag `vX.Y.Z`, installazione, verifiche). La versione dell'app è in `package.json` e si vede in fondo a **Dati**.
+
+**Costruire una build intermedia:** GitHub → [Actions → Android APK](https://github.com/AleCovi04/My-Masterpiece/actions/workflows/android-apk.yml) → **Run workflow** (5–10 minuti) → dal telefono [Releases → ultima](https://github.com/AleCovi04/My-Masterpiece/releases/latest) → scarica e installa sopra la vecchia.
 
 Quando serve: dopo modifiche all'app che vuoi sul telefono, e **sempre** quando cambia la versione dello schema dei dati (altrimenti l'APK vecchio smette di sincronizzare e chiede di aggiornare).
 
-**Chiave di firma:** è in `Documenti\MyMasterpiece-chiave-android\`, mai su git. Se la perdi, il nuovo APK non si installa sopra il vecchio: va disinstallata l'app (i dati tornano dal server dopo il login) e serve una chiave nuova nei segreti GitHub.
+**Chiave di firma:** è in `Documenti\MyMasterpiece-chiave-android\`, mai su git (`android/.gitignore` esclude `*.jks`, `*.keystore`, `*.p12`). Se la perdi, il nuovo APK non si installa sopra il vecchio: va disinstallata l'app (i dati tornano dal server dopo il login) e serve una chiave nuova nei segreti GitHub.
 
 Dettagli tecnici: l'app è la stessa del sito impacchettata con Capacitor (cartella `android/`); icone da `python scripts/make-icons.py`; Java e Android SDK non servono sul PC, costruisce tutto GitHub.
 
@@ -229,6 +242,10 @@ Se Garmin smette di arrivare: su intervals.icu controlla che la connessione con 
 | Il sito nuovo è rotto                                                       | Ultimo deploy difettoso                                                | Vercel → deploy precedente → **Promote to Production**                                   |
 | "Manca il permesso" (Libera spazio, Ricomincia da zero, Ricarica il server) | Schema non rieseguito                                                  | Riesegui `supabase/schema.sql` ([§11](#11-supabase))                                     |
 | Server e dispositivi mostrano dati diversi                                  | Cancellazioni fatte a mano su Supabase                                 | Dal dispositivo giusto: **Dati → Strumenti avanzati → Ricarica il server**               |
+| Avviso rosso "Salvataggio non disponibile"                                  | Database del dispositivo non apribile (spazio pieno, browser)          | Non usare gli strumenti del server; chiudi e riapri l'app, libera spazio                 |
+| Avviso rosso "Aggiorna l'app"                                               | Dati salvati da una versione più nuova (es. sito tornato indietro)     | Aggiorna l'APK o ricarica il sito con la versione nuova                                  |
+| "Questa email non ha un account"                                            | Iscrizioni chiuse, email sbagliata                                     | Controlla l'email; per un utente nuovo riapri le iscrizioni ([§11](#11-supabase))        |
+| "Qualcosa è andato storto" al posto di una pagina                           | Errore nell'app su quella pagina                                       | **Ricarica**; se si ripete, segnala la pagina e il messaggio mostrato                    |
 
 ## 18. Manutenzione: cosa fare e quando
 
@@ -250,7 +267,7 @@ Scegli un giorno fisso (es. il primo del mese) e segui l'ordine:
 
 | #   | Cosa                                 | Come                                                                                                                                                                                                             | Se lo salti                                                                             |
 | --- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| 1   | **Export dei dati**                  | Nell'app: **Dati** → **Esporta tutto (JSON)** → salva il file su Drive o sul PC                                                                                                                                  | Se Supabase e il telefono si perdessero insieme, non avresti una copia                  |
+| 1   | **Export dei dati**                  | Dal PC, nel browser: **Dati** → **Esporta tutto (JSON)** → salva il file su Drive                                                                                                                                | Se Supabase e il telefono si perdessero insieme, non avresti una copia                  |
 | 2   | **Anti-pausa attivo e verde**        | GitHub → [Actions → Supabase keep-alive](https://github.com/AleCovi04/My-Masterpiece/actions/workflows/supabase-keepalive.yml): le ultime esecuzioni sono verdi. Se c'è il pulsante **Enable workflow**, premilo | Supabase va in pausa dopo 7 giorni: la sincronizzazione si ferma finché non lo riattivi |
 | 3   | **Spazio su Supabase**               | Nell'app **Dati** → **Spazio sul server** (o Supabase → **Organization** → **Usage**): barre verdi = tutto bene; gialle o rosse = [docs/spazio-dati.md](spazio-dati.md)                                          | Superati i limiti, i nuovi dati e i file FIT non si salvano più sul server              |
 | 4   | **Sincronizzazione sui dispositivi** | Apri l'app sul telefono e sul PC: l'icona in alto è verde e vedi gli stessi allenamenti                                                                                                                          | Un dispositivo potrebbe lavorare da solo senza che te ne accorga                        |
@@ -275,6 +292,7 @@ Scegli un giorno fisso (es. il primo del mese) e segui l'ordine:
 | Cambi telefono o PC                                                                                             | Installa l'app, accedi con il **codice**, reinserisci la chiave di intervals.icu ([§16](#16-intervalsicu-e-garmin))            |
 | Lo Storage supera l'80 % (barra rossa in **Dati → Spazio sul server**)                                          | Dal PC: **Libera spazio** ([docs/spazio-dati.md](spazio-dati.md), livello 2)                                                   |
 | Vuoi ripartire da zero (es. inizio della preparazione)                                                          | Riesegui `supabase/schema.sql` se è cambiato → su un dispositivo **Dati → Ricomincia da zero** → gli altri si svuotano da soli |
+| Pubblichi una nuova versione                                                                                    | [`docs/release-checklist.md`](release-checklist.md)                                                                            |
 | Qualcosa non funziona                                                                                           | Tabella [§17](#17-se-qualcosa-si-rompe)                                                                                        |
 
 **Quando lo sviluppo si ferma** (dopo la versione 1): GitHub disattiva i workflow programmati se il repository resta **60 giorni senza commit**. Il controllo mensile (punto 2) lo intercetta; se vuoi evitarlo del tutto, fai un piccolo commit ogni mese o chiedi a Claude di farlo.
