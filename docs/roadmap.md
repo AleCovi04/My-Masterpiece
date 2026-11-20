@@ -15,7 +15,7 @@ Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono ch
 - ✅ **B9** Error Boundary: niente più schermo bianco.
 - ✅ **B10** `android/.gitignore`: keystore esclusi (`*.jks`, `*.keystore`, `*.p12`).
 - ✅ **B11** Tasto Indietro di Android con una finestra aperta: chiude la finestra, non cambia pagina, i campi restano.
-- ⬜ **B12** `viewport-fit=cover` e margini safe-area per intestazione, barra del recupero e sidebar.
+- ✅ **B12** `viewport-fit=cover` e margini safe-area per intestazione, barra del recupero e sidebar.
 - ⬜ Versione 1.1.0 nell'app (pagina Dati), `CHANGELOG.md`, `docs/release-checklist.md`, guida aggiornata.
 - ⬜ Verifica finale su telefono e PC (checklist di release).
 
