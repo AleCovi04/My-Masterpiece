@@ -85,26 +85,30 @@ export async function importFit(
   if (existing?.archived) {
     // file archiviato (docs/spazio-dati.md, livello 2): torna, la seduta non cambia
     await dataStore.putFitFile(act.key, bytes)
-    await dataStore.saveImports(
-      imports.map((r) => {
+    const at = nowIso()
+    await dataStore.update(['imports'], (cur) => ({
+      imports: cur.imports.map((r) => {
         if (r.id !== act.key) return r
-        const back: ImportRecord = { ...r, updatedAt: nowIso() }
+        const back: ImportRecord = { ...r, updatedAt: at }
         delete back.archived
         return back
       }),
-    )
+    }))
     void account.uploadFitFiles()
     return { status: 'restored', date }
   }
   if (existing) {
     // stessa attività arrivata da intervals.icu: si ricorda anche il suo id
-    if (options.intervalsId) {
-      const next = imports.map((r) =>
-        r.id === act.key && !r.intervalsId
-          ? { ...r, intervalsId: options.intervalsId, updatedAt: nowIso() }
-          : r,
-      )
-      await dataStore.saveImports(next)
+    const intervalsId = options.intervalsId
+    if (intervalsId) {
+      const at = nowIso()
+      await dataStore.update(['imports'], (cur) => ({
+        imports: cur.imports.map((r) =>
+          r.id === act.key && !r.intervalsId
+            ? { ...r, intervalsId, updatedAt: at }
+            : r,
+        ),
+      }))
     }
     return { status: 'duplicate', date }
   }
@@ -128,19 +132,29 @@ export async function importFit(
     }
   }
 
-  // le sedute potrebbero essere cambiate durante la scelta
-  const fresh = await dataStore.loadSessions()
-  const out = applyImport(fresh, act, target, options.source, nowIso(), {
-    intervalsId: options.intervalsId,
-  })
+  // sedute e attività come sono adesso nel salvataggio (possono essere cambiate durante la scelta)
+  let out: ReturnType<typeof applyImport> | null = null
+  const at = nowIso()
   await dataStore.putFitFile(act.key, bytes)
-  await dataStore.saveImport(out.sessions, [...imports, out.record])
+  const saved = await dataStore.update(['sessions', 'imports'], (cur) => {
+    out = null
+    if (cur.imports.some((r) => r.id === act.key)) return null // importata nel frattempo
+    if (target && !cur.sessions.some((s) => s.id === target)) target = null
+    const o = applyImport(cur.sessions, act, target, options.source, at, {
+      intervalsId: options.intervalsId,
+    })
+    out = o
+    return { sessions: o.sessions, imports: [...cur.imports, o.record] }
+  })
+  const done = out as ReturnType<typeof applyImport> | null
+  if (!saved) throw new Error('Salvataggio non riuscito (import)')
+  if (!done) return { status: 'duplicate', date }
   void account.uploadFitFiles()
   return {
     status: 'imported',
     date,
-    sessionId: out.sessionId,
-    created: out.created,
+    sessionId: done.sessionId,
+    created: done.created,
   }
 }
 

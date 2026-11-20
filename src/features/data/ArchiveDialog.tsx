@@ -90,12 +90,11 @@ export default function ArchiveDialog({ onClose }: { onClose: () => void }) {
       await account.archiveFitFiles(ids)
       const stamp = new Date().toISOString()
       const set = new Set(ids)
-      const latest = await dataStore.loadImports()
-      await dataStore.saveImports(
-        latest.map((r) =>
+      await dataStore.update(['imports'], ({ imports }) => ({
+        imports: imports.map((r) =>
           set.has(r.id) ? { ...r, archived: true, updatedAt: stamp } : r,
         ),
-      )
+      }))
       refreshData()
       setStep({ kind: 'done', count: ids.length })
     } catch (e) {

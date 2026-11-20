@@ -2,7 +2,7 @@ import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { describe, expect, it } from 'vitest'
 import { createDexieStore } from '../dexieStore'
 import { SCHEMA_VERSION } from '../migrations'
-import type { Exercise, ImportRecord } from '../types'
+import type { Exercise, ImportRecord, Session } from '../types'
 import { createSyncEngine } from './engine'
 import type { RemoteChange, SyncChange, SyncRemote } from './types'
 
@@ -243,6 +243,107 @@ describe('sincronizzazione', () => {
     expect(await a.store.pendingChanges()).toEqual([])
     await a.store.saveExercises([exercise('x1')])
     await a.store.saveSettings(await a.store.loadSettings())
+    expect(await a.store.pendingChanges()).toEqual([])
+  })
+})
+
+const session = (id: string, date: string, order = 0): Session => ({
+  id,
+  createdAt: t0.toISOString(),
+  updatedAt: t0.toISOString(),
+  date,
+  order,
+  status: 'planned',
+  name: id,
+  discipline: 'strength',
+  plan: { entries: [] },
+})
+
+describe('salvataggi su dati vecchi (B1)', () => {
+  it('Termina del live non cancella né riporta indietro ciò che è arrivato durante l’allenamento', async () => {
+    const server = fakeServer()
+    const pc = device(server)
+    const phone = device(server)
+    await phone.store.update(['sessions'], () => ({
+      sessions: [
+        session('corsa', '2026-11-18'),
+        session('forza', '2026-11-18', 1),
+      ],
+    }))
+    await phone.connect()
+    await phone.engine.syncNow()
+    await pc.store.init()
+    await pc.connect()
+    await pc.engine.syncNow()
+
+    // il live legge le sedute all'apertura
+    const atOpen = await phone.store.loadSessions()
+    expect(atOpen).toHaveLength(2)
+
+    // durante l'allenamento: la corsa viene collegata sul telefono, il PC crea una seduta
+    phone.later(60_000)
+    await phone.store.update(['sessions'], ({ sessions }) => ({
+      sessions: sessions.map((s) =>
+        s.id === 'corsa' ? { ...s, status: 'done' as const } : s,
+      ),
+    }))
+    pc.later(60_000)
+    await pc.store.update(['sessions'], ({ sessions }) => ({
+      sessions: [...sessions, session('nuoto', '2026-11-19')],
+    }))
+    await pc.engine.syncNow()
+    await phone.engine.syncNow()
+
+    // Termina: la modifica si applica alle sedute di adesso, non alla copia dell'apertura
+    phone.later(60_000)
+    const saved = await phone.store.update(['sessions'], ({ sessions }) => ({
+      sessions: sessions.map((s) =>
+        s.id === 'forza' ? { ...s, status: 'done' as const } : s,
+      ),
+    }))
+    expect(saved?.sessions.map((s) => `${s.id}:${s.status}`).sort()).toEqual([
+      'corsa:done',
+      'forza:done',
+      'nuoto:planned',
+    ])
+    await phone.engine.syncNow()
+    await pc.engine.syncNow()
+    expect(server.rows.get('sessions/nuoto')?.deleted).toBe(false)
+    expect(
+      (await pc.store.loadSessions()).map((s) => `${s.id}:${s.status}`).sort(),
+    ).toEqual(['corsa:done', 'forza:done', 'nuoto:planned'])
+  })
+
+  it('due schede: la modifica di una non cancella ciò che ha creato l’altra', async () => {
+    const idb = { indexedDB: new IDBFactory(), IDBKeyRange }
+    const open = () =>
+      createDexieStore({
+        idb,
+        now: () => t0,
+        requestPersistence: async () => true,
+      })
+    const tab1 = open()
+    const tab2 = open()
+    await tab1.update(['exercises'], () => ({ exercises: [exercise('a')] }))
+    await tab2.update(['exercises'], ({ exercises }) => ({
+      exercises: [...exercises, exercise('b')],
+    }))
+    // la scheda 1 (ferma a [a]) rinomina "a"
+    await tab1.update(['exercises'], ({ exercises }) => ({
+      exercises: exercises.map((e) => (e.id === 'a' ? { ...e, name: 'A' } : e)),
+    }))
+    expect((await tab2.loadExercises()).map((e) => e.name)).toEqual(['A', 'b'])
+  })
+
+  it('una modifica che non cambia nulla non scrive', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.store.update(['exercises'], () => ({ exercises: [exercise('x')] }))
+    await a.connect()
+    await a.engine.syncNow()
+    expect(await a.store.update(['exercises'], () => null)).toMatchObject({
+      exercises: [{ id: 'x' }],
+    })
     expect(await a.store.pendingChanges()).toEqual([])
   })
 })

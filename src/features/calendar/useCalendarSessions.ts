@@ -15,6 +15,7 @@ import { clearSessionActual, setSessionActual } from '../../lib/enduranceActual'
 import { createLiveWorkout, startSession } from '../../lib/liveWorkout'
 import { removeApplication } from '../../lib/blocks'
 import { setSessionRpe } from '../../lib/load'
+import { newId } from '../../lib/ids'
 import { moveSession } from '../../lib/reorder'
 import {
   applyEditedPlan,
@@ -38,6 +39,8 @@ interface Loaded {
 export function useCalendarSessions() {
   const [data, setData] = useState<Loaded | null>(null)
   const latest = useRef<Session[] | null>(null)
+  /** Ultima scrittura avviata: solo il suo risultato aggiorna lo schermo. */
+  const writes = useRef(0)
 
   const revision = useDataRevision()
   useEffect(() => {
@@ -64,7 +67,15 @@ export function useCalendarSessions() {
     if (next === current) return
     latest.current = next
     setData((d) => (d ? { ...d, sessions: next } : d))
-    void dataStore.saveSessions(next)
+    // la stessa modifica, applicata alle sedute come sono adesso nel salvataggio
+    const n = ++writes.current
+    void dataStore
+      .update(['sessions'], (d) => ({ sessions: fn(d.sessions) }))
+      .then((saved) => {
+        if (!saved || n !== writes.current) return
+        latest.current = saved.sessions
+        setData((d) => (d ? { ...d, sessions: saved.sessions } : d))
+      })
   }, [])
 
   const move = useCallback(
@@ -101,7 +112,10 @@ export function useCalendarSessions() {
   )
 
   const duplicate = useCallback(
-    (id: Id) => change((cur) => duplicateSession(cur, id)),
+    (id: Id) => {
+      const copyId = newId() // fuori dalla modifica: deve dare lo stesso risultato due volte
+      change((cur) => duplicateSession(cur, id, undefined, copyId))
+    },
     [change],
   )
 
@@ -125,8 +139,12 @@ export function useCalendarSessions() {
     if (session?.discipline !== 'strength') return
     latest.current = next
     setData((d) => (d ? { ...d, sessions: next } : d))
-    await dataStore.saveSessions(next)
-    await dataStore.saveLiveWorkout(createLiveWorkout(session, now))
+    const saved = await dataStore.update(['sessions'], (d) => ({
+      sessions: startSession(d.sessions, id, now),
+    }))
+    const started = saved?.sessions.find((s) => s.id === id)
+    if (started?.discipline !== 'strength') return
+    await dataStore.saveLiveWorkout(createLiveWorkout(started, now))
   }, [])
 
   /** Eseguito endurance inserito a mano: la seduta diventa completata. */
@@ -153,20 +171,18 @@ export function useCalendarSessions() {
   )
 
   /** Toglie un blocco o una fase applicati: solo le sedute ancora programmate. */
-  const unapply = useCallback(
-    async (appId: Id) => {
-      const current = latest.current
-      const apps = data?.applications
-      if (!current || !apps) return
-      const r = removeApplication(current, apps, appId)
-      latest.current = r.sessions
-      setData((d) =>
-        d ? { ...d, sessions: r.sessions, applications: r.applications } : d,
-      )
-      await dataStore.saveSessionsAndApplications(r.sessions, r.applications)
-    },
-    [data?.applications],
-  )
+  const unapply = useCallback(async (appId: Id) => {
+    const saved = await dataStore.update(['sessions', 'applications'], (d) =>
+      removeApplication(d.sessions, d.applications, appId),
+    )
+    if (!saved) return
+    latest.current = saved.sessions
+    setData((d) =>
+      d
+        ? { ...d, sessions: saved.sessions, applications: saved.applications }
+        : d,
+    )
+  }, [])
 
   const remove = useCallback(
     (id: Id) => change((cur) => removeSession(cur, id)),

@@ -50,7 +50,9 @@ export function useAnalysisData(): {
     const next = { ...d, sessions: setSessionRpe(d.sessions, id, rpe, now) }
     latest.current = next
     setData(next)
-    void dataStore.saveSessions(next.sessions)
+    void dataStore.update(['sessions'], (cur) => ({
+      sessions: setSessionRpe(cur.sessions, id, rpe, now),
+    }))
   }, [])
 
   const setSettings = useCallback((settings: Settings) => {

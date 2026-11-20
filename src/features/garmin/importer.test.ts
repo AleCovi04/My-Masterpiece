@@ -6,13 +6,21 @@ const store = vi.hoisted(() => ({
   files: new Map<string, Uint8Array>(),
   loadSessions: vi.fn(async () => []),
   loadImports: vi.fn(async () => store.imports),
-  saveImports: vi.fn(async (list: ImportRecord[]) => {
-    store.imports = list
-  }),
+  update: vi.fn(
+    async (
+      _keys: string[],
+      fn: (cur: {
+        imports: ImportRecord[]
+      }) => { imports?: ImportRecord[] } | null,
+    ) => {
+      const patch = fn({ imports: store.imports })
+      if (patch?.imports) store.imports = patch.imports
+      return { imports: store.imports }
+    },
+  ),
   putFitFile: vi.fn(async (id: string, bytes: Uint8Array) => {
     store.files.set(id, bytes)
   }),
-  saveImport: vi.fn(async () => {}),
 }))
 const uploadFitFiles = vi.hoisted(() => vi.fn(async () => {}))
 
@@ -55,7 +63,7 @@ describe('import di un FIT archiviato', () => {
     expect(store.files.get('fit-1')).toEqual(bytes)
     expect(store.imports[0].archived).toBeUndefined()
     expect(store.imports[0].sessionId).toBe('s1')
-    expect(store.saveImport).not.toHaveBeenCalled()
+    expect(store.update).toHaveBeenCalledTimes(1)
     expect(uploadFitFiles).toHaveBeenCalled()
   })
 

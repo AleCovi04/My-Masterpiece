@@ -13,6 +13,8 @@ import type {
   BackupReason,
   DataStore,
   IntervalsLink,
+  ListData,
+  ListName,
 } from './store'
 import { normalizeListItem, normalizeMeta } from './sync/items'
 import {
@@ -315,12 +317,14 @@ export function createDexieStore(
     label: string,
     tables: Table[],
     write: () => Promise<void>,
-  ) => {
+  ): Promise<boolean> => {
     try {
       await db.transaction('rw', [...tables, db.meta, db.changes], write)
       emit(localListeners)
+      return true
     } catch (error) {
       console.error(`Salvataggio non riuscito (${label})`, error)
+      return false
     }
   }
 
@@ -486,6 +490,39 @@ export function createDexieStore(
     ...sync,
     subscribe: (fn) => listen(remoteListeners, fn),
     init,
+
+    async update<K extends ListName>(
+      keys: K[],
+      fn: (current: Pick<ListData, K>) => Partial<Pick<ListData, K>> | null,
+    ): Promise<Pick<ListData, K> | null> {
+      await init()
+      const pick = (src: (k: K) => unknown[]) =>
+        Object.fromEntries(keys.map((k) => [k, src(k)])) as Pick<ListData, K>
+      if (mem) {
+        const data = mem
+        const cur = pick((k) => data[k])
+        const patch = fn(cur)
+        if (patch) mem = { ...data, ...patch }
+        return { ...cur, ...patch }
+      }
+      let result: Pick<ListData, K> | null = null
+      const ok = await tracked(
+        'update',
+        keys.map((k) => db[k]),
+        async () => {
+          const lists: Partial<Record<K, unknown[]>> = {}
+          for (const k of keys) lists[k] = await readList(k)
+          const cur = pick((k) => lists[k] ?? [])
+          const patch = fn(cur)
+          for (const k of keys) {
+            const next = patch?.[k]
+            if (next && next !== cur[k]) await writeList(k, next)
+          }
+          result = { ...cur, ...patch }
+        },
+      )
+      return ok ? result : null
+    },
     async isPersistent() {
       try {
         return (await browserStorageManager()?.persisted?.()) ?? false

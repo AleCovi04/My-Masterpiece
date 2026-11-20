@@ -47,7 +47,37 @@ export interface IntervalsLink {
   lastCheckAt?: IsoDateTime
 }
 
+/** Gli elenchi dei dati (una voce per entità, sincronizzati voce per voce). */
+export type ListData = Pick<
+  AppData,
+  | 'exercises'
+  | 'templates'
+  | 'sessions'
+  | 'blocks'
+  | 'phases'
+  | 'applications'
+  | 'imports'
+>
+export type ListName = keyof ListData
+
 export interface DataStore {
+  /**
+   * Modifica uno o più elenchi in **una sola transazione**: `fn` riceve gli
+   * elenchi come sono adesso nel salvataggio e restituisce quelli da scrivere
+   * (`null` = nessuna modifica). Nessun dato arrivato nel frattempo va perso.
+   * `fn` deve essere sincrona e pura (può essere chiamata con dati diversi da
+   * quelli a schermo). Restituisce gli elenchi dopo la modifica, `null` se il
+   * salvataggio non è riuscito.
+   */
+  update<K extends ListName>(
+    keys: K[],
+    fn: (current: Pick<ListData, K>) => Partial<Pick<ListData, K>> | null,
+  ): Promise<Pick<ListData, K> | null>
+
+  // I `save…` qui sotto sostituiscono un elenco intero (ciò che manca viene
+  // cancellato anche sugli altri dispositivi): solo per elenchi appena letti,
+  // mai per una copia tenuta a schermo. Per le modifiche c'è `update`.
+
   /** Solo sedute reali: all'inizio l'elenco è vuoto. */
   loadSessions(): Promise<Session[]>
   saveSessions(sessions: Session[]): Promise<void>

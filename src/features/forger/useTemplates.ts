@@ -28,34 +28,37 @@ export function useTemplates() {
     }
   }, [revision])
 
-  const commit = useCallback((next: WorkoutTemplate[]) => {
-    latest.current = next
-    setData((d) => (d ? { ...d, templates: next } : d))
-    void dataStore.saveTemplates(next)
-  }, [])
+  /** Modifica a schermo e, la stessa, sugli allenamenti come sono adesso nel salvataggio. */
+  const commit = useCallback(
+    (fn: (cur: WorkoutTemplate[]) => WorkoutTemplate[]) => {
+      const next = fn(latest.current)
+      latest.current = next
+      setData((d) => (d ? { ...d, templates: next } : d))
+      void dataStore.update(['templates'], (d) => ({
+        templates: fn(d.templates),
+      }))
+    },
+    [],
+  )
 
   /** Crea o sostituisce (stesso id). */
   const save = useCallback(
-    (template: WorkoutTemplate) => {
-      const cur = latest.current
-      commit(
+    (template: WorkoutTemplate) =>
+      commit((cur) =>
         cur.some((t) => t.id === template.id)
           ? cur.map((t) => (t.id === template.id ? template : t))
           : [...cur, template],
-      )
-    },
+      ),
     [commit],
   )
 
   const setArchived = useCallback(
-    (id: Id, archived: boolean) =>
-      commit(
-        latest.current.map((t) =>
-          t.id === id
-            ? { ...t, archived, updatedAt: new Date().toISOString() }
-            : t,
-        ),
-      ),
+    (id: Id, archived: boolean) => {
+      const now = new Date().toISOString()
+      commit((cur) =>
+        cur.map((t) => (t.id === id ? { ...t, archived, updatedAt: now } : t)),
+      )
+    },
     [commit],
   )
 
@@ -64,23 +67,21 @@ export function useTemplates() {
       const src = latest.current.find((t) => t.id === id)
       if (!src) return
       const now = new Date().toISOString()
-      commit([
-        ...latest.current,
-        {
-          ...structuredClone(src),
-          id: newId(),
-          name: `${src.name} ${copySuffix}`,
-          archived: false,
-          createdAt: now,
-          updatedAt: now,
-        },
-      ])
+      const copy: WorkoutTemplate = {
+        ...structuredClone(src),
+        id: newId(),
+        name: `${src.name} ${copySuffix}`,
+        archived: false,
+        createdAt: now,
+        updatedAt: now,
+      }
+      commit((cur) => [...cur, copy])
     },
     [commit],
   )
 
   const remove = useCallback(
-    (id: Id) => commit(latest.current.filter((t) => t.id !== id)),
+    (id: Id) => commit((cur) => cur.filter((t) => t.id !== id)),
     [commit],
   )
 

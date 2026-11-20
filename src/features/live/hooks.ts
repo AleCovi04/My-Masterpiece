@@ -71,12 +71,15 @@ export function useLiveWorkout() {
         notes,
         rpe,
       )
-      const sessions = finishSession(data.sessions, actual, w.sessionId, now)
-      await dataStore.saveSessions(sessions)
+      // sulle sedute come sono adesso nel salvataggio (non su quelle lette all'apertura)
+      const saved = await dataStore.update(['sessions'], (cur) => ({
+        sessions: finishSession(cur.sessions, actual, w.sessionId, now),
+      }))
+      if (!saved) return // salvataggio non riuscito: la bozza resta
       await dataStore.saveLiveWorkout(null)
       void cancelRestAlert()
       latest.current = null
-      setData({ ...data, sessions, workout: null })
+      setData({ ...data, sessions: saved.sessions, workout: null })
     },
     [data],
   )
@@ -85,16 +88,15 @@ export function useLiveWorkout() {
   const cancel = useCallback(async () => {
     const w = latest.current
     if (!w || !data) return
-    const sessions = cancelSession(
-      data.sessions,
-      w.sessionId,
-      new Date().toISOString(),
-    )
-    await dataStore.saveSessions(sessions)
+    const now = new Date().toISOString()
+    const saved = await dataStore.update(['sessions'], (cur) => ({
+      sessions: cancelSession(cur.sessions, w.sessionId, now),
+    }))
+    if (!saved) return
     await dataStore.saveLiveWorkout(null)
     void cancelRestAlert()
     latest.current = null
-    setData({ ...data, sessions, workout: null })
+    setData({ ...data, sessions: saved.sessions, workout: null })
   }, [data])
 
   return {
