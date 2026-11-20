@@ -1,8 +1,8 @@
 # Roadmap
 
-Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono chiusi**. Dettagli di ogni punto (dove, cosa può succedere, soluzione) in [review-v1.1.md](review-v1.1.md).
+Le versioni non hanno date: una versione esce quando tutti i suoi bloccanti sono chiusi. Dettagli dei punti della v1.1 e dei miglioramenti della v1.2 (dove, cosa può succedere, soluzione) in [archivio/review-v1.1.md](archivio/review-v1.1.md).
 
-## v1.1 — prima versione ufficiale
+## v1.1 — prima versione ufficiale (pubblicata)
 
 - ✅ **B1** Elenchi vecchi che sovrascrivono dati più nuovi (live, Collega, più schede, import Garmin): lettura-modifica-scrittura in una sola transazione.
 - ✅ **B2** Cambi di sola posizione che riscrivono intere sedute (sovrascrittura di modifiche fatte offline, traffico).
@@ -17,7 +17,7 @@ Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono ch
 - ✅ **B11** Tasto Indietro di Android con una finestra aperta: chiude la finestra, non cambia pagina, i campi restano.
 - ✅ **B12** `viewport-fit=cover` e margini safe-area per intestazione, barra del recupero e sidebar.
 - ✅ Versione 1.1.0 nell'app (pagina Dati), `CHANGELOG.md`, `docs/release-checklist.md`, guida aggiornata.
-- ⬜ Verifica finale su telefono e PC (checklist di release).
+- ✅ Verifica finale su telefono e PC e pubblicazione (checklist di release).
 
 ## v1.2 — miglioramenti
 

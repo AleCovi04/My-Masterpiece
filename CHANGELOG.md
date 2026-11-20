@@ -4,7 +4,7 @@ Versioni numerate, senza date di uscita fissate in anticipo: una versione esce q
 
 ## 1.1.0 — prima versione ufficiale
 
-Prima versione per l'uso quotidiano (telefono con l'app Android, PC con il browser), dopo la revisione pre-release (`docs/review-v1.1.md`). Schema dei dati: **10** (nessuna migrazione rispetto alle build precedenti).
+Prima versione per l'uso quotidiano (telefono con l'app Android, PC con il browser), dopo la revisione pre-release (`docs/archivio/review-v1.1.md`). Schema dei dati: **10** (nessuna migrazione rispetto alle build precedenti).
 
 ### Funzioni
 

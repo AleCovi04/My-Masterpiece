@@ -10,7 +10,7 @@ React 19 + TypeScript + Vite, ESLint + Prettier, Vitest, Dexie (IndexedDB).
 
 ## Struttura
 
-- `docs/` roadmap, decisioni, modello dati, `review-v1.1.md` (revisione pre-release: bloccanti e miglioramenti), `guida.md` (uso dell'app e amministrazione dei servizi; aggiornarla quando cambia un flusso o un servizio), `spazio-dati.md` (procedura se lo spazio su Supabase si riempie), `release-checklist.md` (passi per pubblicare una versione: li esegue l'utente, tag e release compresi), `archivio/`; `CHANGELOG.md` nella radice (una voce per versione; la versione è in `package.json` e si vede in fondo a Dati)
+- `docs/` roadmap, decisioni, modello dati, `guida.md` (uso dell'app e amministrazione dei servizi; aggiornarla quando cambia un flusso o un servizio), `spazio-dati.md` (procedura se lo spazio su Supabase si riempie), `release-checklist.md` (passi per pubblicare una versione: li esegue l'utente, tag e release compresi), `archivio/` (anche `review-v1.1.md`: revisione pre-release, con i dettagli dei miglioramenti della v1.2); `CHANGELOG.md` nella radice (una voce per versione; la versione è in `package.json` e si vede in fondo a Dati)
 - `src/app/` entry e cornice dell'app
 - `src/features/` moduli per funzionalità (il Forger è in `forger/`, Il Piano in `plan/`); una feature può usare i componenti di un'altra
 - `src/components/` UI riutilizzabile (`ui/` con `Modal`, `layout/`, `body/`)
