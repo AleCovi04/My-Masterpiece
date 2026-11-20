@@ -791,6 +791,12 @@ export const it = {
     failed:
       'Non riuscito ({error}). Controlla la connessione; se continua, riesegui supabase/schema.sql.',
   },
+  pageError: {
+    title: 'Qualcosa è andato storto',
+    body: 'Questa pagina non si è potuta mostrare. I dati salvati non sono stati toccati: ricarica, oppure vai ad altre pagine dal menu (per esempio Dati, per l’export).',
+    reload: 'Ricarica',
+    toData: 'Vai a Dati',
+  },
   storage: {
     newerTitle: 'Aggiorna l’app',
     newer:

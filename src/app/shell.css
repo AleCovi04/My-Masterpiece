@@ -348,3 +348,19 @@
 .store-alert b {
   color: var(--accent);
 }
+
+/* Errore di una pagina (ErrorBoundary) */
+.page-error {
+  padding: 8px 0;
+}
+.page-error-detail {
+  font-family: ui-monospace, monospace;
+  font-size: 0.85rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.page-error a.pl-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}

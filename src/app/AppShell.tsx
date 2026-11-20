@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { PageContainer } from '../components/layout'
+import ErrorBoundary from '../components/ui/ErrorBoundary'
 import GarminLinks from '../features/garmin/GarminLinks'
 import LiveBanner from '../features/live/LiveBanner'
+import { useI18n } from '../i18n/context'
 import { readPreference, writePreference } from '../lib/preferences'
 import AppUpdate from './AppUpdate'
 import Header from './Header'
@@ -19,6 +21,7 @@ export default function AppShell() {
     () => readPreference(COLLAPSED_KEY) === '1',
   )
   const { pathname } = useLocation()
+  const { t } = useI18n()
   const closeMenu = useCallback(() => setMenuOpen(false), [])
 
   useEffect(() => {
@@ -40,7 +43,9 @@ export default function AppShell() {
           <PageContainer>
             <StoreAlert />
             <LiveBanner />
-            <Outlet />
+            <ErrorBoundary key={pathname} texts={t.pageError}>
+              <Outlet />
+            </ErrorBoundary>
           </PageContainer>
         </main>
       </div>

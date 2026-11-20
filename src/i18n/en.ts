@@ -785,6 +785,12 @@ export const en: Dictionary = {
     failed:
       'Failed ({error}). Check the connection; if it keeps failing, re-run supabase/schema.sql.',
   },
+  pageError: {
+    title: 'Something went wrong',
+    body: 'This page could not be shown. Your saved data has not been touched: reload, or go to other pages from the menu (for example Data, to export).',
+    reload: 'Reload',
+    toData: 'Go to Data',
+  },
   storage: {
     newerTitle: 'Update the app',
     newer:
