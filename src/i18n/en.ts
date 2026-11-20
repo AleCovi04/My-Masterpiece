@@ -659,6 +659,8 @@ export const en: Dictionary = {
       'Storage is not guaranteed: the browser may delete the data when space runs low. Install the app or export often.',
     exportTitle: 'Export',
     exportAll: 'Export everything (JSON)',
+    exportFromPc:
+      'The Android app cannot save the file: export from the PC, in the browser (Data → Export everything (JSON)). Last export and reminder are the PC’s.',
     exportHint: 'One file with all the data, the schema version and the date.',
     lastExport: 'Last manual export',
     never: 'never',
@@ -706,6 +708,7 @@ export const en: Dictionary = {
     confirmRestore: 'Replace the current data with this backup?',
     restoreYes: 'Yes, restore',
     restored: 'Backup restored.',
+    appVersion: 'Version',
     schemaVersion: 'Data schema version',
   },
   space: {
@@ -783,6 +786,27 @@ export const en: Dictionary = {
     failed:
       'Failed ({error}). Check the connection; if it keeps failing, re-run supabase/schema.sql.',
   },
+  pageError: {
+    title: 'Something went wrong',
+    body: 'This page could not be shown. Your saved data has not been touched: reload, or go to other pages from the menu (for example Data, to export).',
+    reload: 'Reload',
+    toData: 'Go to Data',
+  },
+  storage: {
+    newerTitle: 'Update the app',
+    newer:
+      'The data on this device was saved by a newer version of the app. To keep it safe the app is read-only and does not sync: update the app (APK from the GitHub Releases page, or reload the website).',
+    memoryTitle: 'Storage not available',
+    memory:
+      'This device’s database did not open: what you see is only in memory and will be lost when you close the app. Sync and server tools are blocked to protect the data on the server. Close and reopen the app; if it keeps happening, free up space on the device and try again.',
+    writeTitle: 'Save failed',
+    write:
+      'A save failed: your last change may not be saved. Reload to see the saved data; if it happens again, check the free space on the device.',
+    reload: 'Reload',
+    toolsBlocked: 'Not available right now: see the notice at the top.',
+    syncFailed:
+      'Sending to the server failed: the changes stay queued on this device and will go out with the next sync. Try again with a connection.',
+  },
   sync: {
     title: 'Account and sync',
     intro:
@@ -796,6 +820,8 @@ export const en: Dictionary = {
     code: 'Code (if any)',
     signIn: 'Sign in',
     changeEmail: 'Change email',
+    notRegistered:
+      'This email has no account: sign-ups are closed. Check that you typed the right email.',
     sendFailed: 'Sending failed. Check the email and try again in a minute.',
     verifyFailed: 'Invalid or expired code.',
     signedInAs: 'Signed in as',
@@ -816,6 +842,8 @@ export const en: Dictionary = {
         'Sync failed. If this has been happening for days, the Supabase project may be paused: restore it from the dashboard.',
       newer:
         'The server has data from a newer version of the app: update the app to sync.',
+      paused:
+        'Sync paused: this device’s storage is not working (see the notice at the top).',
     },
     badge: 'Sync status',
   },

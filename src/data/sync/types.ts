@@ -1,3 +1,4 @@
+import type { StoreHealth } from '../store'
 // Tipi della sincronizzazione con il server (Supabase).
 import type { IsoDateTime } from '../types'
 
@@ -75,6 +76,9 @@ export interface SyncLocal {
   setSyncMeta(meta: SyncMeta | null): Promise<void>
   /** Avvisa a ogni salvataggio locale (per inviare le modifiche). */
   onLocalChange(listener: () => void): () => void
+  /** Apre il salvataggio (se serve) e dice se si può sincronizzare. */
+  init(): Promise<void>
+  health(): StoreHealth
 }
 
 /** Il lato del server. */

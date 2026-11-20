@@ -91,7 +91,13 @@ Revisione di tutto il progetto prima della v1.1, la prima versione ufficiale, pe
 - **Gravità:** Media.
 - **Soluzione proposta:** Error Boundary attorno alle pagine in AppShell (menu e intestazione restano usabili), con "Ricarica" e "Vai a Dati", testi IT/EN.
 
+### B10, B11, B12 — aggiunti dopo l'approvazione
+
+Spostati dalla v1.2 ai bloccanti su richiesta (dettagli nelle voci della v1.2 qui sotto): **B10** esclusione dei keystore in `android/.gitignore` (anche `*.p12`); **B11** tasto Indietro di Android con una finestra aperta (chiude la finestra senza cambiare pagina e senza perdere i campi); **B12** `viewport-fit=cover` e margini safe-area per intestazione, barra del recupero e sidebar.
+
 ## Decisioni da prendere prima delle correzioni
+
+**Prese:** 1(a) branch `release-1.1`, 2(a) pulizia automatica tolta, 3(a) nota "export dal PC" nell'APK.
 
 1. **Dove fare le correzioni.** (a) Branch `release-1.1`, che unisci tu durante il release (passo "merge" della checklist): il sito non cambia finché non decidi; l'APK di prova si costruisce dal branch con Run workflow. (b) Direttamente su `main`, come sempre: ogni push va subito online. **Consiglio (a)**: sono modifiche al cuore dei dati, meglio provarle prima.
 2. **Pulizia delle cancellazioni (B5).** (a) Disattivarla. (b) Portarla a 365 giorni (riduce il rischio, non lo toglie). **Consiglio (a)**: lo spazio risparmiato è trascurabile.

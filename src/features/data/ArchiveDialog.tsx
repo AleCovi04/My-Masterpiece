@@ -4,6 +4,7 @@ import Modal from '../../components/ui/Modal'
 import { account, dataStore, refreshData } from '../../data'
 import type { ImportRecord, Session } from '../../data/types'
 import { useI18n } from '../../i18n/context'
+import { toolError } from './toolError'
 import {
   ARCHIVE_YEARS,
   archiveCandidates,
@@ -90,19 +91,18 @@ export default function ArchiveDialog({ onClose }: { onClose: () => void }) {
       await account.archiveFitFiles(ids)
       const stamp = new Date().toISOString()
       const set = new Set(ids)
-      const latest = await dataStore.loadImports()
-      await dataStore.saveImports(
-        latest.map((r) =>
+      await dataStore.update(['imports'], ({ imports }) => ({
+        imports: imports.map((r) =>
           set.has(r.id) ? { ...r, archived: true, updatedAt: stamp } : r,
         ),
-      )
+      }))
       refreshData()
       setStep({ kind: 'done', count: ids.length })
     } catch (e) {
       console.error(e)
       setStep({
         kind: 'error',
-        message: e instanceof Error ? e.message : a.failed,
+        message: toolError(e, t) || a.failed,
       })
     }
   }

@@ -2,7 +2,7 @@
 // avvio del motore all'avvio, al ritorno online, quando l'app torna visibile e dopo
 // ogni salvataggio. Senza chiavi in `.env` la sincronizzazione resta spenta.
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { createSyncEngine, type SyncState } from './engine'
+import { createSyncEngine, type SyncState, type SyncStatus } from './engine'
 import type { DataStore } from '../store'
 import { createFitStorage, type FitCache, type FitUsage } from './fitStorage'
 import { createSupabaseRemote } from './supabaseRemote'
@@ -27,7 +27,8 @@ interface Account {
   verifyCode(email: string, code: string): Promise<void>
   /** Esce: i dati restano sul dispositivo. */
   signOut(): Promise<void>
-  syncNow(): Promise<void>
+  /** Sincronizza adesso; restituisce lo stato finale (`idle` = riuscita). */
+  syncNow(): Promise<SyncStatus>
   /**
    * File FIT di un'attività: dalla cache del dispositivo, altrimenti dal
    * server (se collegati); `null` = non disponibile.
@@ -48,17 +49,48 @@ interface Account {
   rebuildServer(): Promise<void>
 }
 
-/** Ogni quanto si puliscono sul server le voci cancellate. */
-const PURGE_EVERY_MS = 7 * 864e5
-/** Età delle voci cancellate da togliere dal server. */
-const PURGE_AFTER_DAYS = 90
-
 type Local = SyncLocal &
   FitCache &
-  Pick<
-    DataStore,
-    'deleteFitFiles' | 'requeueAll' | 'lastPurgeAt' | 'markPurged'
-  >
+  Pick<DataStore, 'deleteFitFiles' | 'requeueAll'>
+
+/** Il salvataggio del dispositivo non funziona: gli strumenti del server sono bloccati. */
+export class StoreUnavailableError extends Error {
+  constructor() {
+    super('Salvataggio del dispositivo non disponibile')
+    this.name = 'StoreUnavailableError'
+  }
+}
+
+/** La sincronizzazione chiesta da uno strumento non è riuscita. */
+export class SyncFailedError extends Error {
+  readonly status: SyncStatus
+  constructor(status: SyncStatus) {
+    super(`Sincronizzazione non riuscita (${status})`)
+    this.name = 'SyncFailedError'
+    this.status = status
+  }
+}
+
+/** L'email non ha un account e le iscrizioni sono chiuse. */
+export class NotRegisteredError extends Error {
+  constructor() {
+    super('Email non registrata')
+    this.name = 'NotRegisteredError'
+  }
+}
+
+/** Errore di Supabase per un'email senza account con le iscrizioni chiuse. */
+export function isNotRegistered(error: {
+  code?: string
+  message?: string
+}): boolean {
+  return (
+    error.code === 'otp_disabled' ||
+    error.code === 'signup_disabled' ||
+    error.code === 'user_not_found' ||
+    /signups? not allowed/i.test(error.message ?? '')
+  )
+}
 
 function makeClient(): SupabaseClient | null {
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
@@ -97,24 +129,11 @@ export function createAccount(local: Local): Account {
   const uploadFitFiles = async () => {
     if (files && userId && online()) await files.uploadPending(userId)
   }
-  /** Pulizia delle voci cancellate da più di 90 giorni (al massimo una volta a settimana). */
-  const purgeDeleted = async () => {
-    if (!client || !userId || !online()) return
-    const last = await local.lastPurgeAt()
-    if (last && Date.now() - Date.parse(last) < PURGE_EVERY_MS) return
-    const { error } = await client.rpc('purge_deleted_items', {
-      min_age_days: PURGE_AFTER_DAYS,
-    })
-    // funzione assente (schema non rieseguito) o errore: si riprova la prossima volta
-    if (error) console.warn('Pulizia delle voci cancellate non riuscita', error)
-    else await local.markPurged()
-  }
   let lastStatus = state.status
   engine.subscribe(() => {
     const status = engine.getState().status
     if (status === 'idle' && lastStatus === 'syncing') {
       void uploadFitFiles()
-      void purgeDeleted()
     }
     lastStatus = status
   })
@@ -163,6 +182,17 @@ export function createAccount(local: Local): Account {
     return client
   }
 
+  /** Strumenti che cancellano dal server: solo con il salvataggio del dispositivo funzionante. */
+  const needStore = async () => {
+    await local.init()
+    if (local.health().mode !== 'ok') throw new StoreUnavailableError()
+  }
+  /** Sincronizza e fallisce se non è andata a buon fine. */
+  const syncOrThrow = async () => {
+    const status = await engine.syncNow()
+    if (status !== 'idle') throw new SyncFailedError(status)
+  }
+
   return {
     getState: () => state,
     subscribe(fn) {
@@ -175,12 +205,13 @@ export function createAccount(local: Local): Account {
       const { error } = await need().auth.signInWithOtp({
         email: address,
         options: {
-          shouldCreateUser: true,
+          // iscrizioni chiuse: si accede solo con un account già creato (docs/release-checklist.md)
+          shouldCreateUser: false,
           emailRedirectTo:
             typeof window === 'undefined' ? undefined : window.location.origin,
         },
       })
-      if (error) throw error
+      if (error) throw isNotRegistered(error) ? new NotRegisteredError() : error
     },
     async verifyCode(address, code) {
       const { error } = await need().auth.verifyOtp({
@@ -209,25 +240,29 @@ export function createAccount(local: Local): Account {
     async archiveFitFiles(ids) {
       if (!files || !userId) throw new Error('Account non collegato')
       if (!online()) throw new Error('Serve la connessione')
+      await needStore()
       await files.remove(userId, ids)
       await local.deleteFitFiles(ids)
     },
     async resetServer() {
       if (!files || !userId) return
       if (!online()) throw new Error('Serve la connessione')
-      await engine.syncNow()
+      await needStore()
+      // i FIT si tolgono solo se le cancellazioni sono arrivate al server
+      await syncOrThrow()
       await files.removeAll(userId)
     },
     async rebuildServer() {
       if (!client || !userId) throw new Error('Account non collegato')
       if (!online()) throw new Error('Serve la connessione')
+      await needStore()
       const { error } = await client
         .from('items')
         .delete()
         .eq('user_id', userId)
       if (error) throw error
       await local.requeueAll()
-      await engine.syncNow()
+      await syncOrThrow()
       await uploadFitFiles()
     },
   }

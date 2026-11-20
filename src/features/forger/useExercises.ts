@@ -31,34 +31,34 @@ export function useExercises() {
     }
   }, [revision])
 
-  const commit = useCallback((next: Exercise[]) => {
+  /** Modifica a schermo e, la stessa, sul catalogo com'è adesso nel salvataggio. */
+  const commit = useCallback((fn: (cur: Exercise[]) => Exercise[]) => {
+    const next = fn(latest.current)
     latest.current = next
     setData((d) => (d ? { ...d, exercises: next } : d))
-    void dataStore.saveExercises(next)
+    void dataStore.update(['exercises'], (d) => ({
+      exercises: fn(d.exercises),
+    }))
   }, [])
 
   /** Crea o sostituisce (stesso id). */
   const save = useCallback(
-    (exercise: Exercise) => {
-      const cur = latest.current
-      commit(
+    (exercise: Exercise) =>
+      commit((cur) =>
         cur.some((e) => e.id === exercise.id)
           ? cur.map((e) => (e.id === exercise.id ? exercise : e))
           : [...cur, exercise],
-      )
-    },
+      ),
     [commit],
   )
 
   const setArchived = useCallback(
-    (id: Id, archived: boolean) =>
-      commit(
-        latest.current.map((e) =>
-          e.id === id
-            ? { ...e, archived, updatedAt: new Date().toISOString() }
-            : e,
-        ),
-      ),
+    (id: Id, archived: boolean) => {
+      const now = new Date().toISOString()
+      commit((cur) =>
+        cur.map((e) => (e.id === id ? { ...e, archived, updatedAt: now } : e)),
+      )
+    },
     [commit],
   )
 
@@ -75,7 +75,7 @@ export function useExercises() {
     (id: Id): boolean => {
       const u = usageOf(id)
       if (u.templates > 0 || u.sessions > 0) return false
-      commit(latest.current.filter((e) => e.id !== id))
+      commit((cur) => cur.filter((e) => e.id !== id))
       return true
     },
     [commit, usageOf],

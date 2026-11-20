@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
-import { account, dataStore, refreshData, useAccount } from '../../data'
+import {
+  account,
+  dataStore,
+  refreshData,
+  useAccount,
+  useStoreOk,
+} from '../../data'
 import { useI18n } from '../../i18n/context'
+import { toolError } from './toolError'
 
 type Phase = 'idle' | 'confirm' | 'working' | 'done' | 'error'
 
@@ -14,8 +21,9 @@ export default function ResetCard() {
   const [typed, setTyped] = useState('')
   const [error, setError] = useState('')
 
+  const storeOk = useStoreOk()
   const offline = typeof navigator !== 'undefined' && navigator.onLine === false
-  const blocked = !!email && offline
+  const blocked = (!!email && offline) || !storeOk
   const confirmed = typed.trim().toUpperCase() === r.word
 
   const run = async () => {
@@ -27,7 +35,7 @@ export default function ResetCard() {
       setPhase('done')
     } catch (e) {
       console.error(e)
-      setError(e instanceof Error ? e.message : String(e))
+      setError(toolError(e, t))
       setPhase('error')
     }
   }
@@ -46,7 +54,11 @@ export default function ResetCard() {
         <li>{r.deleted}</li>
         <li>{r.kept}</li>
       </ul>
-      {blocked && <p className="dt-meta">{r.offline}</p>}
+      {!storeOk ? (
+        <p className="dt-meta">{t.storage.toolsBlocked}</p>
+      ) : (
+        blocked && <p className="dt-meta">{r.offline}</p>
+      )}
       <div className="dt-actions">
         <button
           type="button"

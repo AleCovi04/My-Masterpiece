@@ -109,8 +109,9 @@ create policy "fit: cancellare i propri" on storage.objects
   using (bucket_id = 'fit' and (storage.foldername(name))[1] = (select auth.uid())::text);
 
 -- Pulizia delle voci cancellate: dopo `min_age_days` giorni la riga vuota di una voce
--- cancellata non serve più agli altri dispositivi. La chiama l'app, al massimo
--- una volta a settimana; tocca solo le righe dell'utente (RLS).
+-- cancellata non serve più agli altri dispositivi, ma solo se tutti hanno sincronizzato
+-- nel frattempo. Dalla v1.1 l'app non la chiama più (docs/spazio-dati.md, livello 3a):
+-- resta per un uso futuro; tocca solo le righe dell'utente (RLS).
 create or replace function public.purge_deleted_items(min_age_days int default 90)
 returns integer
 language sql

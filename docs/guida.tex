@@ -153,6 +153,9 @@ vecchio, i dati restano). \bt{Più tardi} la ripropone dopo 24 ore. Serve intern
 dalle versioni costruite dopo il 19/11/2026.
 Il sito e la PWA invece si aggiornano da soli alla riapertura.
 
+\paragraph{Che versione ho?} In fondo alla pagina \bt{Dati}: per esempio ``Versione 1.1.0 (build 42)''
+nell'app Android, ``Versione 1.1.0'' nel sito. Le novità di ogni versione sono in \code{CHANGELOG.md}.
+
 \section{Accedere e sincronizzare}\label{sec:accedere}
 
 L'app funziona anche \bt{senza account}, ma i dati restano solo su quel dispositivo.
@@ -170,6 +173,9 @@ Con l'account si sincronizzano tra telefono e PC.
   \item La prima volta l'app salva un backup (``Prima del collegamento all'account'') e poi
         unisce i dati con quelli del server.
 \end{enumerate}
+
+Le \bt{iscrizioni sono chiuse}: si accede solo con un account già creato. Con un'email senza
+account l'app risponde ``Questa email non ha un account'' (controlla di averla scritta giusta).
 
 L'icona nell'intestazione mostra lo stato: sincronizzato, in corso, offline, errore. Senza rete
 l'app funziona lo stesso e manda le modifiche appena torna online. Se due dispositivi modificano
@@ -260,9 +266,10 @@ I filtri a chip: un tocco accende o spegne, \bt{tenendo premuto} isoli quel chip
   \item \bt{Backup automatici} sul dispositivo: uno alla settimana e prima delle operazioni
     rischiose (import, ripristino, primo collegamento). Se ne tengono gli ultimi 8.
     \bt{Dati} \ra elenco dei backup \ra \bt{Ripristina}.
-  \item \bt{Export}: \bt{Dati} \ra \bt{Esporta} scarica un file \code{.json} con tutti i dati.
-    Fallo ogni tanto e salvalo fuori dal telefono (Drive, PC): è l'unica copia che non dipende
-    da Supabase.
+  \item \bt{Export}: \bt{dal PC}, nel browser: \bt{Dati} \ra \bt{Esporta tutto (JSON)} scarica un
+    file \code{.json} con tutti i dati. Fallo ogni mese e salvalo su Drive: è l'unica copia che non
+    dipende da Supabase. Nell'app Android il file non si può salvare: al posto del pulsante c'è la
+    nota ``fai l'export dal PC''.
   \item \bt{Import}: \bt{Dati} \ra \bt{Importa} un file esportato (prima l'app salva un backup).
   \item \bt{Ricomincia da zero}: \bt{Dati} \ra in fondo, riquadro rosso. Cancella tutto (sedute,
     attività e file Garmin, Forger, data gara, obiettivo, impostazioni) qui e, con l'account, sul
@@ -284,6 +291,21 @@ I filtri a chip: un tocco accende o spegne, \bt{tenendo premuto} isoli quel chip
   \item \bt{Cancellare i dati del browser} (o disinstallare l'app senza account) cancella i dati
     di quel dispositivo: con l'account tornano dal server; senza, solo da un export.
   \item \bt{RPE sempre}: senza, le analisi del carico sono incomplete.
+  \item \bt{Tasto Indietro} (app Android): con una finestra aperta (riepilogo dell'allenamento,
+    eseguito, scelta di un esercizio) la chiude e resti nella pagina; senza finestre torna alla
+    pagina precedente. L'allenamento in corso resta salvato.
+  \item \bt{Avviso rosso in alto}:
+    \begin{itemize}
+      \item ``Salvataggio non disponibile'': il database del dispositivo non si è aperto e ciò che
+        vedi è solo in memoria. Sincronizzazione e strumenti del server sono bloccati apposta.
+        Chiudi e riapri l'app; se continua, libera spazio sul telefono.
+      \item ``Salvataggio non riuscito'': l'ultima modifica potrebbe non essere salvata.
+        \bt{Ricarica} e controlla.
+      \item ``Aggiorna l'app'': i dati del dispositivo sono di una versione più nuova; l'app resta
+        in sola lettura finché non la aggiorni.
+    \end{itemize}
+  \item \bt{``Qualcosa è andato storto''} al posto di una pagina: i dati non sono stati toccati.
+    \bt{Ricarica}, o vai ad altre pagine dal menu.
 \end{itemize}
 
 % ======================================================================
@@ -362,6 +384,10 @@ riepilogo della modifica). Supabase \ra \bt{SQL Editor} \ra \bt{New query} \ra i
     Nei modelli \bt{Magic Link} e \bt{Confirm signup} c'è la riga con \code{\{\{ .Token \}\}}:
     è il codice. Non toglierla.
   \item \bt{Authentication \ra Rate Limits}: limite di email all'ora (alzalo se servono più login ravvicinati).
+  \item \bt{Authentication \ra Sign In / Providers \ra User Signups}: \bt{Allow new users to sign up}
+    disattivato (iscrizioni chiuse: URL e chiave del sito sono pubblici, chiunque potrebbe creare
+    account e riempire lo spazio gratuito) e \bt{Confirm email} attivo. Da riaprire solo quando
+    l'app diventerà multi-utente.
   \item \bt{Storage}: deve esserci il bucket \code{fit}, privato.
 \end{itemize}
 
@@ -415,7 +441,11 @@ disattivare la RLS, usare la chiave \code{service\_role} nell'app.
 
 \section{App Android (APK)}\label{sec:apk}
 
-\paragraph{Costruire una nuova versione.} GitHub \ra
+\paragraph{Pubblicare una versione numerata} (1.1.0, 1.2.0\ldots): segui
+\code{docs/release-checklist.md} (export, Supabase, merge, tag \code{vX.Y.Z}, installazione,
+verifiche). La versione dell'app è in \code{package.json} e si vede in fondo a \bt{Dati}.
+
+\paragraph{Costruire una build intermedia.} GitHub \ra
 \href{\repo/actions/workflows/android-apk.yml}{Actions \ra Android APK} \ra \bt{Run workflow}
 (5--10 minuti) \ra dal telefono \href{\repo/releases/latest}{Releases \ra ultima} \ra scarica e
 installa sopra la vecchia.
@@ -424,7 +454,7 @@ installa sopra la vecchia.
 la versione dello schema dei dati (altrimenti l'APK vecchio smette di sincronizzare e chiede di aggiornare).
 
 \paragraph{Chiave di firma.} È in \code{Documenti\textbackslash\allowbreak MyMasterpiece-\allowbreak chiave-android\textbackslash},
-mai su git. Se la perdi, il nuovo APK non si installa sopra il vecchio: va disinstallata l'app (i dati
+mai su git (\code{android/.gitignore} esclude \code{*.jks}, \code{*.keystore}, \code{*.p12}). Se la perdi, il nuovo APK non si installa sopra il vecchio: va disinstallata l'app (i dati
 tornano dal server dopo il login) e serve una chiave nuova nei segreti GitHub.
 
 \paragraph{Dettagli tecnici.} L'app è la stessa del sito impacchettata con Capacitor (cartella
@@ -496,6 +526,14 @@ attiva; se hai rigenerato la chiave API, reinseriscila su ogni dispositivo.
     Schema non rieseguito & Riesegui \code{supabase/schema.sql} (\sezione{sec:supabase}) \\
   Server e dispositivi mostrano dati diversi & Cancellazioni fatte a mano su Supabase &
     Dal dispositivo giusto: \bt{Dati \ra Strumenti avanzati \ra Ricarica il server} \\
+  Avviso rosso ``Salvataggio non disponibile'' & Database del dispositivo non apribile
+    (spazio pieno, browser) & Non usare gli strumenti del server; chiudi e riapri l'app, libera spazio \\
+  Avviso rosso ``Aggiorna l'app'' & Dati salvati da una versione più nuova (es.\ sito tornato
+    indietro) & Aggiorna l'APK o ricarica il sito con la versione nuova \\
+  ``Questa email non ha un account'' & Iscrizioni chiuse, email sbagliata &
+    Controlla l'email; per un utente nuovo riapri le iscrizioni (\sezione{sec:supabase}) \\
+  ``Qualcosa è andato storto'' al posto di una pagina & Errore nell'app su quella pagina &
+    \bt{Ricarica}; se si ripete, segnala la pagina e il messaggio mostrato \\
 \bottomrule
 \end{tabularx}
 }
@@ -525,8 +563,8 @@ Scegli un giorno fisso (es.\ il primo del mese) e segui l'ordine.
 {\small
 \begin{tabularx}{\textwidth}{L{0.5cm}L{3.2cm}YL{4.0cm}}
   \toprule \thead{} & \thead{Cosa} & \thead{Come} & \thead{Se lo salti} \\ \midrule
-  \todo & \bt{1. Export dei dati} & Nell'app: \bt{Dati} \ra \bt{Esporta tutto (JSON)} \ra salva
-    il file su Drive o sul PC & Se Supabase e il telefono si perdessero insieme, non avresti una copia \\
+  \todo & \bt{1. Export dei dati} & Dal PC, nel browser: \bt{Dati} \ra \bt{Esporta tutto (JSON)}
+    \ra salva il file su Drive & Se Supabase e il telefono si perdessero insieme, non avresti una copia \\
   \todo & \bt{2. Anti-pausa attivo e verde} & GitHub \ra
     \href{\repo/actions/workflows/supabase-keepalive.yml}{Actions \ra Supabase keep-alive}: le ultime
     esecuzioni sono verdi. Se c'è il pulsante \bt{Enable workflow}, premilo &
@@ -580,6 +618,7 @@ Scegli un giorno fisso (es.\ il primo del mese) e segui l'ordine.
   Vuoi ripartire da zero (es.\ inizio della preparazione) & Riesegui \code{supabase/schema.sql}
     se è cambiato \ra su un dispositivo \bt{Dati \ra Ricomincia da zero} \ra gli altri si
     svuotano da soli \\
+  Pubblichi una nuova versione & \code{docs/release-checklist.md} \\
   Qualcosa non funziona & Tabella in \sezione{sec:rotto} \\
 \bottomrule
 \end{tabularx}

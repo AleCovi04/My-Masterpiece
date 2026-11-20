@@ -1,3 +1,4 @@
+import { Capacitor } from '@capacitor/core'
 import {
   useCallback,
   useEffect,
@@ -27,6 +28,8 @@ import './data.css'
 /** Promemoria se l'ultimo export manuale ha più di questi giorni. */
 const EXPORT_REMINDER_DAYS = 30
 const DAY_MS = 864e5
+/** Numero della build dell'APK (scritto dal workflow); vuoto nel sito. */
+const APP_BUILD = import.meta.env.VITE_APP_BUILD as string | undefined
 
 interface Info {
   backups: BackupInfo[]
@@ -56,6 +59,7 @@ type Preview = Extract<ImportResult, { ok: true }> & { fileName: string }
 type Notice = { kind: 'ok' | 'err'; text: string }
 
 export default function DataPage() {
+  const native = Capacitor.isNativePlatform()
   const { t, lang } = useI18n()
   const d = t.data
   const [info, setInfo] = useState<Info | null>(null)
@@ -107,6 +111,7 @@ export default function DataPage() {
 
   const exportAll = () =>
     run(async () => {
+      if (native) return // il download non funziona nell'app Android
       const file = await dataStore.exportAll()
       const url = URL.createObjectURL(
         new Blob([JSON.stringify(file, null, 2)], { type: 'application/json' }),
@@ -179,21 +184,30 @@ export default function DataPage() {
         <section className="dt-card">
           <h2>{d.exportTitle}</h2>
           <p>{d.exportHint}</p>
-          <p className="dt-meta">
-            {d.lastExport}:{' '}
-            <b>{info?.lastExportAt ? dateTime(info.lastExportAt) : d.never}</b>
-          </p>
-          {reminder && <p className="dt-reminder">{reminder}</p>}
-          <div className="dt-actions">
-            <button
-              type="button"
-              className="pl-btn acc"
-              disabled={busy}
-              onClick={() => void exportAll()}
-            >
-              {d.exportAll}
-            </button>
-          </div>
+          {native ? (
+            // nell'app Android il file non si può salvare: niente export finto
+            <p className="dt-reminder">{d.exportFromPc}</p>
+          ) : (
+            <>
+              <p className="dt-meta">
+                {d.lastExport}:{' '}
+                <b>
+                  {info?.lastExportAt ? dateTime(info.lastExportAt) : d.never}
+                </b>
+              </p>
+              {reminder && <p className="dt-reminder">{reminder}</p>}
+              <div className="dt-actions">
+                <button
+                  type="button"
+                  className="pl-btn acc"
+                  disabled={busy}
+                  onClick={() => void exportAll()}
+                >
+                  {d.exportAll}
+                </button>
+              </div>
+            </>
+          )}
         </section>
 
         <section className="dt-card">
@@ -274,7 +288,9 @@ export default function DataPage() {
       <AdvancedTools />
 
       <p className="dt-foot">
-        {d.schemaVersion}: {SCHEMA_VERSION}
+        {d.appVersion} {__APP_VERSION__}
+        {APP_BUILD ? ` (build ${APP_BUILD})` : ''} · {d.schemaVersion}:{' '}
+        {SCHEMA_VERSION}
       </p>
 
       {preview && (

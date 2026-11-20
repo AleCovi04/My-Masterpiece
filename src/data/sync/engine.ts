@@ -14,6 +14,8 @@ export type SyncStatus =
   | 'error'
   /** Sul server ci sono dati di una versione più recente dell'app. */
   | 'newer'
+  /** Il salvataggio del dispositivo non funziona (dati solo in memoria): niente sincronizzazione. */
+  | 'paused'
 
 export interface SyncState {
   status: SyncStatus
@@ -34,8 +36,11 @@ interface SyncEngineOptions {
 interface SyncEngine {
   /** Collega (o scollega, con `null`) l'account e il server. */
   setRemote(remote: { userId: string; api: SyncRemote } | null): Promise<void>
-  /** Sincronizza adesso; se è già in corso, ne fa un'altra subito dopo. */
-  syncNow(): Promise<void>
+  /**
+   * Sincronizza adesso; se è già in corso, ne fa un'altra subito dopo.
+   * Restituisce lo stato finale (`idle` = riuscita).
+   */
+  syncNow(): Promise<SyncStatus>
   /** Sincronizza tra `delayMs` (le chiamate ravvicinate si accorpano). */
   schedule(delayMs?: number): void
   getState(): SyncState
@@ -49,7 +54,6 @@ export function createSyncEngine(options: SyncEngineOptions): SyncEngine {
 
   let remote: { userId: string; api: SyncRemote } | null = null
   let state: SyncState = { status: 'off', lastSyncAt: null }
-  let running: Promise<void> | null = null
   let again = false
   let timer: ReturnType<typeof setTimeout> | null = null
   const listeners = new Set<() => void>()
@@ -63,6 +67,10 @@ export function createSyncEngine(options: SyncEngineOptions): SyncEngine {
     const r = remote
     if (!r) return set({ status: 'off' })
     if (!isOnline()) return set({ status: 'offline' })
+    await local.init()
+    const mode = local.health().mode
+    if (mode === 'newer') return set({ status: 'newer' })
+    if (mode !== 'ok') return set({ status: 'paused' })
     set({ status: 'syncing' })
     try {
       const meta = await local.getSyncMeta()
@@ -100,7 +108,8 @@ export function createSyncEngine(options: SyncEngineOptions): SyncEngine {
     }
   }
 
-  const syncNow = (): Promise<void> => {
+  let running: Promise<SyncStatus> | null = null
+  const syncNow = (): Promise<SyncStatus> => {
     if (running) {
       again = true
       return running
@@ -111,6 +120,7 @@ export function createSyncEngine(options: SyncEngineOptions): SyncEngine {
         await runOnce()
       } while (again)
       running = null
+      return state.status
     })()
     return running
   }

@@ -135,21 +135,25 @@ export function closeGarminLinks() {
 export async function ignoreGarminActivity(row: LinkProposal): Promise<void> {
   const a = row.activity
   const now = new Date().toISOString()
-  const imports = await dataStore.loadImports()
   const id = ignoredImportId(a.id)
-  if (!imports.some((r) => r.id === id))
-    await dataStore.saveImports([
-      ...imports,
-      {
-        id,
-        createdAt: now,
-        updatedAt: now,
-        source: 'intervals',
-        intervalsId: a.id,
-        startedAt: a.startUtc ?? `${row.date}T00:00:00.000Z`,
-        ignored: true,
-      },
-    ])
+  await dataStore.update(['imports'], ({ imports }) =>
+    imports.some((r) => r.id === id)
+      ? null
+      : {
+          imports: [
+            ...imports,
+            {
+              id,
+              createdAt: now,
+              updatedAt: now,
+              source: 'intervals',
+              intervalsId: a.id,
+              startedAt: a.startUtc ?? `${row.date}T00:00:00.000Z`,
+              ignored: true,
+            },
+          ],
+        },
+  )
   const rows = state.rows.filter((r) => r.activity.id !== a.id)
   set({ rows, open: rows.length ? state.open : false })
 }

@@ -664,6 +664,8 @@ export const it = {
       'Archiviazione non garantita: il browser potrebbe cancellare i dati se lo spazio scarseggia. Installa l’app o esporta spesso.',
     exportTitle: 'Esporta',
     exportAll: 'Esporta tutto (JSON)',
+    exportFromPc:
+      'Dall’app Android il file non si può salvare: fai l’export dal PC, nel browser (Dati → Esporta tutto (JSON)). Ultimo export e promemoria sono quelli del PC.',
     exportHint: 'Un file con tutti i dati, la versione dello schema e la data.',
     lastExport: 'Ultimo export manuale',
     never: 'mai',
@@ -711,6 +713,7 @@ export const it = {
     confirmRestore: 'Sostituire i dati attuali con questo backup?',
     restoreYes: 'Sì, ripristina',
     restored: 'Backup ripristinato.',
+    appVersion: 'Versione',
     schemaVersion: 'Versione dello schema dei dati',
   },
   space: {
@@ -789,6 +792,27 @@ export const it = {
     failed:
       'Non riuscito ({error}). Controlla la connessione; se continua, riesegui supabase/schema.sql.',
   },
+  pageError: {
+    title: 'Qualcosa è andato storto',
+    body: 'Questa pagina non si è potuta mostrare. I dati salvati non sono stati toccati: ricarica, oppure vai ad altre pagine dal menu (per esempio Dati, per l’export).',
+    reload: 'Ricarica',
+    toData: 'Vai a Dati',
+  },
+  storage: {
+    newerTitle: 'Aggiorna l’app',
+    newer:
+      'I dati di questo dispositivo sono stati salvati da una versione più recente dell’app. Per non rovinarli l’app è in sola lettura e non sincronizza: aggiorna l’app (APK dalla pagina Release su GitHub, oppure ricarica il sito).',
+    memoryTitle: 'Salvataggio non disponibile',
+    memory:
+      'Il database del dispositivo non si è aperto: ciò che vedi è solo in memoria e sparirà alla chiusura. Sincronizzazione e strumenti del server sono bloccati per proteggere i dati sul server. Chiudi e riapri l’app; se continua, libera spazio sul dispositivo e riprova.',
+    writeTitle: 'Salvataggio non riuscito',
+    write:
+      'Un salvataggio non è riuscito: l’ultima modifica potrebbe non essere salvata. Ricarica per vedere i dati salvati; se succede ancora, controlla lo spazio libero sul dispositivo.',
+    reload: 'Ricarica',
+    toolsBlocked: 'Non disponibile adesso: vedi l’avviso in alto.',
+    syncFailed:
+      'L’invio al server non è riuscito: le modifiche restano in coda su questo dispositivo e partiranno alla prossima sincronizzazione. Riprova con la connessione.',
+  },
   sync: {
     title: 'Account e sincronizzazione',
     intro:
@@ -802,6 +826,8 @@ export const it = {
     code: 'Codice (se presente)',
     signIn: 'Accedi',
     changeEmail: 'Cambia email',
+    notRegistered:
+      'Questa email non ha un account: le iscrizioni sono chiuse. Controlla di aver scritto l’email giusta.',
     sendFailed:
       'Invio non riuscito. Controlla l’email e riprova tra un minuto.',
     verifyFailed: 'Codice non valido o scaduto.',
@@ -823,6 +849,8 @@ export const it = {
         'Sincronizzazione non riuscita. Se succede da giorni, il progetto Supabase potrebbe essere in pausa: riattivalo dalla dashboard (Restore).',
       newer:
         'Sul server ci sono dati di una versione più recente dell’app: aggiorna l’app per sincronizzare.',
+      paused:
+        'Sincronizzazione sospesa: il salvataggio del dispositivo non funziona (vedi l’avviso in alto).',
     },
     badge: 'Stato della sincronizzazione',
   },

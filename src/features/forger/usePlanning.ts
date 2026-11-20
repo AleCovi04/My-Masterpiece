@@ -104,77 +104,72 @@ export function usePlanning() {
     return next
   }, [])
 
-  // ---------- blocchi ----------
-
-  const saveBlocks = useCallback(
-    (blocks: TrainingBlock[]) => {
-      update({ blocks })
-      void dataStore.saveBlocks(blocks)
+  /**
+   * Modifica a schermo e, la stessa, su blocchi e fasi come sono adesso nel
+   * salvataggio (in una sola transazione).
+   */
+  const commit = useCallback(
+    (fn: (cur: Pick<Loaded, 'blocks' | 'phases'>) => Partial<Loaded>) => {
+      const cur = latest.current
+      if (!cur) return
+      update(fn(cur))
+      void dataStore.update(['blocks', 'phases'], fn)
     },
     [update],
   )
+
+  // ---------- blocchi ----------
+
   const saveBlock = useCallback(
-    (b: TrainingBlock) => saveBlocks(upsert(latest.current?.blocks ?? [], b)),
-    [saveBlocks],
+    (b: TrainingBlock) => commit((c) => ({ blocks: upsert(c.blocks, b) })),
+    [commit],
   )
   const setBlockArchived = useCallback(
     (id: Id, value: boolean) =>
-      saveBlocks(archived(latest.current?.blocks ?? [], id, value)),
-    [saveBlocks],
+      commit((c) => ({ blocks: archived(c.blocks, id, value) })),
+    [commit],
   )
   const duplicateBlock = useCallback(
     (id: Id, suffix: string) => {
-      const list = latest.current?.blocks ?? []
-      const src = list.find((b) => b.id === id)
-      if (src) saveBlocks([...list, copyOf(src, suffix)])
+      const src = latest.current?.blocks.find((b) => b.id === id)
+      if (!src) return
+      const copy = copyOf(src, suffix)
+      commit((c) => ({ blocks: [...c.blocks, copy] }))
     },
-    [saveBlocks],
+    [commit],
   )
 
   /** Elimina per sempre il blocco e lo toglie dalle fasi che lo usano. */
   const deleteBlock = useCallback(
-    (id: Id) => {
-      const cur = latest.current
-      if (!cur) return
-      const r = withoutBlock(cur.blocks, cur.phases, id)
-      update({ blocks: r.blocks, phases: r.phases })
-      void dataStore.saveBlocks(r.blocks)
-      void dataStore.savePhases(r.phases)
-    },
-    [update],
+    (id: Id) => commit((c) => withoutBlock(c.blocks, c.phases, id)),
+    [commit],
   )
 
   // ---------- fasi ----------
 
-  const savePhases = useCallback(
-    (phases: Phase[]) => {
-      update({ phases })
-      void dataStore.savePhases(phases)
-    },
-    [update],
-  )
   const savePhase = useCallback(
-    (p: Phase) => savePhases(upsert(latest.current?.phases ?? [], p)),
-    [savePhases],
+    (p: Phase) => commit((c) => ({ phases: upsert(c.phases, p) })),
+    [commit],
   )
   const setPhaseArchived = useCallback(
     (id: Id, value: boolean) =>
-      savePhases(archived(latest.current?.phases ?? [], id, value)),
-    [savePhases],
+      commit((c) => ({ phases: archived(c.phases, id, value) })),
+    [commit],
   )
   const duplicatePhase = useCallback(
     (id: Id, suffix: string) => {
-      const list = latest.current?.phases ?? []
-      const src = list.find((p) => p.id === id)
-      if (src) savePhases([...list, copyOf(src, suffix)])
+      const src = latest.current?.phases.find((p) => p.id === id)
+      if (!src) return
+      const copy = copyOf(src, suffix)
+      commit((c) => ({ phases: [...c.phases, copy] }))
     },
-    [savePhases],
+    [commit],
   )
 
   const deletePhase = useCallback(
     (id: Id) =>
-      savePhases((latest.current?.phases ?? []).filter((p) => p.id !== id)),
-    [savePhases],
+      commit((c) => ({ phases: c.phases.filter((p) => p.id !== id) })),
+    [commit],
   )
 
   // ---------- applicazioni ----------
@@ -184,12 +179,21 @@ export function usePlanning() {
     async (input: ApplyInput): Promise<ApplyResult | null> => {
       const cur = latest.current
       if (!cur) return null
-      // le sedute si rileggono: il Calendario potrebbe averle cambiate
-      const sessions = await dataStore.loadSessions()
-      const r = planApplication(input, sessions, cur.templates)
-      const applications = [...cur.applications, r.application]
-      await dataStore.saveSessionsAndApplications(r.sessions, applications)
-      update({ sessions: r.sessions, applications })
+      let r: ApplyResult | null = null
+      // sulle sedute come sono adesso nel salvataggio (il Calendario potrebbe averle cambiate)
+      const saved = await dataStore.update(
+        ['sessions', 'applications'],
+        (d) => {
+          const out = planApplication(input, d.sessions, cur.templates)
+          r = out
+          return {
+            sessions: out.sessions,
+            applications: [...d.applications, out.application],
+          }
+        },
+      )
+      if (!saved) return null
+      update(saved)
       return r
     },
     [update],
@@ -198,13 +202,18 @@ export function usePlanning() {
   /** Toglie l'applicazione e le sue sedute ancora programmate. */
   const unapply = useCallback(
     async (appId: Id) => {
-      const cur = latest.current
-      if (!cur) return 0
-      const sessions = await dataStore.loadSessions()
-      const r = removeApplication(sessions, cur.applications, appId)
-      await dataStore.saveSessionsAndApplications(r.sessions, r.applications)
-      update({ sessions: r.sessions, applications: r.applications })
-      return r.removed
+      let removed = 0
+      const saved = await dataStore.update(
+        ['sessions', 'applications'],
+        (d) => {
+          const r = removeApplication(d.sessions, d.applications, appId)
+          removed = r.removed
+          return r
+        },
+      )
+      if (!saved) return 0
+      update(saved)
+      return removed
     },
     [update],
   )

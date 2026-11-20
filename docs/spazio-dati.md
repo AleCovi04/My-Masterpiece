@@ -31,7 +31,7 @@ Per avere una copia tua basta l'export mensile (**Dati** → **Esporta tutto (JS
 | 0       | Sempre                | Controllo mensile ed export; FIT caricati compressi    | No                                                | ✅ attivo                                                         |
 | 1       | —                     | Ricomprimere i FIT vecchi                              | No                                                | non serve: dopo la ripartenza del 2026 tutti i FIT sono compressi |
 | 2       | Storage oltre l'80 %  | **Libera spazio**: archivia i FIT più vecchi di N anni | Mappa e grafici di quelle attività (recuperabili) | ✅ in **Dati → Spazio sul server**                                |
-| 3a      | Sempre, da sola       | Pulizia delle voci cancellate da più di 90 giorni      | No                                                | ✅ automatica (una volta a settimana)                             |
+| 3a      | Database oltre l'80 % | Pulizia delle voci cancellate                          | No, se tutti i dispositivi hanno sincronizzato    | a mano (automatica tolta nella v1.1)                              |
 | 3b      | Database oltre l'80 % | Archiviare stagioni intere                             | Lo storico di quel periodo nelle analisi          | a mano, ultima risorsa                                            |
 | 4       | Nessun margine        | Più spazio: piano Pro o FIT altrove                    | No, ma un costo o un servizio in più              | —                                                                 |
 
@@ -50,11 +50,18 @@ Da fare **dal PC** (nell'app sul telefono lo .zip non si può salvare):
 
 Cosa resta: la seduta con riepilogo, giri, RPE e note; analisi e record non cambiano. Cosa si perde: mappa, grafici, zone e migliori prestazioni di quelle attività; la pagina Attività mostra "File archiviato". **Per riaverli:** apri la seduta → **Importa .FIT** → scegli il file dallo .zip: torna sul dispositivo e sul server, senza doppioni.
 
-### Livello 3a – Pulizia automatica del database
+### Livello 3a – Pulizia delle voci cancellate (a mano)
 
-Quando cancelli qualcosa, sul server resta una riga vuota: serve agli altri dispositivi per sapere che va cancellata. Dopo una sincronizzazione riuscita, al massimo una volta a settimana, l'app chiede a Supabase di togliere quelle più vecchie di 90 giorni (funzione `purge_deleted_items` in `supabase/schema.sql`).
+Quando cancelli qualcosa, sul server resta una riga vuota: serve agli altri dispositivi per sapere che va cancellata. Pesa circa 300 byte: 1000 cancellazioni ≈ 0,3 MB su 500 MB, quindi di norma non serve mai toglierle.
 
-Limite: un dispositivo rimasto spento o offline per più di 90 giorni non riceve quelle cancellazioni (tiene la sua copia, ma non la rimanda al server finché non la modifica).
+Fino alla v1.1 l'app le puliva da sola dopo 90 giorni; è stato tolto perché un dispositivo rimasto spento più a lungo (il PC per una stagione, un vecchio telefono) non riceveva più quelle cancellazioni e, rientrando nell'account, le faceva ricomparire su tutti i dispositivi.
+
+Se un giorno servisse davvero (database oltre l'80 %):
+
+1. Su **ogni** dispositivo che usi: apri l'app e controlla in **Dati** che la sincronizzazione sia verde. Esci dall'account sui dispositivi che non usi più.
+2. Supabase → **SQL Editor** → **New query** → incolla ed esegui (**Run**):
+   `delete from public.items where deleted and updated_at < now() - interval '365 days';`
+3. Un dispositivo rimasto fuori che rientra nell'account può far ricomparire le voci cancellate: cancellale di nuovo da lì.
 
 ### Livello 3b – Archiviare stagioni intere (ultima risorsa)
 

@@ -1,8 +1,15 @@
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
-import { describe, expect, it } from 'vitest'
-import { createDexieStore } from '../dexieStore'
+import { describe, expect, it, vi } from 'vitest'
+import Dexie from 'dexie'
+import { createDexieStore, DB_NAME } from '../dexieStore'
 import { SCHEMA_VERSION } from '../migrations'
-import type { Exercise, ImportRecord } from '../types'
+import type {
+  Exercise,
+  ImportRecord,
+  Session,
+  StrengthTemplate,
+} from '../types'
+import { insertSession, removeSession } from '../../lib/sessions'
 import { createSyncEngine } from './engine'
 import type { RemoteChange, SyncChange, SyncRemote } from './types'
 
@@ -244,6 +251,315 @@ describe('sincronizzazione', () => {
     await a.store.saveExercises([exercise('x1')])
     await a.store.saveSettings(await a.store.loadSettings())
     expect(await a.store.pendingChanges()).toEqual([])
+  })
+})
+
+const session = (id: string, date: string, order = 0): Session => ({
+  id,
+  createdAt: t0.toISOString(),
+  updatedAt: t0.toISOString(),
+  date,
+  order,
+  status: 'planned',
+  name: id,
+  discipline: 'strength',
+  plan: { entries: [] },
+})
+
+describe('salvataggi su dati vecchi (B1)', () => {
+  it('Termina del live non cancella né riporta indietro ciò che è arrivato durante l’allenamento', async () => {
+    const server = fakeServer()
+    const pc = device(server)
+    const phone = device(server)
+    await phone.store.update(['sessions'], () => ({
+      sessions: [
+        session('corsa', '2026-11-18'),
+        session('forza', '2026-11-18', 1),
+      ],
+    }))
+    await phone.connect()
+    await phone.engine.syncNow()
+    await pc.store.init()
+    await pc.connect()
+    await pc.engine.syncNow()
+
+    // il live legge le sedute all'apertura
+    const atOpen = await phone.store.loadSessions()
+    expect(atOpen).toHaveLength(2)
+
+    // durante l'allenamento: la corsa viene collegata sul telefono, il PC crea una seduta
+    phone.later(60_000)
+    await phone.store.update(['sessions'], ({ sessions }) => ({
+      sessions: sessions.map((s) =>
+        s.id === 'corsa' ? { ...s, status: 'done' as const } : s,
+      ),
+    }))
+    pc.later(60_000)
+    await pc.store.update(['sessions'], ({ sessions }) => ({
+      sessions: [...sessions, session('nuoto', '2026-11-19')],
+    }))
+    await pc.engine.syncNow()
+    await phone.engine.syncNow()
+
+    // Termina: la modifica si applica alle sedute di adesso, non alla copia dell'apertura
+    phone.later(60_000)
+    const saved = await phone.store.update(['sessions'], ({ sessions }) => ({
+      sessions: sessions.map((s) =>
+        s.id === 'forza' ? { ...s, status: 'done' as const } : s,
+      ),
+    }))
+    expect(saved?.sessions.map((s) => `${s.id}:${s.status}`).sort()).toEqual([
+      'corsa:done',
+      'forza:done',
+      'nuoto:planned',
+    ])
+    await phone.engine.syncNow()
+    await pc.engine.syncNow()
+    expect(server.rows.get('sessions/nuoto')?.deleted).toBe(false)
+    expect(
+      (await pc.store.loadSessions()).map((s) => `${s.id}:${s.status}`).sort(),
+    ).toEqual(['corsa:done', 'forza:done', 'nuoto:planned'])
+  })
+
+  it('due schede: la modifica di una non cancella ciò che ha creato l’altra', async () => {
+    const idb = { indexedDB: new IDBFactory(), IDBKeyRange }
+    const open = () =>
+      createDexieStore({
+        idb,
+        now: () => t0,
+        requestPersistence: async () => true,
+      })
+    const tab1 = open()
+    const tab2 = open()
+    await tab1.update(['exercises'], () => ({ exercises: [exercise('a')] }))
+    await tab2.update(['exercises'], ({ exercises }) => ({
+      exercises: [...exercises, exercise('b')],
+    }))
+    // la scheda 1 (ferma a [a]) rinomina "a"
+    await tab1.update(['exercises'], ({ exercises }) => ({
+      exercises: exercises.map((e) => (e.id === 'a' ? { ...e, name: 'A' } : e)),
+    }))
+    expect((await tab2.loadExercises()).map((e) => e.name)).toEqual(['A', 'b'])
+  })
+
+  it('una modifica che non cambia nulla non scrive', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.store.update(['exercises'], () => ({ exercises: [exercise('x')] }))
+    await a.connect()
+    await a.engine.syncNow()
+    expect(await a.store.update(['exercises'], () => null)).toMatchObject({
+      exercises: [{ id: 'x' }],
+    })
+    expect(await a.store.pendingChanges()).toEqual([])
+  })
+})
+
+describe('salvataggio non disponibile (B3)', () => {
+  it('con i dati solo in memoria la sincronizzazione non parte e lo dice', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const server = fakeServer()
+    await server.api.push([
+      {
+        kind: 'exercises',
+        id: 'x',
+        pos: 0,
+        item: exercise('x'),
+        updatedAt: t0.toISOString(),
+        deleted: false,
+        schemaVersion: SCHEMA_VERSION,
+      },
+    ])
+    const store = createDexieStore({
+      idb: { indexedDB: undefined, IDBKeyRange: undefined },
+      now: () => t0,
+    })
+    const engine = createSyncEngine({ local: store, now: () => t0 })
+    await engine.setRemote({ userId: 'u1', api: server.api })
+    expect(await engine.syncNow()).toBe('paused')
+    expect(engine.getState().status).toBe('paused')
+    expect([...server.rows.keys()]).toEqual(['exercises/x'])
+    error.mockRestore()
+  })
+
+  it('syncNow restituisce l’esito', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    await a.connect()
+    expect(await a.engine.syncNow()).toBe('idle')
+    server.api.pull = async () => {
+      throw new Error('500')
+    }
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+    expect(await a.engine.syncNow()).toBe('error')
+    error.mockRestore()
+  })
+})
+
+describe('migrazioni e versioni (B4)', () => {
+  /** Riporta il database di un dispositivo a uno schema diverso, come se l'app fosse un'altra versione. */
+  const setStoredVersion = async (
+    idb: { indexedDB: IDBFactory; IDBKeyRange: typeof IDBKeyRange },
+    version: number,
+  ) => {
+    const raw = new Dexie(DB_NAME, idb)
+    await raw.open()
+    await raw.table('meta').put({ key: 'schemaVersion', value: version })
+    raw.close()
+  }
+
+  it('la migrazione all’avvio non vince sulle modifiche fatte altrove nel frattempo', async () => {
+    const server = fakeServer()
+    const idbA = { indexedDB: new IDBFactory(), IDBKeyRange }
+    const clock = { now: t0 }
+    const openA = () => {
+      const store = createDexieStore({
+        idb: idbA,
+        now: () => clock.now,
+        requestPersistence: async () => true,
+      })
+      const engine = createSyncEngine({ local: store, now: () => clock.now })
+      return { store, engine }
+    }
+    const tpl: StrengthTemplate = {
+      id: 't',
+      createdAt: t0.toISOString(),
+      updatedAt: t0.toISOString(),
+      name: 'Forza A',
+      discipline: 'strength',
+      archived: false,
+      entries: [{ exerciseId: 'a', restSeconds: 90, sets: [{ reps: 8 }] }],
+    }
+    const a = openA()
+    await a.store.update(['templates'], () => ({ templates: [tpl] }))
+    await a.engine.setRemote({ userId: 'u1', api: server.api })
+    await a.engine.syncNow()
+    const b = device(server)
+    await b.store.init()
+    await b.connect()
+    await b.engine.syncNow()
+
+    // B (già aggiornato) rinomina; A si aggiorna dopo e migra la sua copia (schema 1: serie con i kg)
+    b.later(60_000)
+    await b.store.update(['templates'], ({ templates }) => ({
+      templates: templates.map((x) => ({ ...x, name: 'Forza B' })),
+    }))
+    await b.engine.syncNow()
+    clock.now = new Date(t0.getTime() + 120_000)
+    const raw = new Dexie(DB_NAME, idbA)
+    await raw.open()
+    await raw.table('meta').put({ key: 'schemaVersion', value: 1 })
+    const row = await raw.table('templates').get('t')
+    row.item.entries[0].sets = [{ reps: 8, kg: 60 }]
+    await raw.table('templates').put(row)
+    raw.close()
+
+    const migrated = openA()
+    const [mt] = (await migrated.store.loadTemplates()) as StrengthTemplate[]
+    expect(mt.entries[0].sets).toEqual([{ reps: 8 }])
+    expect(await migrated.store.pendingChanges()).toEqual([])
+    await migrated.engine.setRemote({ userId: 'u1', api: server.api })
+    await migrated.engine.syncNow()
+    expect((await migrated.store.loadTemplates()).map((x) => x.name)).toEqual([
+      'Forza B',
+    ])
+    expect(server.rows.get('templates/t')?.item).toMatchObject({
+      name: 'Forza B',
+    })
+  })
+
+  it('dati di una versione più recente: sola lettura e niente sincronizzazione', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const server = fakeServer()
+    const idb = { indexedDB: new IDBFactory(), IDBKeyRange }
+    const open = () =>
+      createDexieStore({
+        idb,
+        now: () => t0,
+        requestPersistence: async () => true,
+      })
+    const first = open()
+    await first.update(['exercises'], () => ({ exercises: [exercise('x')] }))
+    await setStoredVersion(idb, SCHEMA_VERSION + 1)
+
+    const old = open() // l'app vecchia (rollback) apre dati più nuovi
+    await old.init()
+    expect(old.health().mode).toBe('newer')
+    expect((await old.loadExercises()).map((e) => e.id)).toEqual(['x'])
+    expect(
+      await old.update(['exercises'], () => ({ exercises: [] })),
+    ).toBeNull()
+    await expect(old.resetAll()).rejects.toThrow()
+    const engine = createSyncEngine({ local: old, now: () => t0 })
+    await engine.setRemote({ userId: 'u1', api: server.api })
+    expect(await engine.syncNow()).toBe('newer')
+    expect(server.rows.size).toBe(0)
+    expect((await open().loadExercises()).map((e) => e.id)).toEqual(['x'])
+    warn.mockRestore()
+  })
+})
+
+describe('cambi di sola posizione (B2)', () => {
+  it('telefono offline registra, il PC elimina una seduta precedente: l’allenamento resta', async () => {
+    const server = fakeServer()
+    const pc = device(server)
+    const phone = device(server)
+    const day = '2026-11-18'
+    await pc.store.update(['sessions'], () => ({
+      sessions: [
+        session('s1', '2026-11-16'),
+        session('s2', day),
+        session('s3', day, 1),
+        session('s4', '2026-11-19'),
+      ],
+    }))
+    await pc.connect()
+    await pc.engine.syncNow()
+    await phone.store.init()
+    await phone.connect()
+    await phone.engine.syncNow()
+
+    // in palestra, senza rete
+    phone.later(60_000)
+    await phone.store.update(['sessions'], ({ sessions }) => ({
+      sessions: sessions.map((s) =>
+        s.id === 's3' ? { ...s, status: 'done' as const } : s,
+      ),
+    }))
+    // dopo, sul PC: si elimina una seduta che viene prima nell'elenco
+    pc.later(120_000)
+    await pc.store.update(['sessions'], ({ sessions }) => ({
+      sessions: removeSession(sessions, 's1', pc.clock.now.toISOString()),
+    }))
+    expect((await pc.store.pendingChanges()).map((c) => c.id)).toEqual(['s1'])
+    await pc.engine.syncNow()
+    await phone.engine.syncNow()
+    await pc.engine.syncNow()
+
+    for (const d of [pc, phone]) {
+      const s3 = (await d.store.loadSessions()).find((s) => s.id === 's3')
+      expect(s3?.status).toBe('done')
+    }
+  })
+
+  it('aggiungere una seduta mette in coda una sola voce', async () => {
+    const server = fakeServer()
+    const a = device(server)
+    const day = '2026-11-18'
+    await a.store.update(['sessions'], () => ({
+      sessions: [
+        session('s1', day),
+        session('s2', day, 1),
+        session('s3', '2026-11-19'),
+      ],
+    }))
+    await a.connect()
+    await a.engine.syncNow()
+    a.later(60_000)
+    await a.store.update(['sessions'], ({ sessions }) => ({
+      sessions: insertSession(sessions, session('n', day), day, 2),
+    }))
+    expect((await a.store.pendingChanges()).map((c) => c.id)).toEqual(['n'])
   })
 })
 

@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import Modal from '../../components/ui/Modal'
-import { account, useAccount } from '../../data'
+import { account, useAccount, useStoreOk } from '../../data'
 import { useI18n } from '../../i18n/context'
+import { toolError } from './toolError'
 
 type Phase = 'idle' | 'confirm' | 'working' | 'done' | 'error'
 
@@ -10,6 +11,7 @@ export default function AdvancedTools() {
   const { t } = useI18n()
   const v = t.advanced
   const { email } = useAccount()
+  const storeOk = useStoreOk()
   const [phase, setPhase] = useState<Phase>('idle')
   const [error, setError] = useState('')
 
@@ -22,7 +24,7 @@ export default function AdvancedTools() {
       setPhase('done')
     } catch (e) {
       console.error(e)
-      setError(e instanceof Error ? e.message : String(e))
+      setError(toolError(e, t))
       setPhase('error')
     }
   }
@@ -32,10 +34,12 @@ export default function AdvancedTools() {
       <summary>{v.title}</summary>
       <h3>{v.rebuildTitle}</h3>
       <p>{v.rebuildText}</p>
+      {!storeOk && <p className="dt-meta">{t.storage.toolsBlocked}</p>}
       <div className="dt-actions">
         <button
           type="button"
           className="pl-btn"
+          disabled={!storeOk}
           onClick={() => setPhase('confirm')}
         >
           {v.rebuildButton}

@@ -47,7 +47,53 @@ export interface IntervalsLink {
   lastCheckAt?: IsoDateTime
 }
 
+/**
+ * Stato del salvataggio sul dispositivo.
+ * - `ok`: IndexedDB funziona.
+ * - `memory`: IndexedDB non si è aperto; i dati vivono solo in memoria fino
+ *   alla chiusura. Sincronizzazione e strumenti del server sono bloccati.
+ * - `newer`: i dati salvati sono di una versione più recente dell'app (es.
+ *   rollback del sito): sola lettura, niente sincronizzazione, "aggiorna l'app".
+ */
+export type StoreMode = 'ok' | 'memory' | 'newer'
+
+export interface StoreHealth {
+  mode: StoreMode
+  /** Un salvataggio non è riuscito in questa sessione (ciò che si vede può non essere salvato). */
+  writeFailed: boolean
+}
+
+/** Gli elenchi dei dati (una voce per entità, sincronizzati voce per voce). */
+export type ListData = Pick<
+  AppData,
+  | 'exercises'
+  | 'templates'
+  | 'sessions'
+  | 'blocks'
+  | 'phases'
+  | 'applications'
+  | 'imports'
+>
+export type ListName = keyof ListData
+
 export interface DataStore {
+  /**
+   * Modifica uno o più elenchi in **una sola transazione**: `fn` riceve gli
+   * elenchi come sono adesso nel salvataggio e restituisce quelli da scrivere
+   * (`null` = nessuna modifica). Nessun dato arrivato nel frattempo va perso.
+   * `fn` deve essere sincrona e pura (può essere chiamata con dati diversi da
+   * quelli a schermo). Restituisce gli elenchi dopo la modifica, `null` se il
+   * salvataggio non è riuscito.
+   */
+  update<K extends ListName>(
+    keys: K[],
+    fn: (current: Pick<ListData, K>) => Partial<Pick<ListData, K>> | null,
+  ): Promise<Pick<ListData, K> | null>
+
+  // I `save…` qui sotto sostituiscono un elenco intero (ciò che manca viene
+  // cancellato anche sugli altri dispositivi): solo per elenchi appena letti,
+  // mai per una copia tenuta a schermo. Per le modifiche c'è `update`.
+
   /** Solo sedute reali: all'inizio l'elenco è vuoto. */
   loadSessions(): Promise<Session[]>
   saveSessions(sessions: Session[]): Promise<void>
@@ -105,6 +151,10 @@ export interface DataStore {
 
   /** Apre il salvataggio: migrazioni, persistenza, backup automatico. Si può chiamare più volte. */
   init(): Promise<void>
+  /** Stato del salvataggio (valido dopo `init`). */
+  health(): StoreHealth
+  /** Avvisa quando lo stato del salvataggio cambia. */
+  onHealth(listener: () => void): () => void
   /** Il browser ha garantito di non cancellare i dati? */
   isPersistent(): Promise<boolean>
 
@@ -123,9 +173,6 @@ export interface DataStore {
   resetAll(): Promise<void>
   /** Rimette in coda tutte le voci e tutti i FIT (per ricaricare il server da questo dispositivo). */
   requeueAll(): Promise<void>
-  /** Ultima pulizia delle voci cancellate sul server (solo questo dispositivo). */
-  lastPurgeAt(): Promise<IsoDateTime | null>
-  markPurged(): Promise<void>
 
   /** Backup salvati, dal più recente. */
   listBackups(): Promise<BackupInfo[]>

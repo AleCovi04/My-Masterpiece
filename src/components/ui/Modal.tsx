@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react'
+import { useBackClose } from '../../hooks/useBackClose'
 
 interface Props {
   title: string
@@ -14,7 +15,7 @@ interface Props {
 // Pila delle finestre aperte: Esc chiude solo quella in cima.
 const openStack: symbol[] = []
 
-/** Finestra modale: Esc e clic fuori chiudono, il focus torna dove era. */
+/** Finestra modale: Esc, clic fuori e Indietro di Android chiudono; il focus torna dove era. */
 export default function Modal({
   title,
   closeLabel,
@@ -29,6 +30,8 @@ export default function Modal({
   useEffect(() => {
     closeRef.current = onClose
   })
+  // tasto Indietro di Android: come la ×, senza cambiare pagina
+  useBackClose(true, onClose)
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null

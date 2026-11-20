@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useBackClose } from '../../hooks/useBackClose'
 import type { IsoDate } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 import { parseIsoDate, toIsoDate, todayIso } from '../../lib/dates'
@@ -13,6 +14,7 @@ export default function RaceDatePicker({ value, onChange }: Props) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [view, setView] = useState({ y: 0, m: 0 })
+  useBackClose(open, () => setOpen(false))
   const rootRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {

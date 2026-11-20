@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { createDexieStore } from './dexieStore'
 import type { LegacyStorage } from './legacyLocalStorage'
-import type { DataStore } from './store'
+import type { DataStore, StoreHealth } from './store'
 import { createAccount, type AccountState } from './sync/account'
 
 function legacyStorage(): LegacyStorage | null {
@@ -48,4 +48,14 @@ const subscribeRevision = (fn: () => void) => {
 /** Cambia quando arrivano dati da un altro dispositivo (o con `refreshData`): da mettere nelle dipendenze dei caricamenti. */
 export function useDataRevision(): number {
   return useSyncExternalStore(subscribeRevision, () => revision)
+}
+
+/** Stato del salvataggio del dispositivo (solo in memoria, salvataggi non riusciti). */
+export function useStoreHealth(): StoreHealth {
+  return useSyncExternalStore(dataStore.onHealth, dataStore.health)
+}
+
+/** Il salvataggio del dispositivo funziona (gli strumenti del server si possono usare). */
+export function useStoreOk(): boolean {
+  return useStoreHealth().mode === 'ok'
 }
