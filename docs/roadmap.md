@@ -10,7 +10,7 @@ Le versioni non hanno date: la **v1.1 è pronta quando tutti i bloccanti sono ch
 - ✅ **B4** Migrazioni e sincronizzazione: migrazione senza nuove ore né cancellazioni, guardia per dati di una versione più recente.
 - ✅ **B5** Pulizia automatica delle cancellazioni dopo 90 giorni: da togliere.
 - ✅ **B6** Download dal server a pagine con offset: paginazione a chiave.
-- ⬜ **B7** Iscrizioni aperte su Supabase: chiuse, con messaggio chiaro nell'app.
+- ✅ **B7** Iscrizioni aperte su Supabase: chiuse, con messaggio chiaro nell'app.
 - ⬜ **B8** "Esporta tutto" nell'APK che non salva nulla: export dal PC.
 - ⬜ **B9** Error Boundary: niente più schermo bianco.
 - ⬜ Versione 1.1.0 nell'app (pagina Dati), `CHANGELOG.md`, `docs/release-checklist.md`, guida aggiornata.

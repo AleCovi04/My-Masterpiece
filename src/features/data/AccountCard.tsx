@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { account, useAccount } from '../../data'
+import { NotRegisteredError } from '../../data/sync/account'
 import type { IsoDateTime } from '../../data/types'
 import { useI18n } from '../../i18n/context'
 
@@ -19,14 +20,17 @@ export default function AccountCard({
   const [error, setError] = useState<string | null>(null)
   const [confirmOut, setConfirmOut] = useState(false)
 
-  const run = async (action: () => Promise<void>, failed: string) => {
+  const run = async (
+    action: () => Promise<void>,
+    failed: string | ((e: unknown) => string),
+  ) => {
     setBusy(true)
     setError(null)
     try {
       await action()
     } catch (e) {
       console.error(e)
-      setError(failed)
+      setError(typeof failed === 'string' ? failed : failed(e))
     } finally {
       setBusy(false)
     }
@@ -34,10 +38,13 @@ export default function AccountCard({
 
   const send = (ev: FormEvent) => {
     ev.preventDefault()
-    void run(async () => {
-      await account.sendCode(email.trim())
-      setSent(true)
-    }, s.sendFailed)
+    void run(
+      async () => {
+        await account.sendCode(email.trim())
+        setSent(true)
+      },
+      (e) => (e instanceof NotRegisteredError ? s.notRegistered : s.sendFailed),
+    )
   }
 
   const verify = (ev: FormEvent) => {

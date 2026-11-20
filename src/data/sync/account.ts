@@ -71,6 +71,27 @@ export class SyncFailedError extends Error {
   }
 }
 
+/** L'email non ha un account e le iscrizioni sono chiuse. */
+export class NotRegisteredError extends Error {
+  constructor() {
+    super('Email non registrata')
+    this.name = 'NotRegisteredError'
+  }
+}
+
+/** Errore di Supabase per un'email senza account con le iscrizioni chiuse. */
+export function isNotRegistered(error: {
+  code?: string
+  message?: string
+}): boolean {
+  return (
+    error.code === 'otp_disabled' ||
+    error.code === 'signup_disabled' ||
+    error.code === 'user_not_found' ||
+    /signups? not allowed/i.test(error.message ?? '')
+  )
+}
+
 function makeClient(): SupabaseClient | null {
   const url = import.meta.env.VITE_SUPABASE_URL as string | undefined
   const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as
@@ -184,12 +205,13 @@ export function createAccount(local: Local): Account {
       const { error } = await need().auth.signInWithOtp({
         email: address,
         options: {
-          shouldCreateUser: true,
+          // iscrizioni chiuse: si accede solo con un account già creato (docs/release-checklist.md)
+          shouldCreateUser: false,
           emailRedirectTo:
             typeof window === 'undefined' ? undefined : window.location.origin,
         },
       })
-      if (error) throw error
+      if (error) throw isNotRegistered(error) ? new NotRegisteredError() : error
     },
     async verifyCode(address, code) {
       const { error } = await need().auth.verifyOtp({

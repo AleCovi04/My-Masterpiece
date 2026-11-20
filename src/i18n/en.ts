@@ -811,6 +811,8 @@ export const en: Dictionary = {
     code: 'Code (if any)',
     signIn: 'Sign in',
     changeEmail: 'Change email',
+    notRegistered:
+      'This email has no account: sign-ups are closed. Check that you typed the right email.',
     sendFailed: 'Sending failed. Check the email and try again in a minute.',
     verifyFailed: 'Invalid or expired code.',
     signedInAs: 'Signed in as',

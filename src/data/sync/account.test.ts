@@ -45,7 +45,8 @@ vi.mock('@supabase/supabase-js', () => ({
   }),
 }))
 
-const { createAccount, StoreUnavailableError } = await import('./account')
+const { createAccount, isNotRegistered, StoreUnavailableError } =
+  await import('./account')
 
 const ticks = () => new Promise((r) => setTimeout(r, 20))
 
@@ -79,5 +80,16 @@ describe('strumenti del server con il salvataggio non disponibile (B3)', () => {
     expect(server.storageCalls).toBe(0)
     expect(account.getState().status).toBe('paused')
     error.mockRestore()
+  })
+})
+
+describe('iscrizioni chiuse (B7)', () => {
+  it('riconosce gli errori di Supabase per un’email senza account', () => {
+    expect(isNotRegistered({ code: 'otp_disabled' })).toBe(true)
+    expect(isNotRegistered({ message: 'Signups not allowed for otp' })).toBe(
+      true,
+    )
+    expect(isNotRegistered({ code: 'over_email_send_rate_limit' })).toBe(false)
+    expect(isNotRegistered({ message: 'Network error' })).toBe(false)
   })
 })

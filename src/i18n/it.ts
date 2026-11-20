@@ -817,6 +817,8 @@ export const it = {
     code: 'Codice (se presente)',
     signIn: 'Accedi',
     changeEmail: 'Cambia email',
+    notRegistered:
+      'Questa email non ha un account: le iscrizioni sono chiuse. Controlla di aver scritto l’email giusta.',
     sendFailed:
       'Invio non riuscito. Controlla l’email e riprova tra un minuto.',
     verifyFailed: 'Codice non valido o scaduto.',
