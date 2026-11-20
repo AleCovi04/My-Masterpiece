@@ -790,6 +790,9 @@ export const it = {
       'Non riuscito ({error}). Controlla la connessione; se continua, riesegui supabase/schema.sql.',
   },
   storage: {
+    newerTitle: 'Aggiorna l’app',
+    newer:
+      'I dati di questo dispositivo sono stati salvati da una versione più recente dell’app. Per non rovinarli l’app è in sola lettura e non sincronizza: aggiorna l’app (APK dalla pagina Release su GitHub, oppure ricarica il sito).',
     memoryTitle: 'Salvataggio non disponibile',
     memory:
       'Il database del dispositivo non si è aperto: ciò che vedi è solo in memoria e sparirà alla chiusura. Sincronizzazione e strumenti del server sono bloccati per proteggere i dati sul server. Chiudi e riapri l’app; se continua, libera spazio sul dispositivo e riprova.',
@@ -797,8 +800,7 @@ export const it = {
     write:
       'Un salvataggio non è riuscito: l’ultima modifica potrebbe non essere salvata. Ricarica per vedere i dati salvati; se succede ancora, controlla lo spazio libero sul dispositivo.',
     reload: 'Ricarica',
-    toolsBlocked:
-      'Non disponibile: il salvataggio del dispositivo non funziona (vedi l’avviso in alto).',
+    toolsBlocked: 'Non disponibile adesso: vedi l’avviso in alto.',
     syncFailed:
       'L’invio al server non è riuscito: le modifiche restano in coda su questo dispositivo e partiranno alla prossima sincronizzazione. Riprova con la connessione.',
   },

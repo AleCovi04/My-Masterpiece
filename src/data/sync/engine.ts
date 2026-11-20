@@ -68,7 +68,9 @@ export function createSyncEngine(options: SyncEngineOptions): SyncEngine {
     if (!r) return set({ status: 'off' })
     if (!isOnline()) return set({ status: 'offline' })
     await local.init()
-    if (local.health().mode !== 'ok') return set({ status: 'paused' })
+    const mode = local.health().mode
+    if (mode === 'newer') return set({ status: 'newer' })
+    if (mode !== 'ok') return set({ status: 'paused' })
     set({ status: 'syncing' })
     try {
       const meta = await local.getSyncMeta()

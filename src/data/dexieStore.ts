@@ -101,6 +101,13 @@ export function createDexieStore(
     health = { ...health, ...next }
     emit(healthListeners)
   }
+  /** Dati di una versione più recente: nessuna scrittura. */
+  const readOnly = () => health.mode === 'newer'
+  const refuseReadOnly = () => {
+    if (readOnly())
+      throw new Error('Dati di una versione più recente: aggiorna l’app')
+  }
+
   /** Un salvataggio non riuscito: si registra e l'app lo mostra (non solo in console). */
   const writeFailed = (label: string, error: unknown) => {
     console.error(`Salvataggio non riuscito (${label})`, error)
@@ -245,6 +252,33 @@ export function createDexieStore(
     await db.meta.delete('pristine')
   }
 
+  /**
+   * Scrive i dati migrati allo schema attuale **senza** nuove ore e senza coda:
+   * ogni dispositivo migra la propria copia, e una migrazione non deve vincere
+   * su modifiche fatte altrove nel frattempo. Le voci scartate dalla
+   * validazione si tolgono solo qui (restano nel backup `pre-migration`).
+   */
+  const writeMigrated = async (data: AppData) => {
+    for (const key of LIST_KINDS) {
+      const at = new Map(
+        (await db[key].toArray()).map((r) => [r.id, r.updatedAt]),
+      )
+      await db[key].clear()
+      await db[key].bulkPut(
+        data[key].map((item, pos) => {
+          const updatedAt = at.get(item.id)
+          return updatedAt
+            ? { id: item.id, pos, item, updatedAt }
+            : { id: item.id, pos, item }
+        }),
+      )
+    }
+    for (const id of META_IDS) {
+      const row = await db.meta.get(id)
+      await db.meta.put({ ...row, key: id, value: data[id] })
+    }
+  }
+
   const writeAll = async (data: AppData, track = true) => {
     for (const key of LIST_KINDS) await writeList(key, data[key], track)
     await writeMeta('raceDate', data.raceDate, track)
@@ -297,9 +331,16 @@ export function createDexieStore(
       await db.transaction('rw', all, async () => {
         const raw = await readRaw()
         await addBackup('pre-migration', raw, stored)
-        await writeAll(sanitize(migrate(raw, stored)).data)
+        await writeMigrated(sanitize(migrate(raw, stored)).data)
         await db.meta.put({ key: 'schemaVersion', value: SCHEMA_VERSION })
       })
+    } else if (stored > SCHEMA_VERSION) {
+      // dati di una versione più recente (rollback del sito, APK vecchio): non si tocca nulla
+      console.warn(
+        `Dati della versione ${stored}, app alla ${SCHEMA_VERSION}: sola lettura`,
+      )
+      setHealth({ mode: 'newer' })
+      return
     }
 
     // backup automatico: se non riesce (es. memoria piena) l'app parte lo stesso, si riprova al prossimo avvio
@@ -347,6 +388,7 @@ export function createDexieStore(
     tables: Table[],
     write: () => Promise<void>,
   ): Promise<boolean> => {
+    if (readOnly()) return false
     try {
       await db.transaction('rw', [...tables, db.meta, db.changes], write)
       emit(localListeners)
@@ -421,6 +463,7 @@ export function createDexieStore(
 
     async applyRemote(changes) {
       await init()
+      if (readOnly()) return 0
       if (mem || changes.length === 0) return 0
       let applied = 0
       await db.transaction('rw', [...all, db.fitFiles], async () => {
@@ -471,6 +514,7 @@ export function createDexieStore(
 
     async startAccount(remoteHasData) {
       await init()
+      if (readOnly()) return
       if (mem) return
       await db.transaction('rw', all, async () => {
         await addBackup('pre-sync', await readRaw(), SCHEMA_VERSION)
@@ -592,6 +636,7 @@ export function createDexieStore(
 
     async putFitFile(id, bytes) {
       await init()
+      if (readOnly()) return
       if (mem) return
       try {
         const prev = await db.fitFiles.get(id)
@@ -612,6 +657,7 @@ export function createDexieStore(
     },
     async markFitUploaded(id, bytes) {
       await init()
+      if (readOnly()) return
       if (mem) return
       const row = await db.fitFiles.get(id)
       await db.fitFiles.put({
@@ -622,6 +668,7 @@ export function createDexieStore(
     },
     async deleteFitFiles(ids) {
       await init()
+      if (readOnly()) return
       if (mem || ids.length === 0) return
       await db.fitFiles.bulkDelete(ids)
     },
@@ -688,6 +735,7 @@ export function createDexieStore(
     },
     async saveLiveWorkout(workout) {
       await init()
+      if (readOnly()) return
       if (mem) {
         memLive = workout
         return
@@ -716,6 +764,7 @@ export function createDexieStore(
     },
     async replaceAll(data) {
       await init()
+      refuseReadOnly()
       if (mem) {
         mem = data
         return
@@ -729,6 +778,7 @@ export function createDexieStore(
 
     async resetAll() {
       await init()
+      refuseReadOnly()
       if (mem) {
         mem = freshData()
         memLive = null
@@ -745,6 +795,7 @@ export function createDexieStore(
     },
     async requeueAll() {
       await init()
+      refuseReadOnly()
       if (mem) return
       await db.transaction('rw', [...all, db.fitFiles], async () => {
         const stamp = now().toISOString()
@@ -791,6 +842,7 @@ export function createDexieStore(
     },
     async restoreBackup(id) {
       await init()
+      refuseReadOnly()
       if (mem) return
       await db.transaction('rw', all, async () => {
         const backup = await db.backups.get(id)

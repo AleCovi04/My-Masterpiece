@@ -784,6 +784,9 @@ export const en: Dictionary = {
       'Failed ({error}). Check the connection; if it keeps failing, re-run supabase/schema.sql.',
   },
   storage: {
+    newerTitle: 'Update the app',
+    newer:
+      'The data on this device was saved by a newer version of the app. To keep it safe the app is read-only and does not sync: update the app (APK from the GitHub Releases page, or reload the website).',
     memoryTitle: 'Storage not available',
     memory:
       'This device’s database did not open: what you see is only in memory and will be lost when you close the app. Sync and server tools are blocked to protect the data on the server. Close and reopen the app; if it keeps happening, free up space on the device and try again.',
@@ -791,8 +794,7 @@ export const en: Dictionary = {
     write:
       'A save failed: your last change may not be saved. Reload to see the saved data; if it happens again, check the free space on the device.',
     reload: 'Reload',
-    toolsBlocked:
-      'Not available: this device’s storage is not working (see the notice at the top).',
+    toolsBlocked: 'Not available right now: see the notice at the top.',
     syncFailed:
       'Sending to the server failed: the changes stay queued on this device and will go out with the next sync. Try again with a connection.',
   },

@@ -7,11 +7,13 @@ export default function StoreAlert() {
   const v = t.storage
   const health = useStoreHealth()
   const problem =
-    health.mode === 'memory'
-      ? { title: v.memoryTitle, text: v.memory }
-      : health.writeFailed
-        ? { title: v.writeTitle, text: v.write }
-        : null
+    health.mode === 'newer'
+      ? { title: v.newerTitle, text: v.newer }
+      : health.mode === 'memory'
+        ? { title: v.memoryTitle, text: v.memory }
+        : health.writeFailed
+          ? { title: v.writeTitle, text: v.write }
+          : null
   if (!problem) return null
   return (
     <div className="store-alert" role="alert">

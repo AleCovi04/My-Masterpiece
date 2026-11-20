@@ -1,8 +1,14 @@
 import { IDBFactory, IDBKeyRange } from 'fake-indexeddb'
 import { describe, expect, it, vi } from 'vitest'
-import { createDexieStore } from '../dexieStore'
+import Dexie from 'dexie'
+import { createDexieStore, DB_NAME } from '../dexieStore'
 import { SCHEMA_VERSION } from '../migrations'
-import type { Exercise, ImportRecord, Session } from '../types'
+import type {
+  Exercise,
+  ImportRecord,
+  Session,
+  StrengthTemplate,
+} from '../types'
 import { insertSession, removeSession } from '../../lib/sessions'
 import { createSyncEngine } from './engine'
 import type { RemoteChange, SyncChange, SyncRemote } from './types'
@@ -387,6 +393,109 @@ describe('salvataggio non disponibile (B3)', () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(await a.engine.syncNow()).toBe('error')
     error.mockRestore()
+  })
+})
+
+describe('migrazioni e versioni (B4)', () => {
+  /** Riporta il database di un dispositivo a uno schema diverso, come se l'app fosse un'altra versione. */
+  const setStoredVersion = async (
+    idb: { indexedDB: IDBFactory; IDBKeyRange: typeof IDBKeyRange },
+    version: number,
+  ) => {
+    const raw = new Dexie(DB_NAME, idb)
+    await raw.open()
+    await raw.table('meta').put({ key: 'schemaVersion', value: version })
+    raw.close()
+  }
+
+  it('la migrazione all’avvio non vince sulle modifiche fatte altrove nel frattempo', async () => {
+    const server = fakeServer()
+    const idbA = { indexedDB: new IDBFactory(), IDBKeyRange }
+    const clock = { now: t0 }
+    const openA = () => {
+      const store = createDexieStore({
+        idb: idbA,
+        now: () => clock.now,
+        requestPersistence: async () => true,
+      })
+      const engine = createSyncEngine({ local: store, now: () => clock.now })
+      return { store, engine }
+    }
+    const tpl: StrengthTemplate = {
+      id: 't',
+      createdAt: t0.toISOString(),
+      updatedAt: t0.toISOString(),
+      name: 'Forza A',
+      discipline: 'strength',
+      archived: false,
+      entries: [{ exerciseId: 'a', restSeconds: 90, sets: [{ reps: 8 }] }],
+    }
+    const a = openA()
+    await a.store.update(['templates'], () => ({ templates: [tpl] }))
+    await a.engine.setRemote({ userId: 'u1', api: server.api })
+    await a.engine.syncNow()
+    const b = device(server)
+    await b.store.init()
+    await b.connect()
+    await b.engine.syncNow()
+
+    // B (già aggiornato) rinomina; A si aggiorna dopo e migra la sua copia (schema 1: serie con i kg)
+    b.later(60_000)
+    await b.store.update(['templates'], ({ templates }) => ({
+      templates: templates.map((x) => ({ ...x, name: 'Forza B' })),
+    }))
+    await b.engine.syncNow()
+    clock.now = new Date(t0.getTime() + 120_000)
+    const raw = new Dexie(DB_NAME, idbA)
+    await raw.open()
+    await raw.table('meta').put({ key: 'schemaVersion', value: 1 })
+    const row = await raw.table('templates').get('t')
+    row.item.entries[0].sets = [{ reps: 8, kg: 60 }]
+    await raw.table('templates').put(row)
+    raw.close()
+
+    const migrated = openA()
+    const [mt] = (await migrated.store.loadTemplates()) as StrengthTemplate[]
+    expect(mt.entries[0].sets).toEqual([{ reps: 8 }])
+    expect(await migrated.store.pendingChanges()).toEqual([])
+    await migrated.engine.setRemote({ userId: 'u1', api: server.api })
+    await migrated.engine.syncNow()
+    expect((await migrated.store.loadTemplates()).map((x) => x.name)).toEqual([
+      'Forza B',
+    ])
+    expect(server.rows.get('templates/t')?.item).toMatchObject({
+      name: 'Forza B',
+    })
+  })
+
+  it('dati di una versione più recente: sola lettura e niente sincronizzazione', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const server = fakeServer()
+    const idb = { indexedDB: new IDBFactory(), IDBKeyRange }
+    const open = () =>
+      createDexieStore({
+        idb,
+        now: () => t0,
+        requestPersistence: async () => true,
+      })
+    const first = open()
+    await first.update(['exercises'], () => ({ exercises: [exercise('x')] }))
+    await setStoredVersion(idb, SCHEMA_VERSION + 1)
+
+    const old = open() // l'app vecchia (rollback) apre dati più nuovi
+    await old.init()
+    expect(old.health().mode).toBe('newer')
+    expect((await old.loadExercises()).map((e) => e.id)).toEqual(['x'])
+    expect(
+      await old.update(['exercises'], () => ({ exercises: [] })),
+    ).toBeNull()
+    await expect(old.resetAll()).rejects.toThrow()
+    const engine = createSyncEngine({ local: old, now: () => t0 })
+    await engine.setRemote({ userId: 'u1', api: server.api })
+    expect(await engine.syncNow()).toBe('newer')
+    expect(server.rows.size).toBe(0)
+    expect((await open().loadExercises()).map((e) => e.id)).toEqual(['x'])
+    warn.mockRestore()
   })
 })
 

@@ -52,8 +52,10 @@ export interface IntervalsLink {
  * - `ok`: IndexedDB funziona.
  * - `memory`: IndexedDB non si è aperto; i dati vivono solo in memoria fino
  *   alla chiusura. Sincronizzazione e strumenti del server sono bloccati.
+ * - `newer`: i dati salvati sono di una versione più recente dell'app (es.
+ *   rollback del sito): sola lettura, niente sincronizzazione, "aggiorna l'app".
  */
-export type StoreMode = 'ok' | 'memory'
+export type StoreMode = 'ok' | 'memory' | 'newer'
 
 export interface StoreHealth {
   mode: StoreMode
